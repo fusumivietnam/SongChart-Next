@@ -4,6 +4,17 @@
   "rule": "Candidates are research choices, NOT dependencies; exact installed versions belong only to manifests and lockfiles. License/edition must be reviewed at adoption.",
   "technologies": [
     {
+      "id": "docker-compose",
+      "capability": "project-os",
+      "source": "https://github.com/docker/compose",
+      "status": "implemented",
+      "version_authority": "docker compose version in validated developer/CI toolchain; image digests in deployment manifests",
+      "license_review": "Docker Engine/Desktop usage and Compose license/edition review required",
+      "implementation": "compose.yaml",
+      "decision": "docs/adr/ADR-0001-docker-first-development.md",
+      "scope": "local development PostgreSQL scaffold only; application service and CI not implemented"
+    },
+    {
       "id": "laravel",
       "capability": "canonical-music-core",
       "source": "https://github.com/laravel/framework",
