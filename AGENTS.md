@@ -11,6 +11,10 @@ This document governs **this repository only**. Do not load, cite as current aut
 6. docs/roadmap/VERTICAL_SLICES.md and the actual GitHub issue/PR for the task
 7. Inspect actual source, manifests, migrations and tests; these supersede guesses about installed code.
 
+## Docker development decision
+- [ADR-0001](docs/adr/ADR-0001-docker-first-development.md) approves Docker Compose for reproducible local development. [Docker setup](docs/operations/DOCKER_DEVELOPMENT.md) describes the database-only scaffold; never claim an app or test suite exists until the official starter lands.
+- Complete an application Dockerfile/service, locked PHP/JS dependencies, container-based test commands and CI in the reviewed starter slice. Do not equate Docker parity with production readiness.
+
 ## Work protocol
 - On every new session: read current main HEAD, open issues/PRs and manifests before claiming status. Existing work on an active branch is resumed rather than duplicated.
 - Separate **candidate / approved / implemented / verified / deployed**. Do not infer later states from earlier ones.
