@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "project": "SongChart-Next",
+  "rule": "Trigger satisfaction permits review, never automatic install or roadmap promotion; link decision issue, ADR and acceptance evidence.",
+  "triggers": [
+    {
+      "capability": "public-web",
+      "condition": "MVP user journey and design baseline approved",
+      "evidence": [
+        "approved product scope",
+        "approved design references",
+        "frontend ADR"
+      ],
+      "decision": "human-review"
+    },
+    {
+      "capability": "canonical-database",
+      "condition": "First Artist persistence slice is approved",
+      "evidence": [
+        "schema and identity invariant tests",
+        "migration and restore plan"
+      ],
+      "decision": "human-review"
+    },
+    {
+      "capability": "provider-adapters",
+      "condition": "Artist fixture vertical slice contract is verified",
+      "evidence": [
+        "normalized claim fixtures",
+        "provider rights and quota policy"
+      ],
+      "decision": "human-review"
+    },
+    {
+      "capability": "admin-review",
+      "condition": "Real unresolved claims require moderation",
+      "evidence": [
+        "review use case",
+        "roles and authorization tests"
+      ],
+      "decision": "human-review"
+    },
+    {
+      "capability": "search-index",
+      "condition": "PostgreSQL search plus cache fails measured relevance/latency targets or dedicated indexing provides justified value",
+      "evidence": [
+        "benchmark",
+        "reindex/recovery plan",
+        "outbox/consistency policy"
+      ],
+      "decision": "human-review"
+    },
+    {
+      "capability": "external-workflows",
+      "condition": "Live recurring/multi-step provider pipeline demonstrably exceeds Laravel scheduler/queue operating needs",
+      "evidence": [
+        "existing-job ownership inventory",
+        "retry/idempotency tests",
+        "retirement plan"
+      ],
+      "decision": "human-review"
+    },
+    {
+      "capability": "production-deploy",
+      "condition": "Public MVP has passed candidate release gates",
+      "evidence": [
+        "restore drill",
+        "rollback rehearsal",
+        "secrets/privacy check",
+        "E2E smoke"
+      ],
+      "decision": "human-review"
+    },
+    {
+      "capability": "security-and-recovery",
+      "condition": "Runtime/environment is created",
+      "evidence": [
+        "threat model",
+        "CI security checks",
+        "backup restore runbook"
+      ],
+      "decision": "human-review"
+    },
+    {
+      "capability": "developer-reference",
+      "condition": "First real Artist symbols and contracts exist",
+      "evidence": [
+        "source linked reference entries",
+        "stale reference CI"
+      ],
+      "decision": "human-review"
+    },
+    {
+      "capability": "ai-assistance",
+      "condition": "Stable typed read tools and measured task need exist",
+      "evidence": [
+        "permission boundary",
+        "evaluation fixtures",
+        "cost and privacy budget"
+      ],
+      "decision": "human-review"
+    },
+    {
+      "capability": "flutter-clients",
+      "condition": "Account/offline/device-specific user value exceeds PWA and stable API exists",
+      "evidence": [
+        "user need",
+        "typed Dart SDK",
+        "token mapping and sync model"
+      ],
+      "decision": "human-review"
+    },
+    {
+      "capability": "notifications",
+      "condition": "Follow/save features produce verified user notification needs",
+      "evidence": [
+        "consent/preference policy",
+        "delivery budget",
+        "unsubscribe and retry tests"
+      ],
+      "decision": "human-review"
+    }
+  ]
+}

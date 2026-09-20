@@ -1,0 +1,208 @@
+{
+  "schema_version": 1,
+  "project": "SongChart-Next",
+  "authority": "governance/CAPABILITY_MAP.json",
+  "status_semantics": {
+    "candidate": "proposed, not approved or installed",
+    "approved": "choice approved, not necessarily implemented",
+    "implemented": "source exists; verification separate",
+    "verified": "acceptance evidence recorded",
+    "deployed": "production evidence recorded",
+    "watch": "not activated"
+  },
+  "capabilities": [
+    {
+      "id": "product-scope",
+      "plane": "product",
+      "owner": "songchart",
+      "status": "candidate",
+      "depends_on": [],
+      "implementation": null
+    },
+    {
+      "id": "canonical-music-core",
+      "plane": "domain",
+      "owner": "songchart",
+      "status": "candidate",
+      "depends_on": [
+        "product-scope"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "provider-adapters",
+      "plane": "integration",
+      "owner": "songchart",
+      "status": "candidate",
+      "depends_on": [
+        "canonical-music-core",
+        "provider-policy"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "provider-policy",
+      "plane": "trust",
+      "owner": "songchart",
+      "status": "candidate",
+      "depends_on": [
+        "product-scope"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "api-contracts",
+      "plane": "integration",
+      "owner": "songchart",
+      "status": "candidate",
+      "depends_on": [
+        "canonical-music-core"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "design-authority",
+      "plane": "experience",
+      "owner": "songchart",
+      "status": "candidate",
+      "depends_on": [
+        "product-scope"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "public-web",
+      "plane": "experience",
+      "owner": "songchart",
+      "status": "candidate",
+      "depends_on": [
+        "design-authority",
+        "canonical-music-core"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "admin-review",
+      "plane": "experience",
+      "owner": "songchart",
+      "status": "candidate",
+      "depends_on": [
+        "canonical-music-core",
+        "provider-policy"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "canonical-database",
+      "plane": "data",
+      "owner": "postgresql",
+      "status": "candidate",
+      "depends_on": [
+        "canonical-music-core"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "internal-jobs",
+      "plane": "async",
+      "owner": "laravel",
+      "status": "candidate",
+      "depends_on": [
+        "canonical-music-core"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "search-index",
+      "plane": "data",
+      "owner": "meilisearch",
+      "status": "watch",
+      "depends_on": [
+        "canonical-database",
+        "api-contracts"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "external-workflows",
+      "plane": "integration",
+      "owner": "kestra",
+      "status": "watch",
+      "depends_on": [
+        "provider-adapters"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "production-deploy",
+      "plane": "delivery",
+      "owner": "undecided",
+      "status": "candidate",
+      "depends_on": [
+        "public-web",
+        "canonical-database"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "project-os",
+      "plane": "governance",
+      "owner": "songchart",
+      "status": "implemented",
+      "depends_on": [],
+      "implementation": "governance/"
+    },
+    {
+      "id": "developer-reference",
+      "plane": "governance",
+      "owner": "songchart",
+      "status": "candidate",
+      "depends_on": [
+        "project-os"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "ai-assistance",
+      "plane": "intelligence",
+      "owner": "songchart",
+      "status": "watch",
+      "depends_on": [
+        "api-contracts",
+        "developer-reference"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "flutter-clients",
+      "plane": "experience",
+      "owner": "flutter",
+      "status": "watch",
+      "depends_on": [
+        "api-contracts",
+        "design-authority"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "notifications",
+      "plane": "experience",
+      "owner": "undecided",
+      "status": "watch",
+      "depends_on": [
+        "internal-jobs"
+      ],
+      "implementation": null
+    },
+    {
+      "id": "security-and-recovery",
+      "plane": "operations",
+      "owner": "songchart",
+      "status": "candidate",
+      "depends_on": [
+        "production-deploy"
+      ],
+      "implementation": null
+    }
+  ]
+}

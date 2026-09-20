@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "project": "SongChart-Next",
+  "rule": "Candidates are research choices, NOT dependencies; exact installed versions belong only to manifests and lockfiles. License/edition must be reviewed at adoption.",
+  "technologies": [
+    {
+      "id": "laravel",
+      "capability": "canonical-music-core",
+      "source": "https://github.com/laravel/framework",
+      "status": "candidate",
+      "version_authority": "composer.lock when installed",
+      "license_review": "required"
+    },
+    {
+      "id": "laravel-react-starter",
+      "capability": "public-web",
+      "source": "https://github.com/laravel/react-starter-kit",
+      "status": "candidate",
+      "version_authority": "starter commit and project lockfiles",
+      "license_review": "required"
+    },
+    {
+      "id": "inertia-react",
+      "capability": "public-web",
+      "source": "https://github.com/inertiajs/inertia",
+      "status": "candidate",
+      "version_authority": "package-lock.json when installed",
+      "license_review": "required"
+    },
+    {
+      "id": "filament",
+      "capability": "admin-review",
+      "source": "https://github.com/filamentphp/filament",
+      "status": "watch",
+      "version_authority": "composer.lock when installed",
+      "license_review": "required"
+    },
+    {
+      "id": "postgresql",
+      "capability": "canonical-database",
+      "source": "https://github.com/postgres/postgres",
+      "status": "candidate",
+      "version_authority": "runtime image digest/deployment manifest",
+      "license_review": "required"
+    },
+    {
+      "id": "meilisearch",
+      "capability": "search-index",
+      "source": "https://github.com/meilisearch/meilisearch",
+      "status": "watch",
+      "edition": "community-only candidate",
+      "version_authority": "runtime image digest",
+      "license_review": "CE/EE feature review required"
+    },
+    {
+      "id": "kestra",
+      "capability": "external-workflows",
+      "source": "https://github.com/kestra-io/kestra",
+      "status": "watch",
+      "version_authority": "runtime image digest",
+      "license_review": "edition and workflow feature review required"
+    },
+    {
+      "id": "github-actions",
+      "capability": "project-os",
+      "source": "https://github.com/features/actions",
+      "status": "candidate",
+      "version_authority": "workflow action SHA",
+      "license_review": "workflow action review required"
+    },
+    {
+      "id": "renovate",
+      "capability": "project-os",
+      "source": "https://github.com/renovatebot/renovate",
+      "status": "watch",
+      "version_authority": "bot/config version",
+      "license_review": "required"
+    },
+    {
+      "id": "storybook",
+      "capability": "design-authority",
+      "source": "https://github.com/storybookjs/storybook",
+      "status": "watch",
+      "version_authority": "package lockfile",
+      "license_review": "required"
+    },
+    {
+      "id": "flutter",
+      "capability": "flutter-clients",
+      "source": "https://github.com/flutter/flutter",
+      "status": "watch",
+      "version_authority": "Flutter lock/toolchain",
+      "license_review": "required"
+    },
+    {
+      "id": "coolify",
+      "capability": "production-deploy",
+      "source": "https://github.com/coollabsio/coolify",
+      "status": "watch",
+      "version_authority": "deployment manifest",
+      "license_review": "required"
+    }
+  ]
+}
