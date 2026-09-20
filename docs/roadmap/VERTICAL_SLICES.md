@@ -3,7 +3,7 @@
 **All slices below are planned, not completed.** GitHub Issues/Projects become execution authority once configured; this document is the proposed release scope, not an independent task-state tracker.
 
 ## FOUNDATION — approve then build
-Approve MVP acceptance, choose public frontend in ADR, approve brand/UI baseline and component/page contracts, choose OpenAPI declaration authority, initialize official framework starter without importing old SongChart code; install PostgreSQL and focused tests.
+Approve MVP acceptance, choose public frontend in ADR, approve brand/UI baseline and component/page contracts, choose OpenAPI declaration authority. Docker-first local development is accepted in ADR-0001 and a PostgreSQL-only Compose scaffold exists on its implementation branch. Next initialize the official framework starter without importing old SongChart code; complete the containerized application image/service, lockfiles, CI, PostgreSQL persistence and focused tests. A Compose file alone is not a verified runtime.
 
 ## VS-01a — fixture-first Artist
 Given a deterministic MusicBrainz-shaped fixture: normalize ExternalArtistClaim -> validate -> resolve by stable external identifier -> create/read SongChart Artist in PostgreSQL -> serve a typed read view -> render mobile+desktop Artist page under approved design -> run unit, DB and browser tests. Do not merge on name alone; duplicate fixture imports are idempotent. This is not live integration.
