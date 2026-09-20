@@ -145,6 +145,17 @@
       "implementation": null
     },
     {
+      "id": "local-docker-development",
+      "plane": "operations",
+      "owner": "songchart",
+      "status": "implemented",
+      "depends_on": [
+        "project-os"
+      ],
+      "implementation": "compose.yaml",
+      "scope": "PostgreSQL-only local Compose scaffold; app container and runtime validation pending"
+    },
+    {
       "id": "project-os",
       "plane": "governance",
       "owner": "songchart",
