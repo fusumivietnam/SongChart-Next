@@ -2,9 +2,13 @@
 
 SongChart Next is a new, independent music knowledge and discovery project. **This repository is its sole project authority.** Previous SongChart repositories, chat summaries, ZIP bundles and historical stage plans are not dependencies or implementation evidence.
 
+## Docker-first development
+- Docker Compose is the accepted local development entry point ([ADR-0001](docs/adr/ADR-0001-docker-first-development.md)); the committed [Compose scaffold](compose.yaml) currently defines PostgreSQL only. See [Docker setup](docs/operations/DOCKER_DEVELOPMENT.md).
+- This is **not** a Laravel starter, running application, verified database migration or production deployment. The app image/service and lockfiles belong to the subsequent approved starter slice.
+
 ## Current status
 - Repository bootstrap: governance and engineering contracts only.
-- Product, framework and visual decisions below are **proposals** until accepted in an ADR.
+- Product, framework and visual decisions below are **proposals** until accepted in an ADR; Docker-first local development alone was accepted in ADR-0001.
 - No Laravel application, provider integration, production deployment, approved visual baseline or passing end-to-end feature is implied by these documents.
 - Do not copy old source, stage numbering, generated authority or UI by default.
 
