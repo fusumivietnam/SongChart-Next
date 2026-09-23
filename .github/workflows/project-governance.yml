@@ -1,0 +1,21 @@
+name: Project governance
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check authored registries and contracts
+        run: python3 scripts/verify_project_os.py
+      - name: Run governance regression tests
+        run: python3 -m unittest discover -s tests/governance -v
+      - name: Generate read-only status snapshot
+        run: python3 scripts/project_status.py --json > project-status.json
+      - name: Show snapshot summary
+        run: python3 scripts/project_status.py
