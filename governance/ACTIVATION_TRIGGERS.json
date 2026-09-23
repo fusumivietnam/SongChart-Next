@@ -5,11 +5,11 @@
   "triggers": [
     {
       "capability": "local-docker-development",
-      "condition": "Application Docker image/service may be activated after official Laravel starter and lockfiles are approved and committed",
+      "condition": "Application image and service require approved official Laravel starter revision and committed PHP/JS lockfiles",
       "evidence": [
-        "approved starter revision and frontend ADR",
-        "container build and Compose integration checks",
-        "database connectivity, migration and test evidence"
+        "frontend/starter ADR and app dependency provenance",
+        "container build and Compose integration checks at exact commit SHA",
+        "database connectivity, migration and application test evidence"
       ],
       "decision": "human-review"
     },
