@@ -8,11 +8,11 @@
       "capability": "local-docker-development",
       "source": "https://github.com/docker/compose",
       "status": "implemented",
-      "version_authority": "docker compose version in validated developer/CI toolchain; image digests in deployment manifests",
-      "license_review": "Pending: Docker Compose OSS license and Docker Engine/Desktop usage terms require review before managed deployment",
+      "version_authority": "Docker Compose developer/CI toolchain; application and database image digests in manifests when approved",
+      "license_review": "pending: Docker Compose license and Docker Engine/Desktop usage terms must be reviewed",
       "implementation": "compose.yaml",
       "decision": "docs/adr/ADR-0001-docker-first-development.md",
-      "scope": "Approved local development choice; PostgreSQL-only Compose source, application image absent; runtime checks not yet verified"
+      "scope": "Local PostgreSQL-only Compose scaffold; runtime tests and app image not verified"
     },
     {
       "id": "laravel",
