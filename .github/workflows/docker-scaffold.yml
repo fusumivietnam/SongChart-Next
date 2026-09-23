@@ -1,0 +1,26 @@
+name: Docker scaffold (local infrastructure)
+on:
+  pull_request:
+    paths:
+      - compose.yaml
+      - .env.example
+      - .github/workflows/docker-scaffold.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  postgres-scaffold:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_PASSWORD: ci-only-generated-in-step
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
+      - name: Start ephemeral database
+        run: docker compose up -d --wait db
+      - name: Verify PostgreSQL responds in container
+        run: docker compose exec -T db sh -ec 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+      - name: Clean up ephemeral CI database
+        if: always()
+        run: docker compose down --volumes --remove-orphans

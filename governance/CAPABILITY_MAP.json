@@ -153,6 +153,17 @@
       "implementation": "governance/"
     },
     {
+      "id": "local-docker-development",
+      "plane": "operations",
+      "owner": "songchart",
+      "status": "implemented",
+      "depends_on": [
+        "project-os"
+      ],
+      "implementation": "compose.yaml",
+      "scope": "PostgreSQL-only local Compose scaffold in PR #1; runtime verification and application service missing"
+    },
+    {
       "id": "developer-reference",
       "plane": "governance",
       "owner": "songchart",

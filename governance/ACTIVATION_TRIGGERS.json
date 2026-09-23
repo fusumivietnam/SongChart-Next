@@ -4,6 +4,16 @@
   "rule": "Trigger satisfaction permits review, never automatic install or roadmap promotion; link decision issue, ADR and acceptance evidence.",
   "triggers": [
     {
+      "capability": "local-docker-development",
+      "condition": "Application image and service require approved official Laravel starter revision and committed PHP/JS lockfiles",
+      "evidence": [
+        "frontend/starter ADR and app dependency provenance",
+        "container build and Compose integration checks at exact commit SHA",
+        "database connectivity, migration and application test evidence"
+      ],
+      "decision": "human-review"
+    },
+    {
       "capability": "public-web",
       "condition": "MVP user journey and design baseline approved",
       "evidence": [

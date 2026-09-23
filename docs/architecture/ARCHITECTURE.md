@@ -17,6 +17,9 @@ Laravel Queue/Jobs owns short internal jobs. Kestra is a candidate only for just
 ## Interface authorities
 Public API: authored OpenAPI or code-first generated OpenAPI with an explicit single declaring authority chosen in ADR; generated counterpart is verified, not separately edited. JSON Schema for provider/event contracts. Source symbols own actual signatures. Reference registry indexes these; it does not override them. Design Authority owns visual semantics; source implementation and screenshots provide evidence.
 
+## Local development decision (ADR-0001)
+Docker Compose is the approved local development entry point. The current [Docker setup](../operations/DOCKER_DEVELOPMENT.md) defines a PostgreSQL-only Compose scaffold, not an application image, production controller or verified runtime. Component inventory is empty until an actual approved environment-scoped instance is established.
+
 ## Execution and release
 GitHub owns source/PR/issues. CI checks code and contracts; one deployment controller owns production. Runtime must be recoverable without optional management SaaS. Secret values never in Git; production changes and destructive actions require explicit review and restore/rollback plan.
 

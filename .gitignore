@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+/vendor/
+/node_modules/
+/public/build/
+/.phpunit.cache/
+/coverage/
+.DS_Store
