@@ -145,6 +145,14 @@
       "implementation": null
     },
     {
+      "id": "project-os",
+      "plane": "governance",
+      "owner": "songchart",
+      "status": "implemented",
+      "depends_on": [],
+      "implementation": "governance/"
+    },
+    {
       "id": "local-docker-development",
       "plane": "operations",
       "owner": "songchart",
@@ -153,15 +161,7 @@
         "project-os"
       ],
       "implementation": "compose.yaml",
-      "scope": "PostgreSQL-only local Compose scaffold; app container and runtime validation pending"
-    },
-    {
-      "id": "project-os",
-      "plane": "governance",
-      "owner": "songchart",
-      "status": "implemented",
-      "depends_on": [],
-      "implementation": "governance/"
+      "scope": "PostgreSQL-only local Compose scaffold in PR #1; runtime verification and application service missing"
     },
     {
       "id": "developer-reference",
