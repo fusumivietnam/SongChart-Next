@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SongChart Next research registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "project",
+    "authority",
+    "rule",
+    "research"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "project": {
+      "const": "SongChart-Next"
+    },
+    "authority": {
+      "const": "governance/RESEARCH_REGISTRY.json"
+    },
+    "rule": {
+      "type": "string",
+      "minLength": 1
+    },
+    "research": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "source",
+          "status",
+          "capability_ids",
+          "decision_ref",
+          "superseded_by"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^RES-[0-9]{4,}$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "registered",
+              "evaluated",
+              "accepted",
+              "rejected",
+              "deferred",
+              "superseded"
+            ]
+          },
+          "capability_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "decision_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "superseded_by": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
