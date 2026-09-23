@@ -2,8 +2,12 @@
 
 **All slices below are planned, not completed.** GitHub Issues/Projects become execution authority once configured; this document is the proposed release scope, not an independent task-state tracker.
 
+Delivery acceptance for every slice: [Engineering Delivery Contract](../engineering/DELIVERY_CONTRACT.md) and [Acceptance Gates](../operations/ACCEPTANCE_GATES.md). Research references are catalogued in [Research Registry](../../governance/RESEARCH_REGISTRY.json) but cannot automatically change this planned scope. Live Issues and PRs own execution status, not this document or an offline snapshot.
+
+Docker-first local development is approved in ADR-0001; PR #1 supplies a PostgreSQL-only scaffold. The Laravel application container, lockfiles, app/DB tests and runtime verification remain Foundation work. Follow [Issue #4](https://github.com/fusumivietnam/SongChart-Next/issues/4) and do not treat scaffold existence as a completed Foundation or VS-01a slice.
+
 ## FOUNDATION — approve then build
-Approve MVP acceptance, choose public frontend in ADR, approve brand/UI baseline and component/page contracts, choose OpenAPI declaration authority. Docker-first local development is accepted in ADR-0001 and a PostgreSQL-only Compose scaffold exists on its implementation branch. Next initialize the official framework starter without importing old SongChart code; complete the containerized application image/service, lockfiles, CI, PostgreSQL persistence and focused tests. A Compose file alone is not a verified runtime.
+Approve MVP acceptance, choose public frontend in ADR, approve brand/UI baseline and component/page contracts, choose OpenAPI declaration authority, initialize official framework starter without importing old SongChart code; install PostgreSQL and focused tests.
 
 ## VS-01a — fixture-first Artist
 Given a deterministic MusicBrainz-shaped fixture: normalize ExternalArtistClaim -> validate -> resolve by stable external identifier -> create/read SongChart Artist in PostgreSQL -> serve a typed read view -> render mobile+desktop Artist page under approved design -> run unit, DB and browser tests. Do not merge on name alone; duplicate fixture imports are idempotent. This is not live integration.
