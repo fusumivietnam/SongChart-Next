@@ -11,9 +11,11 @@ This document governs **this repository only**. Do not load, cite as current aut
 6. docs/roadmap/VERTICAL_SLICES.md and the actual GitHub issue/PR for the task
 7. Inspect actual source, manifests, migrations and tests; these supersede guesses about installed code.
 
-## Docker development decision
-- [ADR-0001](docs/adr/ADR-0001-docker-first-development.md) approves Docker Compose for reproducible local development. [Docker setup](docs/operations/DOCKER_DEVELOPMENT.md) describes the database-only scaffold; never claim an app or test suite exists until the official starter lands.
-- Complete an application Dockerfile/service, locked PHP/JS dependencies, container-based test commands and CI in the reviewed starter slice. Do not equate Docker parity with production readiness.
+## Mandatory per-session control
+Follow [Project Control session bootstrap](docs/operations/PROJECT_CONTROL.md): read main HEAD, live Issues/PRs, manifests and CI; validate governance and create a read-only local snapshot. Unknown live GitHub status stays unknown, never filled from memory, prior chat or a cached snapshot. Consult [Research Registry](governance/RESEARCH_REGISTRY.json) only as referenced research, [Infrastructure Registry](governance/INFRASTRUCTURE_REGISTRY.json) only for approved runtime inventory, [Delivery Contract](docs/engineering/DELIVERY_CONTRACT.md), [Acceptance Gates](docs/operations/ACCEPTANCE_GATES.md), and [Dependency Policy](docs/operations/DEPENDENCY_POLICY.md). PR template supplies evidence checklist. These new governance documents do not approve any unapproved product design or software dependency.
+
+## Docker-first local development
+[ADR-0001](docs/adr/ADR-0001-docker-first-development.md) approves local Compose. The current [Docker setup](docs/operations/DOCKER_DEVELOPMENT.md) defines PostgreSQL-only scaffold; CI/runtime/production readiness are independent. [Issue #4](https://github.com/fusumivietnam/SongChart-Next/issues/4) owns reconciliation; do not call an app or production environment installed from the scaffold.
 
 ## Work protocol
 - On every new session: read current main HEAD, open issues/PRs and manifests before claiming status. Existing work on an active branch is resumed rather than duplicated.
