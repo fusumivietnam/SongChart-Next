@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "project": "SongChart-Next",
+  "authority": "governance/RESEARCH_REGISTRY.json",
+  "rule": "Register research only with a retrievable source; registration/acceptance does not approve a technology or roadmap change. No historic chat or old SongChart artifacts become implementation authority.",
+  "research": []
+}

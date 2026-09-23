@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "project": "SongChart-Next",
+  "authority": "governance/INFRASTRUCTURE_REGISTRY.json",
+  "rule": "Register actual, approved environment-scoped runtime instances only; technology choices live in TECHNOLOGY_REGISTRY, actual versions in manifests, secrets outside Git. PR-only Docker scaffold is not a main runtime instance.",
+  "instances": []
+}

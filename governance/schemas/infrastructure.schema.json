@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SongChart Next environment-scoped runtime inventory",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "project",
+    "authority",
+    "rule",
+    "instances"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "project": {
+      "const": "SongChart-Next"
+    },
+    "authority": {
+      "const": "governance/INFRASTRUCTURE_REGISTRY.json"
+    },
+    "rule": {
+      "type": "string",
+      "minLength": 1
+    },
+    "instances": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "capability_id",
+          "technology_id",
+          "environment",
+          "status",
+          "configuration_ref",
+          "runtime_owner",
+          "data_classification",
+          "secrets_ref",
+          "backup_policy_ref",
+          "recovery_policy_ref",
+          "failure_mode",
+          "operational_evidence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "capability_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "technology_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "environment": {
+            "enum": [
+              "development",
+              "ci",
+              "staging",
+              "production"
+            ]
+          },
+          "status": {
+            "enum": [
+              "approved",
+              "implemented",
+              "verified",
+              "deployed",
+              "retired"
+            ]
+          },
+          "configuration_ref": {
+            "type": "string",
+            "minLength": 1
+          },
+          "runtime_owner": {
+            "type": "string",
+            "minLength": 1
+          },
+          "data_classification": {
+            "type": "string",
+            "minLength": 1
+          },
+          "secrets_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "backup_policy_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "recovery_policy_ref": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "failure_mode": {
+            "type": "string",
+            "minLength": 1
+          },
+          "operational_evidence": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          }
+        }
+      }
+    }
+  }
+}

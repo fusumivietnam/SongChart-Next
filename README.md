@@ -8,6 +8,9 @@ SongChart Next is a new, independent music knowledge and discovery project. **Th
 - No Laravel application, provider integration, production deployment, approved visual baseline or passing end-to-end feature is implied by these documents.
 - Do not copy old source, stage numbering, generated authority or UI by default.
 
+## Project control (read-only status, no chat authority)
+Project governance protocols and evidence ownership: [Project Control](docs/operations/PROJECT_CONTROL.md). Research and environment-scoped runtime inventories: [Research Registry](governance/RESEARCH_REGISTRY.json) and [Infrastructure Registry](governance/INFRASTRUCTURE_REGISTRY.json). See [Delivery Contract](docs/engineering/DELIVERY_CONTRACT.md), [Acceptance Gates](docs/operations/ACCEPTANCE_GATES.md), and [Dependency Policy](docs/operations/DEPENDENCY_POLICY.md). Run `python3 scripts/verify_project_os.py` and `python3 scripts/project_status.py`; the latter is an offline projection and must not be treated as current GitHub Issue/PR or deployment status. This documentation does not approve product choices or mark any product feature as implemented.
+
 ## Start here
 1. [Project charter](docs/product/PRODUCT_CHARTER.md)
 2. [Architecture and source authority](docs/architecture/ARCHITECTURE.md)
