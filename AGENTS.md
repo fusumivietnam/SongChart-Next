@@ -11,6 +11,9 @@ This document governs **this repository only**. Do not load, cite as current aut
 6. docs/roadmap/VERTICAL_SLICES.md and the actual GitHub issue/PR for the task
 7. Inspect actual source, manifests, migrations and tests; these supersede guesses about installed code.
 
+## Mandatory per-session control
+Follow [Project Control session bootstrap](docs/operations/PROJECT_CONTROL.md): read main HEAD, live Issues/PRs, manifests and CI; validate governance and create a read-only local snapshot. Unknown live GitHub status stays unknown, never filled from memory, prior chat or a cached snapshot. Consult [Research Registry](governance/RESEARCH_REGISTRY.json) only as referenced research, [Infrastructure Registry](governance/INFRASTRUCTURE_REGISTRY.json) only for approved runtime inventory, [Delivery Contract](docs/engineering/DELIVERY_CONTRACT.md), [Acceptance Gates](docs/operations/ACCEPTANCE_GATES.md), and [Dependency Policy](docs/operations/DEPENDENCY_POLICY.md). PR template supplies evidence checklist. These new governance documents do not approve any unapproved product design or software dependency.
+
 ## Work protocol
 - On every new session: read current main HEAD, open issues/PRs and manifests before claiming status. Existing work on an active branch is resumed rather than duplicated.
 - Separate **candidate / approved / implemented / verified / deployed**. Do not infer later states from earlier ones.
