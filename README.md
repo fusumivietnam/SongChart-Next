@@ -2,15 +2,18 @@
 
 SongChart Next is a new, independent music knowledge and discovery project. **This repository is its sole project authority.** Previous SongChart repositories, chat summaries, ZIP bundles and historical stage plans are not dependencies or implementation evidence.
 
-## Docker-first development
-- Docker Compose is the accepted local development entry point ([ADR-0001](docs/adr/ADR-0001-docker-first-development.md)); the committed [Compose scaffold](compose.yaml) currently defines PostgreSQL only. See [Docker setup](docs/operations/DOCKER_DEVELOPMENT.md).
-- This is **not** a Laravel starter, running application, verified database migration or production deployment. The app image/service and lockfiles belong to the subsequent approved starter slice.
+## Docker-first local development
+- [ADR-0001](docs/adr/ADR-0001-docker-first-development.md) records owner approval of **local** Docker Compose. The [Compose scaffold](compose.yaml) and [local setup](docs/operations/DOCKER_DEVELOPMENT.md) define a PostgreSQL development service only; no Laravel app, runtime verification, backup proof or production release is implied.
+- The Docker changes are proposed for merge in [PR #1](https://github.com/fusumivietnam/SongChart-Next/pull/1); the Project Control System merged in [PR #2](https://github.com/fusumivietnam/SongChart-Next/pull/2) governs status and evidence.
 
 ## Current status
-- Repository bootstrap: governance and engineering contracts only.
-- Product, framework and visual decisions below are **proposals** until accepted in an ADR; Docker-first local development alone was accepted in ADR-0001.
+- Repository bootstrap: governance and engineering contracts; local PostgreSQL Compose scaffold is proposed in PR #1, not an installed app.
+- Product, framework and visual decisions below are **proposals** until accepted in an ADR.
 - No Laravel application, provider integration, production deployment, approved visual baseline or passing end-to-end feature is implied by these documents.
 - Do not copy old source, stage numbering, generated authority or UI by default.
+
+## Project control (read-only status, no chat authority)
+Project governance protocols and evidence ownership: [Project Control](docs/operations/PROJECT_CONTROL.md). Research and environment-scoped runtime inventories: [Research Registry](governance/RESEARCH_REGISTRY.json) and [Infrastructure Registry](governance/INFRASTRUCTURE_REGISTRY.json). See [Delivery Contract](docs/engineering/DELIVERY_CONTRACT.md), [Acceptance Gates](docs/operations/ACCEPTANCE_GATES.md), and [Dependency Policy](docs/operations/DEPENDENCY_POLICY.md). Run `python3 scripts/verify_project_os.py` and `python3 scripts/project_status.py`; the latter is an offline projection and must not be treated as current GitHub Issue/PR or deployment status. This documentation does not approve product choices or mark any product feature as implemented.
 
 ## Start here
 1. [Project charter](docs/product/PRODUCT_CHARTER.md)
