@@ -7,7 +7,7 @@ SongChart Next is a new, independent music knowledge and discovery project. **Th
 - [PR #1](https://github.com/fusumivietnam/SongChart-Next/pull/1) and [PR #2](https://github.com/fusumivietnam/SongChart-Next/pull/2) are merged. The official starter import is scoped to [Issue #5](https://github.com/fusumivietnam/SongChart-Next/issues/5); see [pinned upstream provenance](docs/engineering/UPSTREAM_STARTER.md).
 
 ## Current status
-- Main is governance and a local PostgreSQL Compose scaffold; the official Laravel React Starter + Docker app is proposed on a separate Issue #5 branch and is not implemented on main until merge.
+- `main` contains the governance and PostgreSQL-only local Compose scaffold. Official Laravel React Starter source, real lockfiles and app + PostgreSQL 18.6 Docker development implementation are in [draft PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6), **not yet merged into main**. Application CI for the pinned PR revision must be inspected at review; product features and production deployment remain separate.
 - Product, framework and visual decisions below are **proposals** until accepted in an ADR.
 - No verified Laravel application, provider integration, production deployment, approved visual baseline or passing end-to-end product feature is implied by these documents.
 - Do not copy old source, stage numbering, generated authority or UI by default.
