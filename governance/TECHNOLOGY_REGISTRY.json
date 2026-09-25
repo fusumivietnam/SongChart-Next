@@ -110,6 +110,33 @@
       "status": "watch",
       "version_authority": "deployment manifest",
       "license_review": "required"
+    },
+    {
+      "id": "php-runtime",
+      "capability": "canonical-music-core",
+      "source": "https://github.com/php/php-src",
+      "status": "candidate",
+      "version_authority": "Dockerfile base image version; immutable digest after review",
+      "license_review": "PHP license and Docker image terms review pending",
+      "scope": "PHP 8.4 Foundation baseline, not a verified production runtime"
+    },
+    {
+      "id": "nodejs-build-toolchain",
+      "capability": "public-web",
+      "source": "https://github.com/nodejs/node",
+      "status": "candidate",
+      "version_authority": "Dockerfile node image version; pnpm-lock.yaml for JS dependencies",
+      "license_review": "Node.js runtime license review pending",
+      "scope": "Node 22 build/development tooling, excluded from php-fpm production image"
+    },
+    {
+      "id": "pnpm",
+      "capability": "public-web",
+      "source": "https://github.com/pnpm/pnpm",
+      "status": "candidate",
+      "version_authority": "package.json packageManager + pnpm-lock.yaml",
+      "license_review": "pending",
+      "scope": "Single JS dependency resolver and lockfile for official starter"
     }
   ]
 }

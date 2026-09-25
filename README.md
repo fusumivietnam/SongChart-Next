@@ -3,13 +3,13 @@
 SongChart Next is a new, independent music knowledge and discovery project. **This repository is its sole project authority.** Previous SongChart repositories, chat summaries, ZIP bundles and historical stage plans are not dependencies or implementation evidence.
 
 ## Docker-first local development
-- [ADR-0001](docs/adr/ADR-0001-docker-first-development.md) records owner approval of **local** Docker Compose. The [Compose scaffold](compose.yaml) and [local setup](docs/operations/DOCKER_DEVELOPMENT.md) define a PostgreSQL development service only; no Laravel app, runtime verification, backup proof or production release is implied.
-- The Docker changes are proposed for merge in [PR #1](https://github.com/fusumivietnam/SongChart-Next/pull/1); the Project Control System merged in [PR #2](https://github.com/fusumivietnam/SongChart-Next/pull/2) governs status and evidence.
+- ADR-0001 governs local Compose and [ADR-0003](docs/adr/ADR-0003-foundation-runtime.md) proposes the app/toolchain baseline. The [Docker development runbook](docs/operations/DOCKER_DEVELOPMENT.md) documents app + PostgreSQL 18.6 startup after real lockfiles and checks are available.
+- [PR #1](https://github.com/fusumivietnam/SongChart-Next/pull/1) and [PR #2](https://github.com/fusumivietnam/SongChart-Next/pull/2) are merged. The official starter import is scoped to [Issue #5](https://github.com/fusumivietnam/SongChart-Next/issues/5); see [pinned upstream provenance](docs/engineering/UPSTREAM_STARTER.md).
 
 ## Current status
-- Repository bootstrap: governance and engineering contracts; local PostgreSQL Compose scaffold is proposed in PR #1, not an installed app.
+- `main` contains the governance and PostgreSQL-only local Compose scaffold. Official Laravel React Starter source, real lockfiles and app + PostgreSQL 18.6 Docker development implementation are in [draft PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6), **not yet merged into main**. Application CI for the pinned PR revision must be inspected at review; product features and production deployment remain separate.
 - Product, framework and visual decisions below are **proposals** until accepted in an ADR.
-- No Laravel application, provider integration, production deployment, approved visual baseline or passing end-to-end feature is implied by these documents.
+- No verified Laravel application, provider integration, production deployment, approved visual baseline or passing end-to-end product feature is implied by these documents.
 - Do not copy old source, stage numbering, generated authority or UI by default.
 
 ## Project control (read-only status, no chat authority)

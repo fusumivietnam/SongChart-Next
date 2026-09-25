@@ -1,0 +1,15 @@
+.git
+.github
+.env
+.env.*
+!.env.example
+/vendor
+/node_modules
+/public/build
+/storage
+/bootstrap/cache
+/coverage
+/.phpunit.cache
+/docs/research
+
+/public/hot

@@ -4,7 +4,7 @@
 
 Delivery acceptance for every slice: [Engineering Delivery Contract](../engineering/DELIVERY_CONTRACT.md) and [Acceptance Gates](../operations/ACCEPTANCE_GATES.md). Research references are catalogued in [Research Registry](../../governance/RESEARCH_REGISTRY.json) but cannot automatically change this planned scope. Live Issues and PRs own execution status, not this document or an offline snapshot.
 
-Docker-first local development is approved in ADR-0001; PR #1 supplies a PostgreSQL-only scaffold. The Laravel application container, lockfiles, app/DB tests and runtime verification remain Foundation work. Follow [Issue #4](https://github.com/fusumivietnam/SongChart-Next/issues/4) and do not treat scaffold existence as a completed Foundation or VS-01a slice.
+Docker-first local development is approved by ADR-0001; PR #1 merged a PostgreSQL-only scaffold. [Issue #5](https://github.com/fusumivietnam/SongChart-Next/issues/5) owns the pinned official starter import, real Composer/pnpm locks, app+PostgreSQL 18.6 Docker build and runtime verification. [ADR-0003](../adr/ADR-0003-foundation-runtime.md) records the proposed toolchain. [Draft PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6) includes imported starter, both resolved lockfiles and successful framework-level app/database/frontend tests. It is **not merged**; review and operational gates remain. A merged scaffold, image build or upstream welcome page does not complete Foundation or VS-01a.
 
 ## FOUNDATION — approve then build
 Approve MVP acceptance, choose public frontend in ADR, approve brand/UI baseline and component/page contracts, choose OpenAPI declaration authority, initialize official framework starter without importing old SongChart code; install PostgreSQL and focused tests.
