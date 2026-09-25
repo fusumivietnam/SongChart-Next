@@ -13,7 +13,7 @@ Once `composer.lock` and `pnpm-lock.yaml` are available:
 3. Run `docker compose exec app php artisan key:generate --force` once; this writes an APP_KEY to your untracked `.env`. Check it exists before using auth/session pages.
 4. Run `docker compose exec app php artisan migrate --force` for the **new local** database only. The starter migrations are not SongChart canonical music schemas.
 5. Run `docker compose exec app pnpm run build`, or `docker compose exec app pnpm dev --host 0.0.0.0` separately for hot reload.
-6. Run `docker compose exec app php artisan test`; scaffold tests default to in-memory SQLite (pdo_sqlite extension). The app's *runtime* database is PostgreSQL and must be checked separately via `docker compose exec app php artisan db:show --database=pgsql`.
+6. Run `docker compose exec -e APP_ENV=testing -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: app php artisan test`; the upstream scaffold suite uses in-memory SQLite (pdo_sqlite extension). Never run the fixture test suite against a populated PostgreSQL development database. The app's *runtime* database is PostgreSQL and must be checked separately via `docker compose exec app php artisan db:show --database=pgsql`.
 7. Browse http://localhost:8000 only for framework smoke testing. Upstream welcome/auth/dashboard pages are **not** SongChart's approved design or released product.
 
 ## PostgreSQL 18 volume and safety
