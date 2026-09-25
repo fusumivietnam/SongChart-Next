@@ -21,6 +21,7 @@ RUN composer --version && node --version && pnpm --version
 
 FROM php-toolchain AS development
 COPY . .
+RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
 RUN test -s composer.lock && test -s pnpm-lock.yaml \
     && composer install --prefer-dist --no-interaction --no-progress \
     && pnpm install --frozen-lockfile
@@ -33,6 +34,7 @@ RUN pnpm run build && pnpm run types:check
 FROM php-base AS production
 COPY --from=composer-bin /usr/bin/composer /usr/local/bin/composer
 COPY . .
+RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs
 RUN test -s composer.lock && composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader \
     && rm /usr/local/bin/composer \
     && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
