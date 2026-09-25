@@ -1,6 +1,6 @@
 # Docker-first application development (Issue #5)
 
-Status: candidate app runtime source on Foundation PR branch, **not verified** until CI evidence at exact commit. ADR-0001 governs local Docker; ADR-0003 proposes the runtime baseline. Source and lockfiles must first be committed. These instructions assume a new, disposable database, not a PostgreSQL 17 data migration.
+Status: development app runtime implemented on [draft PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6), not merged into `main`. [Run #36090841394](https://github.com/fusumivietnam/SongChart-Next/actions/runs/36090841394) verified app/database startup and scaffold tests at commit `83df1d867248626f4d22fd45d46ecdb4dcd272cd`; later revisions require their own evidence. This does **not** verify product features or production runtime. ADR-0001 governs local Docker; ADR-0003 proposes the runtime baseline. Source and real dependency lockfiles are committed on the PR branch. These instructions assume a new, disposable database, not a PostgreSQL 17 data migration.
 
 ## Environment and startup
 
