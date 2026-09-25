@@ -43,5 +43,11 @@ jobs:
             echo "Lockfiles already up to date"
           else
             git commit -m "build(foundation): lock resolved Composer and pnpm dependencies"
+            git fetch origin foundation/official-starter-import
+            if ! git diff --quiet HEAD origin/foundation/official-starter-import -- composer.json package.json Dockerfile; then
+              echo "Manifest/toolchain changed during resolution; rerun on latest branch SHA" >&2
+              exit 1
+            fi
+            git rebase origin/foundation/official-starter-import
             git push origin HEAD:refs/heads/foundation/official-starter-import
           fi
