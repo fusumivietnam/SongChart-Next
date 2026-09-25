@@ -38,6 +38,12 @@ services:
       - ./:/var/www/html
       - composer_vendor:/var/www/html/vendor
       - pnpm_node_modules:/var/www/html/node_modules
+    healthcheck:
+      test: ["CMD-SHELL", "php -r 'exit(@fsockopen(\"127.0.0.1\", 8000) ? 0 : 1);'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
     depends_on:
       db:
         condition: service_healthy
