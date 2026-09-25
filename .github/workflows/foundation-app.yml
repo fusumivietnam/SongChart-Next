@@ -57,7 +57,7 @@ jobs:
         run: |
           docker compose exec -T app pnpm run build
           docker compose exec -T app pnpm run types:check
-          docker compose exec -T app php artisan test
+          docker compose exec -T -e APP_ENV=testing -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: app php artisan test
       - name: Cleanup CI only
         if: always()
         run: docker compose down --volumes --remove-orphans
