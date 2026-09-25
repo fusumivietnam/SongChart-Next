@@ -58,6 +58,15 @@ jobs:
           docker compose exec -T app pnpm run build
           docker compose exec -T app pnpm run types:check
           docker compose exec -T -e APP_ENV=testing -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: app php artisan test
+      - name: HTTP smoke of development app (framework only)
+        run: |
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-connrefused http://127.0.0.1:8000/up > /dev/null
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-connrefused http://127.0.0.1:8000/ > /dev/null
+      - name: Build non-deployable PHP-FPM production target
+        run: |
+          docker build --target production --tag songchart-next:foundation-ci .
+          docker run --rm --entrypoint php songchart-next:foundation-ci -r 'foreach (["pdo_pgsql", "intl", "Zend OPcache"] as $ext) { if (!extension_loaded($ext)) exit(1); }'
+          docker run --rm --entrypoint php-fpm songchart-next:foundation-ci -t
       - name: Cleanup CI only
         if: always()
         run: docker compose down --volumes --remove-orphans
