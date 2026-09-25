@@ -28,14 +28,14 @@ EXPOSE 8000 5173
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
 
 FROM development AS frontend-build
-RUN pnpm run types:check && pnpm run build
+RUN pnpm run build && pnpm run types:check
 
 FROM php-base AS production
 COPY --from=composer-bin /usr/bin/composer /usr/local/bin/composer
 COPY . .
 RUN test -s composer.lock && composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader \
     && rm /usr/local/bin/composer \
-    && mkdir -p storage/framework/{cache,sessions,views} storage/logs bootstrap/cache \
+    && mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
     && chown -R www-data:www-data storage bootstrap/cache
 COPY --from=frontend-build /var/www/html/public/build /var/www/html/public/build
 USER www-data
