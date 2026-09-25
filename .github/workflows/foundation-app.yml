@@ -40,7 +40,13 @@ jobs:
           cp .env.example .env
           sed -i 's/REPLACE_WITH_UNIQUE_LOCAL_PASSWORD/ci-ephemeral-only/g' .env
       - name: Build and boot app with PostgreSQL
-        run: docker compose up -d --build --wait db app
+        shell: bash
+        run: |
+          if ! docker compose up -d --build --wait db app; then
+            docker compose ps -a
+            docker compose logs --no-color --tail=160 app db
+            exit 1
+          fi
       - name: Verify platform and initialize disposable database
         run: |
           docker compose exec -T app composer check-platform-reqs
