@@ -228,10 +228,13 @@ def main():
     ap.add_argument("--repo", default=os.environ.get("GITHUB_REPOSITORY", "fusumivietnam/SongChart-Next"))
     ap.add_argument("--token", default=os.environ.get("GITHUB_TOKEN"))
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--output-json", help="Also write the derived report to this path.")
     ap.add_argument("--fail-on-error", action="store_true", help="Exit non-zero only for controller errors, never warnings/blockers.")
     args = ap.parse_args()
     live = fetch_live(args.repo, args.token) if args.live_github else {"status": "unknown", "reason": "offline mode", "issues": [], "pull_requests": []}
     report = derive(live)
+    if args.output_json:
+        Path(args.output_json).write_text(json.dumps(report, indent=2) + "\\n", encoding="utf-8")
     if args.json:
         print(json.dumps(report, indent=2))
     else:
