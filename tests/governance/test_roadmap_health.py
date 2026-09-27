@@ -95,6 +95,41 @@ class RoadmapHealthTests(unittest.TestCase):
         self.assertTrue(any(f["code"] == "capability.missing_verification_evidence" for f in report["findings"]))
         self.assertGreater(report["summary"]["error"], 0)
 
+    def test_governance_pr_mentioning_foundation_is_not_mislinked(self):
+        live = {
+            "status": "known",
+            "truncated": False,
+            "issues": [],
+            "pull_requests": [{
+                "number": 20,
+                "title": "Governance: roadmap authority",
+                "body": "Independent of Foundation PR #6; no roadmap slice ownership.",
+                "state": "open",
+                "draft": False,
+                "html_url": "https://example.test/pulls/20",
+            }],
+        }
+        report = health.derive(live)
+        self.assertTrue(all(not x["open_prs"] for x in report["slices"]))
+
+    def test_explicit_pr_slice_link_is_counted(self):
+        live = {
+            "status": "known",
+            "truncated": False,
+            "issues": [],
+            "pull_requests": [{
+                "number": 21,
+                "title": "Artist implementation",
+                "body": "Slice ID: VS-01a\nOwning Issue / slice / capability: #30 / VS-01a / canonical-music-core",
+                "state": "open",
+                "draft": False,
+                "html_url": "https://example.test/pulls/21",
+            }],
+        }
+        report = health.derive(live)
+        artist = next(x for x in report["slices"] if x["id"] == "VS-01A")
+        self.assertEqual(artist["open_prs"][0]["number"], 21)
+
     def test_unlinked_research_issue_is_info_not_roadmap_failure(self):
         live = {
             "status": "known",
