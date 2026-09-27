@@ -59,7 +59,7 @@ COPY app ./app
 COPY config ./config
 COPY database ./database
 COPY public ./public
-COPY resources ./resources
+COPY resources/views ./resources/views
 COPY routes ./routes
 COPY artisan composer.json composer.lock ./
 COPY --from=frontend-build /var/www/html/public/build ./public/build
