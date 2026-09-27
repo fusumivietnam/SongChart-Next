@@ -18,6 +18,7 @@ LIFECYCLE_ORDER = {"candidate": 0, "approved": 1, "implemented": 2, "verified": 
 SLICE_RE = re.compile(r"^##\s+(FOUNDATION|VS-[0-9]+[a-z]?|Later(?:\s*/\s*activated only)?)\b", re.I)
 BODY_SLICE_RE = re.compile(r"\*\*Slice ID:\*\*\s*([^\n]+)", re.I)
 BODY_CAP_RE = re.compile(r"\*\*Capability ID\(s\):\*\*\s*([^\n]+)", re.I)
+PR_OWNER_RE = re.compile(r"(?:Owning Issue / slice / capability|Slice ID):\\s*([^\\n]+)", re.I)
 TITLE_SLICE_RE = re.compile(r"^\[?(FOUNDATION|VS-[0-9]+[a-z]?)\]?[\s:]+" , re.I)
 
 def git(*args):
