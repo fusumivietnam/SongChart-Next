@@ -67,6 +67,29 @@ jobs:
           docker build --target production --tag songchart-next:foundation-ci .
           docker run --rm --entrypoint php songchart-next:foundation-ci -r 'foreach (["pdo_pgsql", "intl", "Zend OPcache"] as $ext) { if (!extension_loaded($ext)) exit(1); }'
           docker run --rm --entrypoint php-fpm songchart-next:foundation-ci -t
+          docker run --rm --entrypoint sh songchart-next:foundation-ci -ec '
+            ! command -v composer
+            ! command -v node
+            ! command -v npm
+            ! command -v pnpm
+            test ! -d /var/www/html/tests
+            test ! -d /var/www/html/docs
+            test -d /var/www/html/vendor
+            test -f /var/www/html/public/build/manifest.json
+          '
+          dev_image="$(docker compose images -q app)"
+          dev_size="$(docker image inspect "$dev_image" --format '{{.Size}}')"
+          prod_size="$(docker image inspect songchart-next:foundation-ci --format '{{.Size}}')"
+          echo "Development image bytes: $dev_size"
+          echo "Production image bytes: $prod_size"
+          test "$prod_size" -lt "$dev_size"
+          {
+            echo "### Docker image footprint"
+            echo
+            echo "- Development image: $dev_size bytes"
+            echo "- Production image: $prod_size bytes"
+            echo "- Production/dev ratio: $(( prod_size * 100 / dev_size ))%"
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Cleanup CI only
         if: always()
         run: docker compose down --volumes --remove-orphans
