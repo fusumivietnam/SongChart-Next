@@ -19,6 +19,9 @@ on:
       - tests/**
       - .github/workflows/foundation-app.yml
   workflow_dispatch:
+concurrency:
+  group: foundation-app-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
