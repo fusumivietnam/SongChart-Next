@@ -129,13 +129,11 @@ def derive(live):
         for pr in live["pull_requests"]:
             if pr.get("state") != "open":
                 continue
-            text = f"{pr.get('title','')}\n{pr.get('body') or ''}"
-            sid = normalize_slice((TITLE_SLICE_RE.match(pr.get("title") or "") or [None, None])[1] if TITLE_SLICE_RE.match(pr.get("title") or "") else None)
+            title_match = TITLE_SLICE_RE.match(pr.get("title") or "")
+            sid = normalize_slice(title_match.group(1)) if title_match else None
             if not sid:
-                for candidate in slices:
-                    if candidate != "LATER" and re.search(rf"\b{re.escape(candidate)}\b", text, re.I):
-                        sid = candidate
-                        break
+                owner_match = PR_OWNER_RE.search(pr.get("body") or "")
+                sid = normalize_slice(owner_match.group(1)) if owner_match else None
             if sid in execution:
                 execution[sid]["open_prs"].append({"number": pr["number"], "title": pr["title"], "url": pr["html_url"], "draft": pr.get("draft", False)})
 
