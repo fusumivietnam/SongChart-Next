@@ -86,6 +86,9 @@ jobs:
             ! command -v pnpm
             test ! -d /var/www/html/tests
             test ! -d /var/www/html/docs
+            test ! -d /var/www/html/resources/js
+            test ! -d /var/www/html/resources/css
+            test -d /var/www/html/resources/views
             test -d /var/www/html/vendor
             test -f /var/www/html/public/build/manifest.json
           '
