@@ -52,6 +52,19 @@ Project fields are convenience metadata. They must be reconstructible from the l
 
 GitHub Milestones may group Issues by a release objective, but a milestone percentage is only work-item aggregation. It is not capability verification or release readiness.
 
+## Roadmap Controller
+
+`scripts/roadmap_health.py` is the read-only reconciliation engine. It derives planned slices from this repository, capability lifecycle from the Capability Map and, when a GitHub token is available, current execution from live Issues/PRs. It never mutates Issues, Projects, registries or lifecycle state.
+
+The `Roadmap health` GitHub Actions workflow runs on relevant PR/main changes, manual dispatch and a daily schedule. It:
+- runs controller regression tests;
+- queries GitHub with read-only contents/issues/pull-requests/actions permissions;
+- reports active execution and conservative blockers;
+- flags missing capability links, lifecycle/evidence inconsistencies and unknown/truncated live state;
+- preserves JSON/text reports as short-lived artifacts for review.
+
+Warnings and blockers are information, not automatic roadmap edits. Controller **errors** fail the health job because they represent contradictory authority/evidence claims. A GitHub/API outage produces `unknown`, never a guessed status.
+
 ## Roadmap change workflow
 
 1. Research or product request is registered/evaluated without changing roadmap status.
