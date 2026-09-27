@@ -20,6 +20,9 @@ Once `composer.lock` and `pnpm-lock.yaml` are available:
 
 The postgres:18.6 image stores PGDATA at /var/lib/postgresql/18/docker; mount its parent at /var/lib/postgresql. Compose uses the **new** `postgres18_data` named volume. Never mount existing `postgres_data` from the PostgreSQL 17 scaffold into the 18 container. A PostgreSQL major upgrade requires a reviewed backup, restore/pg_upgrade plan and test; do not imply an automatic volume migration. Named volumes survive `docker compose down` but do **not** constitute backups. `docker compose down -v` destroys local database and dependency volumes; never run it on data you need.
 
+## Image footprint
+The production target intentionally excludes Composer, Node/npm/pnpm, tests, docs and governance source; build dependencies remain in intermediate stages. Foundation CI reports development and production image sizes and requires production to be smaller. Do not switch to Alpine or another libc/base family solely for a smaller number: evaluate extension compatibility, debugging/operations cost and measured transfer/storage benefit first.
+
 ## Image/build policy
 
 The multi-stage Dockerfile defines php-base, php-toolchain, development, frontend-build and production targets; the production target is **PHP-FPM only**, not a complete public web serving or deployment configuration. Use the development target for local work. Composer and pnpm lockfiles are mandatory build inputs; no dependency resolution during production image build. PHP 8.4, Node 22 and pnpm 10.17.1 are baseline candidates for verification. Base image SHA pinning, complete license/edition review, production secrets, ingress, backups and serving controller remain separate release gates.
