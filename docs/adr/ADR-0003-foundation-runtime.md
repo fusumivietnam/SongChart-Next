@@ -14,5 +14,8 @@ Initial local topology is app+db. No Redis, Nginx, Kestra, Meilisearch, separate
 
 Upstream auth and welcome/dashboard pages are unapproved scaffold, not SongChart product or Design Authority. Remove/restrict via separate scoped review after starter baseline, without promoting UI baselines. OpenAPI single declaring authority is a separate ADR before public API implementation.
 
+## Image footprint policy
+Production image optimization is structural: build-only compiler headers, Composer, Node/pnpm, tests, docs and governance sources do not belong in the final PHP-FPM image. CI must build both development and production targets, verify the final image omits build tools and non-runtime project material, and report image bytes; production must remain smaller than development. Keep Debian Bookworm for the Foundation baseline rather than switching to Alpine solely for size; a base-family change requires compatibility and measured-value review. Image size is an optimization metric, not a release gate by itself.
+
 ## Acceptance
 Real lockfiles; matching official upstream source provenance and license review; `docker compose config`, dev image build, php platform requirements, PostgreSQL 18 connectivity, starter tests, type/check/build and governance CI on exact PR SHA. Feature Artist, live ingestion, production restore and deployment remain unimplemented until separately evidenced.
