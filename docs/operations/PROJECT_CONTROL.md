@@ -10,6 +10,9 @@
 5. Resume an owning Issue/PR rather than duplicate it. Distinguish proposed/approved/implemented/verified/deployed; use referenced G0–G5 acceptance evidence. Obtain review for decisions and provider/data-impact changes.
 6. Commit bounded changes to a branch, run validation/tests, open/update PR with exact SHA and evidence. Do not merge/deploy/perform destructive changes without explicit review. Update owning authorities, not generated copies.
 
+## Roadmap authority
+Follow [Roadmap Governance](../roadmap/ROADMAP_GOVERNANCE.md). `VERTICAL_SLICES.md` owns planned slice scope/dependencies/gates; `CAPABILITY_MAP.json` owns capability lifecycle; live GitHub Issues/PRs own execution; GitHub Projects/Milestones, if configured, are derived views only. Never create or hand-maintain a competing roadmap-status file.
+
 ## Authority and linking
 - Research ID RES-0001: research provenance and disposition, not approval; link to existing capability and decision.
 - Capability ID in CAPABILITY_MAP: canonical scope/status; technology ID in TECHNOLOGY_REGISTRY: approved/candidate/watch selection.
