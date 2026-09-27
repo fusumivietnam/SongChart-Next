@@ -27,16 +27,20 @@ RUN ln -s /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
 ENV COMPOSER_ALLOW_SUPERUSER=1
 RUN composer --version && node --version && pnpm --version
 
-FROM php-toolchain AS development
+FROM php-toolchain AS app-source
 COPY . .
 RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
-    && test -s composer.lock && test -s pnpm-lock.yaml \
-    && composer install --prefer-dist --no-interaction --no-progress \
-    && pnpm install --frozen-lockfile
+    && test -s composer.lock && test -s pnpm-lock.yaml
+
+FROM app-source AS development
 EXPOSE 8000 5173
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
 
-FROM development AS frontend-build
+FROM app-source AS build-deps
+RUN composer install --prefer-dist --no-interaction --no-progress \
+    && pnpm install --frozen-lockfile
+
+FROM build-deps AS frontend-build
 RUN pnpm run build && pnpm run types:check
 
 FROM php-runtime AS production-deps
