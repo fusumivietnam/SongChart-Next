@@ -148,6 +148,32 @@ jobs:
             echo "- Production image: $prod_size bytes"
             echo "- Production/dev ratio: $(( prod_size * 100 / dev_size ))%"
           } >> "$GITHUB_STEP_SUMMARY"
+      - name: Generate source dependency SBOM
+        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        with:
+          path: .
+          format: spdx-json
+          output-file: foundation-source.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+          dependency-snapshot: false
+      - name: Generate production image SBOM
+        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
+        with:
+          image: songchart-next:foundation-ci
+          format: spdx-json
+          output-file: foundation-image.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+          dependency-snapshot: false
+      - name: Preserve Foundation SBOMs
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: foundation-sbom-${{ github.sha }}
+          path: |
+            foundation-source.spdx.json
+            foundation-image.spdx.json
+          retention-days: 14
       - name: Cleanup CI only
         if: always()
         run: docker compose down --volumes --remove-orphans
