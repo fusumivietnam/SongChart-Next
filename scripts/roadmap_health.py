@@ -123,6 +123,8 @@ def derive(live):
     caps = {c["id"]: c for c in cmap["capabilities"]}
     findings = []
     execution = {sid: {"open_issues": [], "closed_issues": [], "open_prs": []} for sid in slices}
+    issue_by_number = {}
+    prs_by_issue = {}
 
     if "FOUNDATION" not in slices or "VS-01A" not in slices:
         findings.append(finding("roadmap.missing_core_slice", "error", "Expected FOUNDATION and VS-01a slices are not both declared."))
@@ -132,11 +134,12 @@ def derive(live):
     else:
         if live.get("truncated"):
             findings.append(finding("live.truncated", "warning", "GitHub query reached 100-item page limit; report may be incomplete."))
+        issue_by_number = {int(issue["number"]): issue for issue in live["issues"]}
         for issue in live["issues"]:
             sid = issue_slice(issue)
             if sid and sid in execution:
                 key = "closed_issues" if issue.get("state") == "closed" else "open_issues"
-                execution[sid][key].append({"number": issue["number"], "title": issue["title"], "url": issue["html_url"]})
+                execution[sid][key].append({"number": issue["number"], "title": issue["title"], "url": issue["html_url"], "blockers": issue_blockers(issue)})
                 referenced_caps = issue_capabilities(issue, caps)
                 if not referenced_caps:
                     findings.append(finding("issue.missing_capability_link", "warning",
@@ -149,13 +152,16 @@ def derive(live):
         for pr in live["pull_requests"]:
             if pr.get("state") != "open":
                 continue
+            linked_issues = pr_issue_numbers(pr)
+            for issue_number in linked_issues:
+                prs_by_issue.setdefault(issue_number, []).append(pr)
             title_match = TITLE_SLICE_RE.match(pr.get("title") or "")
             sid = normalize_slice(title_match.group(1)) if title_match else None
             if not sid:
                 owner_match = PR_OWNER_RE.search(pr.get("body") or "")
                 sid = normalize_slice(owner_match.group(1)) if owner_match else None
             if sid in execution:
-                execution[sid]["open_prs"].append({"number": pr["number"], "title": pr["title"], "url": pr["html_url"], "draft": pr.get("draft", False)})
+                execution[sid]["open_prs"].append({"number": pr["number"], "title": pr["title"], "url": pr["html_url"], "draft": pr.get("draft", False), "issue_numbers": linked_issues})
 
     # Capability lifecycle consistency / next-gate hints.
     for cid, cap in caps.items():
