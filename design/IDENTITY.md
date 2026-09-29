@@ -1,12 +1,31 @@
-# Design identity — pending human approval
+# Design identity — Foundation baseline candidate
 
-Status: candidate / unapproved. No logo, brand name styling, palette, typography, artwork aspect-ratio or global layout is declared final.
+Status: candidate for human visual review. The direction is new SongChart Next identity; no prior SongChart visual styling is inherited.
 
-Decision questions to resolve with real mockups and user journeys:
-- Which product posture: search-centric finder, knowledge catalogue, editorial discovery or a deliberate combination?
-- What hierarchy differentiates artist, recording, work, release and provider destination?
-- What balance of artwork and structured metadata works on mobile and desktop?
-- Which typography, spacing, radius, colors, motion and empty/error states convey the chosen identity?
-- What provider badges, provenance and verification terms are truthful and accessible?
+## Product posture
+SongChart Next is a search-first music knowledge catalogue with restrained editorial qualities. The UI should prioritize entity identity, relationships, provenance and provider navigation over decorative chrome.
 
-Upon approval add semantic tokens, screenshots/stories with controlled fixtures, component and page contracts, then an ADR referencing exactly those assets. Avoid borrowing the previous project's approved direction automatically.
+## Identity principles
+- Content and music metadata are primary; UI chrome remains quiet.
+- Clear hierarchy must distinguish Artist, Release, Recording and provider destination.
+- Provenance/unknown/contested states are explicit but not visually alarmist.
+- Artwork is supportive rather than mandatory; layouts remain complete with deterministic placeholders.
+- Accessibility, narrow-screen reading and long/international names are baseline constraints.
+- No visual language should imply streaming playback where SongChart only links to external providers.
+
+## Candidate visual language
+This is a reviewable baseline, not yet approved:
+- typography: modern system sans stack first; no externally hosted font dependency in Foundation;
+- shape: restrained medium radius; avoid pill-heavy/generic dashboard styling;
+- color: neutral surfaces/text with one accessible accent family used for actions/links, not entity semantics;
+- spacing: 4px base rhythm with semantic spacing steps;
+- motion: minimal, reduced-motion safe; no motion required to understand state;
+- artwork: square/near-square entity artwork slots with placeholder fallback; Artist page must remain usable without artwork.
+
+Concrete semantic token names live in `design/tokens/foundation.json`. Approval of this identity requires rendered narrow/wide references, not this prose alone.
+
+## Content tone
+Concise, factual, provenance-aware. Avoid promotional superlatives and fabricated verification language. Provider actions should say where they lead rather than imply SongChart hosts the media.
+
+## Deferred
+Logo/wordmark exploration, custom typeface, expressive motion, dark theme, multi-brand themes and native-client-specific rendering remain outside the first baseline unless separately approved.
