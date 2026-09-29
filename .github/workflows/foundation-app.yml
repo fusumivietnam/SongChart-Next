@@ -101,7 +101,7 @@ jobs:
               digests[ref] = m.group(1)
           Path("foundation-image-digests.json").write_text(json.dumps(digests, indent=2) + "\n")
           PY
-          python3 scripts/foundation_provenance.py             --image-digests foundation-image-digests.json             --output foundation-provenance.json             > foundation-provenance.txt
+          python3 scripts/foundation_provenance.py --image-digests foundation-image-digests.json --require-digests --output foundation-provenance.json > foundation-provenance.txt
           test -s foundation-provenance.json
           cat foundation-provenance.txt >> "$GITHUB_STEP_SUMMARY"
       - name: Preserve Foundation provenance
