@@ -17,7 +17,9 @@ ROADMAP = ROOT / "docs" / "roadmap" / "VERTICAL_SLICES.md"
 LIFECYCLE_ORDER = {"candidate": 0, "approved": 1, "implemented": 2, "verified": 3, "deployed": 4, "watch": -1}
 SLICE_RE = re.compile(r"^##\s+(FOUNDATION|VS-[0-9]+[a-z]?|Later(?:\s*/\s*activated only)?)\b", re.I)
 BODY_SLICE_RE = re.compile(r"\*\*Slice ID:\*\*\s*([^\n]+)", re.I)
-BODY_CAP_RE = re.compile(r"\*\*Capability ID\(s\):\*\*\s*([^\n]+)", re.I)\nBODY_BLOCKED_BY_RE = re.compile(r"\*\*Blocked by:\*\*\s*([^\n]*)", re.I)\nPR_ISSUE_RE = re.compile(r"(?:(?:implements|closes|fixes|resolves)\s+#(\d+)|Owning Issue / slice / capability:\s*#?(\d+))", re.I)
+BODY_CAP_RE = re.compile(r"\*\*Capability ID\(s\):\*\*\s*([^\n]+)", re.I)
+BODY_BLOCKED_BY_RE = re.compile(r"\*\*Blocked by:\*\*\s*([^\n]*)", re.I)
+PR_ISSUE_RE = re.compile(r"(?:(?:implements|closes|fixes|resolves)\s+#(\d+)|Owning Issue / slice / capability:\s*#?(\d+))", re.I)
 PR_OWNER_RE = re.compile(r"(?:Owning Issue / slice / capability|Slice ID):\s*([^\n]+)", re.I)
 TITLE_SLICE_RE = re.compile(r"^\[?(FOUNDATION|VS-[0-9]+[a-z]?)\]?[\s:]+" , re.I)
 
