@@ -17,7 +17,7 @@ ROADMAP = ROOT / "docs" / "roadmap" / "VERTICAL_SLICES.md"
 LIFECYCLE_ORDER = {"candidate": 0, "approved": 1, "implemented": 2, "verified": 3, "deployed": 4, "watch": -1}
 SLICE_RE = re.compile(r"^##\s+(FOUNDATION|VS-[0-9]+[a-z]?|Later(?:\s*/\s*activated only)?)\b", re.I)
 BODY_SLICE_RE = re.compile(r"\*\*Slice ID:\*\*\s*([^\n]+)", re.I)
-BODY_CAP_RE = re.compile(r"\*\*Capability ID\(s\):\*\*\s*([^\n]+)", re.I)
+BODY_CAP_RE = re.compile(r"\*\*Capability ID\(s\):\*\*\s*([^\n]+)", re.I)\nBODY_BLOCKED_BY_RE = re.compile(r"\*\*Blocked by:\*\*\s*([^\n]*)", re.I)\nPR_ISSUE_RE = re.compile(r"(?:(?:implements|closes|fixes|resolves)\s+#(\d+)|Owning Issue / slice / capability:\s*#?(\d+))", re.I)
 PR_OWNER_RE = re.compile(r"(?:Owning Issue / slice / capability|Slice ID):\s*([^\n]+)", re.I)
 TITLE_SLICE_RE = re.compile(r"^\[?(FOUNDATION|VS-[0-9]+[a-z]?)\]?[\s:]+" , re.I)
 
@@ -63,6 +63,25 @@ def issue_capabilities(issue, known):
     if not m:
         return []
     return sorted({cid for cid in re.findall(r"[a-z0-9][a-z0-9-]+", m.group(1).lower()) if cid in known})
+
+def issue_blockers(issue):
+    body = issue.get("body") or ""
+    m = BODY_BLOCKED_BY_RE.search(body)
+    if not m:
+        return []
+    value = m.group(1).strip()
+    if not value or value.lower() in {"none", "n/a", "-"}:
+        return []
+    return sorted({int(n) for n in re.findall(r"#(\d+)", value)})
+
+def pr_issue_numbers(pr):
+    body = pr.get("body") or ""
+    found = set()
+    for m in PR_ISSUE_RE.finditer(body):
+        for value in m.groups():
+            if value:
+                found.add(int(value))
+    return sorted(found)
 
 def api_get(repo, path, token):
     url = f"https://api.github.com/repos/{repo}{path}"
