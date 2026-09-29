@@ -15,9 +15,11 @@
       "id": "product-scope",
       "plane": "product",
       "owner": "songchart",
-      "status": "candidate",
+      "status": "approved",
       "depends_on": [],
-      "implementation": null
+      "implementation": "docs/product/PRODUCT_CHARTER.md",
+      "scope": "MVP scope approved 2026-09-29: public read/discovery journey; editorial/review-only auth; no public account requirement; fixture-first then MusicBrainz; stable SongChart IDs; correction review; international-ready public web; public API remains separately activated.",
+      "decision": "docs/adr/ADR-0004-mvp-product-scope.md"
     },
     {
       "id": "canonical-music-core",
