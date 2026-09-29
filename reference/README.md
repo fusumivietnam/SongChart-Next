@@ -2,7 +2,7 @@
 
 **Status: contract proposal; no PHP class, hook, endpoint or component is claimed to exist yet.**
 
-Reference entries index actual repository source and explicitly authored semantics; they do not create runtime APIs or override OpenAPI, design rules or code signatures. Do not emulate a global WordPress-style mutable hook bus for canonical decisions.
+Reference entries index actual repository source and explicitly authored semantics; they do not create runtime APIs or override OpenAPI, design rules or code signatures. When a public HTTP API is activated, `openapi/songchart-public.yaml` is its single declaration authority under ADR-0005; generated/reference views are derived and must fail stale-reference validation when they diverge. Do not emulate a global WordPress-style mutable hook bus for canonical decisions.
 
 When a source implementation exists, an entry should have stable ID, kind, status, owner capability, source path/symbol, inputs/outputs, side effects, authorization, execution phase, consumers, example and test paths. Proposed entries must not assert source exists. Generated symbols and link graphs are derived snapshots; never hand-maintain them as another source of truth.
 
