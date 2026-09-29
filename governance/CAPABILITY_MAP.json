@@ -161,7 +161,19 @@
         "project-os"
       ],
       "implementation": "compose.yaml",
-      "scope": "Local app + PostgreSQL 18.6 Docker development baseline merged in PR #6; exact-head CI verified build/start, DB connectivity, starter tests, frontend checks, provenance/SBOM and smoke checks. Not production deployment."
+      "scope": "Local app + PostgreSQL 18.6 Docker development baseline merged in PR #6; exact-head CI verified build/start, DB connectivity, starter tests, frontend checks, provenance/SBOM and smoke checks. Not production deployment.",
+      "verification_evidence": {
+        "type": "github-actions",
+        "pr": 6,
+        "head_sha": "05e60db52d424ceee71b079b8ff93d321c2d400a",
+        "workflows": [
+          "Foundation application checks #36520618208",
+          "Docker scaffold (local infrastructure) #36520618212",
+          "Project governance #36520618228",
+          "Project OS contracts #36520618239"
+        ],
+        "verified_at": "2026-09-29"
+      }
     },
     {
       "id": "developer-reference",
