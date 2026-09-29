@@ -22,3 +22,25 @@ For each required page/state, store or link:
 - review decision and date.
 
 Text contracts and token files alone do not satisfy approval. The first approved baselines must cover Shell + Artist + Search on narrow and wide layouts. Release may remain contract-level until VS-02 provided the Artist/Search decisions do not conflict with it.
+
+
+## Local/testing preview routes
+
+The candidate is rendered from source only in `local` and `testing` environments; these routes are intentionally absent from production:
+
+- `/_design/foundation/artist`
+- `/_design/foundation/artist-long`
+- `/_design/foundation/search`
+- `/_design/foundation/search-empty`
+- `/_design/foundation/search-error`
+
+The preview uses deterministic fixture copy only. It does not read or mutate canonical data and must not be treated as a public product surface.
+
+### Manual capture procedure
+
+1. Run the approved Docker development stack.
+2. Open the required preview route.
+3. Capture at exactly 390 × 844 CSS px and 1440 × 1024 CSS px.
+4. Record the exact Git commit SHA, route, viewport and review date with each screenshot/reference.
+5. Verify visible keyboard focus, skip link behavior, long-name wrapping, no-artwork layout, and search empty/error semantics.
+6. Human approval or requested changes are recorded on Issue #10 before any `design-authority` lifecycle promotion.
