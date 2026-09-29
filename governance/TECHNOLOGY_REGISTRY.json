@@ -19,24 +19,33 @@
       "capability": "canonical-music-core",
       "source": "https://github.com/laravel/framework",
       "status": "candidate",
-      "version_authority": "composer.lock when installed",
-      "license_review": "required"
+      "version_authority": "composer.lock",
+      "license_review": "required",
+      "decision": "docs/adr/ADR-0003-foundation-runtime.md",
+      "implementation": "composer.json",
+      "scope": "Laravel 13 family resolved by composer.lock on draft PR #6; technology adoption remains under ADR review"
     },
     {
       "id": "laravel-react-starter",
       "capability": "public-web",
       "source": "https://github.com/laravel/react-starter-kit",
       "status": "candidate",
-      "version_authority": "starter commit and project lockfiles",
-      "license_review": "required"
+      "version_authority": "pinned upstream commit 717b8f55aefd82d25d4119eaebdc8e3a72b8d7e5 plus composer.lock and pnpm-lock.yaml",
+      "license_review": "required",
+      "decision": "docs/adr/ADR-0003-foundation-runtime.md",
+      "implementation": "docs/engineering/UPSTREAM_STARTER.md",
+      "scope": "Official starter source imported on draft PR #6; inherited UI/auth is not approved SongChart product scope"
     },
     {
       "id": "inertia-react",
       "capability": "public-web",
       "source": "https://github.com/inertiajs/inertia",
       "status": "candidate",
-      "version_authority": "package-lock.json when installed",
-      "license_review": "required"
+      "version_authority": "pnpm-lock.yaml",
+      "license_review": "required",
+      "decision": "docs/adr/ADR-0003-foundation-runtime.md",
+      "implementation": "package.json",
+      "scope": "Resolved frontend framework packages on draft PR #6; Design Authority approval remains separate"
     },
     {
       "id": "filament",
@@ -51,8 +60,11 @@
       "capability": "canonical-database",
       "source": "https://github.com/postgres/postgres",
       "status": "candidate",
-      "version_authority": "runtime image digest/deployment manifest",
-      "license_review": "required"
+      "version_authority": "compose image tag for local development; immutable image digest required for controlled release",
+      "license_review": "required",
+      "decision": "docs/adr/ADR-0003-foundation-runtime.md",
+      "implementation": "compose.yaml",
+      "scope": "PostgreSQL 18.6 development baseline with new postgres18_data volume; no PG17 in-place volume migration"
     },
     {
       "id": "meilisearch",
@@ -110,6 +122,50 @@
       "status": "watch",
       "version_authority": "deployment manifest",
       "license_review": "required"
+    },
+    {
+      "id": "php-runtime",
+      "capability": "canonical-music-core",
+      "source": "https://github.com/php/php-src",
+      "status": "candidate",
+      "version_authority": "Dockerfile base image version; immutable digest after review",
+      "license_review": "PHP license and Docker image terms review pending",
+      "scope": "PHP 8.4 Foundation baseline, not a verified production runtime",
+      "decision": "docs/adr/ADR-0003-foundation-runtime.md",
+      "implementation": "Dockerfile"
+    },
+    {
+      "id": "nodejs-build-toolchain",
+      "capability": "public-web",
+      "source": "https://github.com/nodejs/node",
+      "status": "candidate",
+      "version_authority": "Dockerfile node image version; pnpm-lock.yaml for JS dependencies",
+      "license_review": "Node.js runtime license review pending",
+      "scope": "Node 22 build/development tooling, excluded from php-fpm production image",
+      "decision": "docs/adr/ADR-0003-foundation-runtime.md",
+      "implementation": "Dockerfile"
+    },
+    {
+      "id": "pnpm",
+      "capability": "public-web",
+      "source": "https://github.com/pnpm/pnpm",
+      "status": "candidate",
+      "version_authority": "package.json packageManager + pnpm-lock.yaml",
+      "license_review": "pending",
+      "scope": "Single JS dependency resolver and lockfile for official starter",
+      "decision": "docs/adr/ADR-0003-foundation-runtime.md",
+      "implementation": "package.json"
+    },
+    {
+      "id": "anchore-sbom-action",
+      "capability": "project-os",
+      "source": "https://github.com/anchore/sbom-action",
+      "status": "candidate",
+      "version_authority": "GitHub Actions commit SHA pinned in .github/workflows/foundation-app.yml",
+      "license_review": "Apache-2.0 verified at pinned v0.24.2 commit; adoption review pending",
+      "implementation": ".github/workflows/foundation-app.yml",
+      "decision": "docs/adr/ADR-0003-foundation-runtime.md",
+      "scope": "CI-only SPDX SBOM generation for Foundation source dependencies and non-deployable production image; no dependency submission or release publishing"
     }
   ]
 }

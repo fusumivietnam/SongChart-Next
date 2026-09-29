@@ -1,0 +1,12 @@
+# Upstream starter provenance (Issue #5)
+
+Source: https://github.com/laravel/react-starter-kit
+Pinned Git commit: `717b8f55aefd82d25d4119eaebdc8e3a72b8d7e5`. Upstream README identifies the starter as MIT licensed; dependency licenses and editions require separate review. Imported upstream project source includes upstream auth/welcome/dashboard scaffolding; it is **not** approved SongChart product UI or activated authentication. Do not replace SongChart's authored README, AGENTS, governance, Docker, Design Authority or original env/CI files with upstream files.
+
+Excluded upstream files by ownership: `README.md`, `.env.example`, `.gitignore`, `.github/workflows/tests.yml`, `.github/dependabot.yml`. Repo-authoritative `composer.json`, `package.json`, `pnpm-workspace.yaml`, app source and tests originate from the pinned revision, except future explicitly reviewed deltas. The resulting app's Composer package name is reset to `songchart/next`; package manager fixed to pnpm.
+
+Real lockfiles have been generated and committed by the branch-scoped bootstrap workflow: [lockfile-generation run](https://github.com/fusumivietnam/SongChart-Next/actions/runs/36089662836). This records dependency resolution only, not a successful application build or production provenance. The Composer and pnpm lockfiles in Git remain the only installed-version authority.
+
+The lockfiles exist on [draft PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6). Current verification evidence belongs to the PR head's GitHub Actions checks; do not hard-code an older successful revision as current evidence. The Foundation workflow verifies development-image startup, PostgreSQL connectivity/migrations, frontend build, TypeScript, unmodified starter tests, dependency audits, HTTP smoke and the structurally minimal PHP-FPM production target. New revisions require new green checks; these checks are neither product-feature nor production-deployment verification. Exact installed versions belong to the lockfiles, not this page. Upstream components/Tailwind/Radix/shadcn remain implementation primitives subject to Design Authority. An inherited route or feature is not an approved public SongChart feature. The upstream starter has dependencies for Fortify/passkeys but activating a user workflow needs product review.
+
+Review upstream changes by comparing this pinned commit with newer upstream revisions, not by merging upstream main automatically. The lock generation workflow is a one-time branch-scoped bootstrap, not a dependency-update bot.
