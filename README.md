@@ -3,13 +3,13 @@
 SongChart Next is a new, independent music knowledge and discovery project. **This repository is its sole project authority.** Previous SongChart repositories, chat summaries, ZIP bundles and historical stage plans are not dependencies or implementation evidence.
 
 ## Docker-first local development
-- ADR-0001 governs local Compose and [ADR-0003](docs/adr/ADR-0003-foundation-runtime.md) proposes the app/toolchain baseline. The [Docker development runbook](docs/operations/DOCKER_DEVELOPMENT.md) documents app + PostgreSQL 18.6 startup after real lockfiles and checks are available.
-- [PR #1](https://github.com/fusumivietnam/SongChart-Next/pull/1) and [PR #2](https://github.com/fusumivietnam/SongChart-Next/pull/2) are merged. The official starter import is scoped to [Issue #5](https://github.com/fusumivietnam/SongChart-Next/issues/5); see [pinned upstream provenance](docs/engineering/UPSTREAM_STARTER.md).
+- ADR-0001 governs local Compose and [ADR-0003](docs/adr/ADR-0003-foundation-runtime.md) records the accepted Foundation app/toolchain baseline. The [Docker development runbook](docs/operations/DOCKER_DEVELOPMENT.md) documents app + PostgreSQL 18.6 startup after real lockfiles and checks are available.
+- [PR #1](https://github.com/fusumivietnam/SongChart-Next/pull/1), [PR #2](https://github.com/fusumivietnam/SongChart-Next/pull/2), [PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6) and [PR #8](https://github.com/fusumivietnam/SongChart-Next/pull/8) are merged; see [pinned upstream provenance](docs/engineering/UPSTREAM_STARTER.md).
 
 ## Current status
-- `main` contains the governance and PostgreSQL-only local Compose scaffold. Official Laravel React Starter source, real lockfiles and app + PostgreSQL 18.6 Docker development implementation are in [draft PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6), **not yet merged into main**. Application CI for the pinned PR revision must be inspected at review; product features and production deployment remain separate.
-- Product, framework and visual decisions below are **proposals** until accepted in an ADR.
-- No verified Laravel application, provider integration, production deployment, approved visual baseline or passing end-to-end product feature is implied by these documents.
+- `main` contains the governance controller plus the pinned official Laravel React Starter source, real Composer/pnpm lockfiles and app + PostgreSQL 18.6 Docker development baseline merged from [PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6). Exact-SHA Foundation CI passed before merge; this verifies the local Foundation runtime only, not a SongChart product feature or production deployment.
+- Product scope, visual authority, public API declaration and production deployment decisions remain separate until accepted by their owning issue/ADR.
+- No provider integration, production deployment, approved visual baseline or passing end-to-end SongChart product feature is implied by the Foundation runtime verification.
 - Do not copy old source, stage numbering, generated authority or UI by default.
 
 ## Project control (read-only status, no chat authority)
@@ -31,7 +31,7 @@ Project governance protocols and evidence ownership: [Project Control](docs/oper
 Git owns code and authored decisions; PostgreSQL will own canonical product data when installed; GitHub Issues/Projects own execution work when configured. Generated docs and AI contexts are **read-only projections** of their declared sources. A proposal is not an installed dependency, an approved design, a completed feature or a production release.
 
 ## First milestone
-Approve product/design decisions, initialize an official Laravel React Starter application, and implement the fixture-first Artist end-to-end slice with PostgreSQL and automated checks. Add live provider ingestion, search, admin and external infrastructure only when accepted capability triggers are met.
+Approve the remaining product/design/API decisions and implement the fixture-first Artist end-to-end slice with PostgreSQL and automated checks. Add live provider ingestion, search, admin and external infrastructure only when accepted capability triggers are met.
 
 ## Verification
 Run `python3 scripts/verify_project_os.py` to validate project registry links and lifecycle claims (Python standard library only).
