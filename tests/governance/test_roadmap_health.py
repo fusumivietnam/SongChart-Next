@@ -130,6 +130,111 @@ class RoadmapHealthTests(unittest.TestCase):
         artist = next(x for x in report["slices"] if x["id"] == "VS-01A")
         self.assertEqual(artist["open_prs"][0]["number"], 21)
 
+    def test_ready_issue_without_open_blockers_or_prs(self):
+        live = {
+            "status": "known",
+            "truncated": False,
+            "pull_requests": [],
+            "issues": [{
+                "number": 30,
+                "title": "FOUNDATION: product decision",
+                "body": "**Slice ID:** FOUNDATION\n**Capability ID(s):** project-os\n**Blocked by:** none",
+                "state": "open",
+                "html_url": "https://example.test/issues/30",
+            }],
+        }
+        report = health.derive(live)
+        self.assertEqual([x["issue"] for x in report["work_queue"]["ready"]], [30])
+
+    def test_open_blocker_marks_issue_blocked(self):
+        live = {
+            "status": "known",
+            "truncated": False,
+            "pull_requests": [],
+            "issues": [
+                {
+                    "number": 31,
+                    "title": "FOUNDATION: design",
+                    "body": "**Slice ID:** FOUNDATION\n**Capability ID(s):** project-os\n**Blocked by:** #30",
+                    "state": "open",
+                    "html_url": "https://example.test/issues/31",
+                },
+                {
+                    "number": 30,
+                    "title": "FOUNDATION: scope",
+                    "body": "**Slice ID:** FOUNDATION\n**Capability ID(s):** project-os\n**Blocked by:** none",
+                    "state": "open",
+                    "html_url": "https://example.test/issues/30",
+                },
+            ],
+        }
+        report = health.derive(live)
+        blocked = next(x for x in report["work_queue"]["blocked"] if x["issue"] == 31)
+        self.assertEqual(blocked["blocked_by"], [30])
+
+    def test_draft_pr_marks_owned_issue_in_progress(self):
+        live = {
+            "status": "known",
+            "truncated": False,
+            "issues": [{
+                "number": 32,
+                "title": "FOUNDATION: runtime",
+                "body": "**Slice ID:** FOUNDATION\n**Capability ID(s):** project-os\n**Blocked by:** none",
+                "state": "open",
+                "html_url": "https://example.test/issues/32",
+            }],
+            "pull_requests": [{
+                "number": 40,
+                "title": "Foundation runtime",
+                "body": "Implements #32\nSlice ID: FOUNDATION",
+                "state": "open",
+                "draft": True,
+                "html_url": "https://example.test/pulls/40",
+            }],
+        }
+        report = health.derive(live)
+        self.assertEqual([x["issue"] for x in report["work_queue"]["in_progress"]], [32])
+
+    def test_ready_for_review_pr_marks_owned_issue_in_review(self):
+        live = {
+            "status": "known",
+            "truncated": False,
+            "issues": [{
+                "number": 33,
+                "title": "[VS-01a] Artist contract",
+                "body": "**Slice ID:** VS-01a\n**Capability ID(s):** canonical-music-core\n**Blocked by:** none",
+                "state": "open",
+                "html_url": "https://example.test/issues/33",
+            }],
+            "pull_requests": [{
+                "number": 41,
+                "title": "[VS-01a] Artist contract",
+                "body": "Resolves #33\nSlice ID: VS-01a",
+                "state": "open",
+                "draft": False,
+                "html_url": "https://example.test/pulls/41",
+            }],
+        }
+        report = health.derive(live)
+        self.assertEqual([x["issue"] for x in report["work_queue"]["in_review"]], [33])
+
+    def test_unknown_blocker_is_warning_and_blocks(self):
+        live = {
+            "status": "known",
+            "truncated": False,
+            "pull_requests": [],
+            "issues": [{
+                "number": 34,
+                "title": "FOUNDATION: unknown dependency",
+                "body": "**Slice ID:** FOUNDATION\n**Capability ID(s):** project-os\n**Blocked by:** #999",
+                "state": "open",
+                "html_url": "https://example.test/issues/34",
+            }],
+        }
+        report = health.derive(live)
+        self.assertEqual([x["issue"] for x in report["work_queue"]["blocked"]], [34])
+        self.assertTrue(any(f["code"] == "issue.unknown_blocker" for f in report["findings"]))
+
     def test_unlinked_research_issue_is_info_not_roadmap_failure(self):
         live = {
             "status": "known",
