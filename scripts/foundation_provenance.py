@@ -71,6 +71,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--image-digests", help="JSON file mapping image references to resolved manifest digests")
     ap.add_argument("--list-images", action="store_true", help="Print external container image references and exit")
+    ap.add_argument("--require-digests", action="store_true", help="Fail unless every external image resolved to a sha256 digest")
     ap.add_argument("--output", help="Write report JSON to path")
     args = ap.parse_args()
     refs = []
@@ -87,6 +88,10 @@ def main():
     digests = {}
     if args.image_digests:
         digests = json.loads(Path(args.image_digests).read_text(encoding="utf-8"))
+    if args.require_digests:
+        missing = [ref for ref in refs if not re.fullmatch(r"sha256:[0-9a-f]{64}", str(digests.get(ref, "")))]
+        if missing:
+            raise SystemExit("Missing/invalid resolved image digests: " + ", ".join(missing))
 
     report = {
         "schema_version": 1,
