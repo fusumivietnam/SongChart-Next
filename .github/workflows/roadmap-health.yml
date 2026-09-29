@@ -1,0 +1,62 @@
+name: Roadmap health
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed, ready_for_review, converted_to_draft, edited]
+  issues:
+    types: [opened, edited, closed, reopened, labeled, unlabeled]
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - AGENTS.md
+      - docs/operations/PROJECT_CONTROL.md
+      - docs/roadmap/**
+      - governance/**
+      - scripts/roadmap_health.py
+      - tests/governance/test_roadmap_health.py
+      - .github/ISSUE_TEMPLATE/roadmap_work.md
+      - .github/workflows/roadmap-health.yml
+  schedule:
+    - cron: "17 1 * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  actions: read
+concurrency:
+  group: roadmap-health-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Run roadmap controller regressions
+        run: python3 -m unittest tests.governance.test_roadmap_health -v
+      - name: Derive live roadmap health
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/roadmap_health.py \
+            --live-github \
+            --fail-on-error \
+            --output-json roadmap-health.json \
+            | tee roadmap-health.txt
+          {
+            echo "## Roadmap health"
+            echo
+            echo '```text'
+            cat roadmap-health.txt
+            echo '```'
+            echo
+            echo "This report is derived/read-only. It cannot change Capability Map lifecycle or GitHub work state."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve roadmap health report
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: roadmap-health-${{ github.sha }}
+          path: |
+            roadmap-health.json
+            roadmap-health.txt
+          retention-days: 14

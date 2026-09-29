@@ -1,6 +1,6 @@
 # Vertical slices — dependency and evidence driven
 
-**All slices below are planned, not completed.** GitHub Issues/Projects become execution authority once configured; this document is the proposed release scope, not an independent task-state tracker.
+**All slices below are planned, not completed.** This document owns planned slice scope, dependency order and acceptance intent only. Live GitHub Issues/PRs own execution; `CAPABILITY_MAP.json` owns capability lifecycle. GitHub Projects/Milestones, if configured, are derived views and never independent status authority. See [Roadmap Governance](ROADMAP_GOVERNANCE.md).
 
 Delivery acceptance for every slice: [Engineering Delivery Contract](../engineering/DELIVERY_CONTRACT.md) and [Acceptance Gates](../operations/ACCEPTANCE_GATES.md). Research references are catalogued in [Research Registry](../../governance/RESEARCH_REGISTRY.json) but cannot automatically change this planned scope. Live Issues and PRs own execution status, not this document or an offline snapshot.
 

@@ -5,10 +5,13 @@
 ## Session read protocol
 1. Read current main HEAD, README and AGENTS; read Product Charter, Architecture and owning Design/contract docs.
 2. Validate CAPABILITY_MAP, TECHNOLOGY_REGISTRY, ACTIVATION_TRIGGERS, RESEARCH_REGISTRY and INFRASTRUCTURE_REGISTRY with `python3 scripts/verify_project_os.py`.
-3. Read roadmap scope; run `python3 scripts/project_status.py` for a local **read-only** inventory. This offline report intentionally marks Issues/PRs/CI/deployment unknown.
+3. Read Roadmap Governance and roadmap scope. Run `python3 scripts/project_status.py` for an offline **read-only** inventory. For proactive roadmap reconciliation, use the latest `Roadmap health` Action report or run `python3 scripts/roadmap_health.py --live-github` with read-only GitHub credentials; offline/live-query failures remain unknown.
 4. Query **live** GitHub Issues, PRs, branch HEADs, CI, manifests and tests; identify existing active capability/slice/branch. If API unavailable report unknown; never infer from snapshot or chat memory.
 5. Resume an owning Issue/PR rather than duplicate it. Distinguish proposed/approved/implemented/verified/deployed; use referenced G0–G5 acceptance evidence. Obtain review for decisions and provider/data-impact changes.
 6. Commit bounded changes to a branch, run validation/tests, open/update PR with exact SHA and evidence. Do not merge/deploy/perform destructive changes without explicit review. Update owning authorities, not generated copies.
+
+## Roadmap authority
+Follow [Roadmap Governance](../roadmap/ROADMAP_GOVERNANCE.md). `VERTICAL_SLICES.md` owns planned slice scope/dependencies/gates; `CAPABILITY_MAP.json` owns capability lifecycle; live GitHub Issues/PRs own execution; GitHub Projects/Milestones, if configured, are derived views only. Never create or hand-maintain a competing roadmap-status file.
 
 ## Authority and linking
 - Research ID RES-0001: research provenance and disposition, not approval; link to existing capability and decision.

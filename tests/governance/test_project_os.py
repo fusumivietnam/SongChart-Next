@@ -31,7 +31,7 @@ class RegistryTests(unittest.TestCase):
             "schema_version": 1, "project": "SongChart-Next", "instances": []}))
         for ref in ("AGENTS.md", "docs/product/PRODUCT_CHARTER.md", "docs/architecture/ARCHITECTURE.md",
                     "design/DESIGN_AUTHORITY.md", "reference/README.md", "docs/roadmap/VERTICAL_SLICES.md",
-                    "docs/engineering/DELIVERY_CONTRACT.md", "docs/operations/ACCEPTANCE_GATES.md",
+                    "docs/engineering/DELIVERY_CONTRACT.md", "docs/roadmap/ROADMAP_GOVERNANCE.md", "docs/operations/ACCEPTANCE_GATES.md",
                     "docs/operations/DEPENDENCY_POLICY.md", "docs/operations/ENVIRONMENT_POLICY.md",
                     "docs/research/README.md", "governance/schemas/research.schema.json",
                     "governance/schemas/infrastructure.schema.json"):

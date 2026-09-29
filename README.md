@@ -24,7 +24,8 @@ Project governance protocols and evidence ownership: [Project Control](docs/oper
 6. [Design authority](design/DESIGN_AUTHORITY.md)
 7. [Developer reference](reference/README.md)
 8. [AI/developer instructions](AGENTS.md)
-9. [Vertical slices](docs/roadmap/VERTICAL_SLICES.md)
+9. [Roadmap governance](docs/roadmap/ROADMAP_GOVERNANCE.md)
+10. [Vertical slices](docs/roadmap/VERTICAL_SLICES.md)
 
 ## Authority rule
 Git owns code and authored decisions; PostgreSQL will own canonical product data when installed; GitHub Issues/Projects own execution work when configured. Generated docs and AI contexts are **read-only projections** of their declared sources. A proposal is not an installed dependency, an approved design, a completed feature or a production release.
