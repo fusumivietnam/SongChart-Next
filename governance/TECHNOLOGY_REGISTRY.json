@@ -155,6 +155,17 @@
       "scope": "Single JS dependency resolver and lockfile for official starter",
       "decision": "docs/adr/ADR-0003-foundation-runtime.md",
       "implementation": "package.json"
+    },
+    {
+      "id": "anchore-sbom-action",
+      "capability": "project-os",
+      "source": "https://github.com/anchore/sbom-action",
+      "status": "candidate",
+      "version_authority": "GitHub Actions commit SHA pinned in .github/workflows/foundation-app.yml",
+      "license_review": "Apache-2.0 verified at pinned v0.24.2 commit; adoption review pending",
+      "implementation": ".github/workflows/foundation-app.yml",
+      "decision": "docs/adr/ADR-0003-foundation-runtime.md",
+      "scope": "CI-only SPDX SBOM generation for Foundation source dependencies and non-deployable production image; no dependency submission or release publishing"
     }
   ]
 }
