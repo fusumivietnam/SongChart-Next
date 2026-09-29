@@ -156,12 +156,12 @@
       "id": "local-docker-development",
       "plane": "operations",
       "owner": "songchart",
-      "status": "implemented",
+      "status": "verified",
       "depends_on": [
         "project-os"
       ],
       "implementation": "compose.yaml",
-      "scope": "PostgreSQL-only local Compose scaffold in PR #1; runtime verification and application service missing"
+      "scope": "Local app + PostgreSQL 18.6 Docker development baseline merged in PR #6; exact-head CI verified build/start, DB connectivity, starter tests, frontend checks, provenance/SBOM and smoke checks. Not production deployment."
     },
     {
       "id": "developer-reference",
