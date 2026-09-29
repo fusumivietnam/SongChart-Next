@@ -294,6 +294,19 @@ def render_text(report):
         print("Conservative blockers:")
         for item in report["blocked_slices"]:
             print(f"  {item['slice']}: {item['reason']}")
+    queue = report["work_queue"]
+    if any(queue.values()):
+        print("Execution queue:")
+        for state in ("ready", "in_progress", "in_review", "blocked"):
+            if not queue[state]:
+                continue
+            print(f"  {state}:")
+            for item in queue[state]:
+                suffix = ""
+                if item["blocked_by"] or item["unknown_blockers"]:
+                    refs = [f"#{n}" for n in item["blocked_by"] + item["unknown_blockers"]]
+                    suffix = " (blocked by " + ", ".join(refs) + ")"
+                print(f"    #{item['issue']} [{item['slice']}] {item['title']}{suffix}")
     for f in report["findings"]:
         print(f"[{f['severity'].upper()}] {f['code']}: {f['message']}")
 
