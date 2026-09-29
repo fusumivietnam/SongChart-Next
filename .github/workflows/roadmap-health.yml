@@ -1,16 +1,9 @@
 name: Roadmap health
 on:
   pull_request:
-    paths:
-      - README.md
-      - AGENTS.md
-      - docs/operations/PROJECT_CONTROL.md
-      - docs/roadmap/**
-      - governance/**
-      - scripts/roadmap_health.py
-      - tests/governance/test_roadmap_health.py
-      - .github/ISSUE_TEMPLATE/roadmap_work.md
-      - .github/workflows/roadmap-health.yml
+    types: [opened, synchronize, reopened, closed, ready_for_review, converted_to_draft, edited]
+  issues:
+    types: [opened, edited, closed, reopened, labeled, unlabeled]
   push:
     branches: [main]
     paths:
