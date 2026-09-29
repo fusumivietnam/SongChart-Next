@@ -1,6 +1,6 @@
 # ADR-0003 — Foundation runtime and official starter import
 
-Status: proposed for review in Issue #5 and the official-starter PR. This does not approve visual identity, product scope, production serving/deployment, or canonical-data policies.
+Status: accepted for the Foundation runtime baseline by completion of Issue #5 and merge of PR #6 on 2026-09-29. This does not approve visual identity, product scope, production serving/deployment, or canonical-data policies.
 
 ## Choice and provenance
 Import only the official upstream `laravel/react-starter-kit` revision `717b8f55aefd82d25d4119eaebdc8e3a72b8d7e5` into the existing SongChart Next repository. Preserve SongChart-authored README, AGENTS, governance, roadmap, Docker and design authorities; do not copy old SongChart. The upstream kit uses Laravel 13/PHP ^8.3, React 19/Inertia 3/TypeScript, Tailwind/Radix/shadcn primitives and Fortify/passkeys scaffolding. These packages are not a SongChart visual design or activated user-facing product feature.
