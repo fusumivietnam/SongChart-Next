@@ -69,21 +69,24 @@ def starter_revision():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--image-digests", help="JSON file mapping image references to resolved RepoDigests")
+    ap.add_argument("--image-digests", help="JSON file mapping image references to resolved manifest digests")
+    ap.add_argument("--list-images", action="store_true", help="Print external container image references and exit")
     ap.add_argument("--output", help="Write report JSON to path")
     args = ap.parse_args()
+    refs = []
+    for item in dockerfile_images():
+        if item["reference"] not in refs:
+            refs.append(item["reference"])
+    pg = compose_postgres()
+    if pg and pg not in refs:
+        refs.append(pg)
+    if args.list_images:
+        print("\n".join(refs))
+        return
+
     digests = {}
     if args.image_digests:
         digests = json.loads(Path(args.image_digests).read_text(encoding="utf-8"))
-
-    external_images = dockerfile_images()
-    pg = compose_postgres()
-    refs = []
-    for item in external_images:
-        if item["reference"] not in refs:
-            refs.append(item["reference"])
-    if pg and pg not in refs:
-        refs.append(pg)
 
     report = {
         "schema_version": 1,
