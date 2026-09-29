@@ -195,6 +195,56 @@ def derive(live):
             if sid.startswith("VS-"):
                 blocked.append({"slice": sid, "reason": "FOUNDATION has open execution; do not infer readiness until owning gates are approved."})
 
+    work_queue = {"ready": [], "blocked": [], "in_progress": [], "in_review": []}
+    if live["status"] == "known":
+        for issue in live["issues"]:
+            if issue.get("state") != "open":
+                continue
+            sid = issue_slice(issue)
+            if not sid or sid not in execution:
+                continue
+            blockers = issue_blockers(issue)
+            unresolved = []
+            unknown = []
+            for blocker in blockers:
+                if blocker == int(issue["number"]):
+                    findings.append(finding("issue.self_blocked", "error",
+                        f"Issue #{issue['number']} blocks itself.", issue=issue["number"]))
+                    unresolved.append(blocker)
+                    continue
+                target = issue_by_number.get(blocker)
+                if target is None:
+                    unknown.append(blocker)
+                    findings.append(finding("issue.unknown_blocker", "warning",
+                        f"Issue #{issue['number']} references unknown blocker #{blocker}.",
+                        issue=issue["number"], blocker=blocker))
+                elif target.get("state") != "closed":
+                    unresolved.append(blocker)
+            linked_prs = prs_by_issue.get(int(issue["number"]), [])
+            if unresolved or unknown:
+                state = "blocked"
+            elif any(not pr.get("draft", False) for pr in linked_prs):
+                state = "in_review"
+            elif linked_prs:
+                state = "in_progress"
+            else:
+                state = "ready"
+            work_queue[state].append({
+                "issue": issue["number"],
+                "title": issue["title"],
+                "url": issue["html_url"],
+                "slice": sid,
+                "capabilities": issue_capabilities(issue, caps),
+                "blocked_by": unresolved,
+                "unknown_blockers": unknown,
+                "pull_requests": [
+                    {"number": pr["number"], "title": pr["title"], "url": pr["html_url"], "draft": pr.get("draft", False)}
+                    for pr in linked_prs
+                ],
+            })
+        for state in work_queue:
+            work_queue[state].sort(key=lambda item: (slices.index(item["slice"]), item["issue"]))
+
     trigger_by_cap = {t["capability"]: t for t in triggers["triggers"]}
     watch = []
     for cid, cap in caps.items():
@@ -223,6 +273,7 @@ def derive(live):
         "slices": [{"id": sid, **execution[sid]} for sid in slices],
         "active_execution": active,
         "blocked_slices": blocked,
+        "work_queue": work_queue,
         "watch_capabilities": watch,
         "findings": findings,
         "summary": {"planned_slices": len(slices), "capabilities": len(caps), "technologies": len(technologies["technologies"]), **counts},
