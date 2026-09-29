@@ -1,6 +1,6 @@
 # Product charter — SongChart Next
 
-**Status: proposed; approval is tracked in an ADR/issue.**
+**Status: proposed; approval is tracked in an ADR/issue.**\n\nCandidate testable acceptance contract: [MVP acceptance](MVP_ACCEPTANCE.md). The linked contract remains proposed until Issue #9 review; its existence does not promote `product-scope`.
 
 SongChart Next is an internationally oriented music knowledge, metadata discovery and legal provider-navigation product, **not** a streaming/hosting or general developer-platform product.
 
