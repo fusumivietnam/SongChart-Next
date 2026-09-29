@@ -65,6 +65,16 @@ The `Roadmap health` GitHub Actions workflow runs on relevant PR/main changes, m
 
 Warnings and blockers are information, not automatic roadmap edits. Controller **errors** fail the health job because they represent contradictory authority/evidence claims. A GitHub/API outage produces `unknown`, never a guessed status.
 
+## Derived execution queue
+
+Roadmap Issues may declare `**Blocked by:** #issue` references. The controller combines these explicit blockers with PR ownership links (`Implements/Resolves/Closes/Fixes #issue` or the PR template owning-Issue field) to derive execution state:
+- **Ready** — open roadmap Issue, no unresolved blocker, no linked open PR.
+- **In progress** — linked open draft PR and no unresolved blocker.
+- **In review** — linked open non-draft PR and no unresolved blocker.
+- **Blocked** — one or more referenced blocker Issues remain open, are unknown, or the Issue self-blocks.
+
+These are execution projections only. They do not rank political/product choices, do not choose priorities, and never promote capability lifecycle. Multiple Ready items may exist; prioritization remains a project decision.
+
 ## Roadmap change workflow
 
 1. Research or product request is registered/evaluated without changing roadmap status.
