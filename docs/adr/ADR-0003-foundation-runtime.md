@@ -17,5 +17,8 @@ Upstream auth and welcome/dashboard pages are unapproved scaffold, not SongChart
 ## Image footprint policy
 Production image optimization is structural: build-only compiler headers, Composer, Node/pnpm, tests, docs and governance sources do not belong in the final PHP-FPM image. CI must build both development and production targets, verify the final image omits build tools and non-runtime project material, and report image bytes; production must remain smaller than development. Keep Debian Bookworm for the Foundation baseline rather than switching to Alpine solely for size; a base-family change requires compatibility and measured-value review. Image size is an optimization metric, not a release gate by itself.
 
+## Supply-chain evidence
+Foundation CI generates a read-only provenance artifact from repository authorities: pinned starter commit, SHA-256 hashes for Composer/pnpm lockfiles, selected resolved package versions, and the manifest digest resolved for every external Docker image reference used by Dockerfile/Compose. These resolved digests are evidence for the tested revision; they do not automatically approve a production pin or deployment. License inventories and vulnerability audits remain separate evidence. A standards-based SBOM is still a release gate until explicitly implemented and reviewed.
+
 ## Acceptance
 Real lockfiles; matching official upstream source provenance and license review; `docker compose config`, dev image build, php platform requirements, PostgreSQL 18 connectivity, starter tests, type/check/build and governance CI on exact PR SHA. Feature Artist, live ingestion, production restore and deployment remain unimplemented until separately evidenced.
