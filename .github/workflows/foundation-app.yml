@@ -17,6 +17,7 @@ on:
       - resources/**
       - routes/**
       - tests/**
+      - scripts/foundation_provenance.py
       - .github/workflows/foundation-app.yml
   workflow_dispatch:
 concurrency:
@@ -36,6 +37,7 @@ jobs:
         run: |
           test -s composer.lock
           test -s pnpm-lock.yaml
+          python3 -m unittest tests.governance.test_foundation_provenance -v
           docker compose config --quiet
       - name: Prepare disposable CI application environment
         shell: bash
@@ -80,6 +82,37 @@ jobs:
           docker compose exec -T app composer audit --locked --no-interaction
           docker compose exec -T app pnpm audit --prod --audit-level=high
           echo "Locked Composer and production pnpm vulnerability audits passed; license inventories are retained as a review artifact." >> "$GITHUB_STEP_SUMMARY"
+      - name: Resolve Foundation image provenance
+        shell: bash
+        run: |
+          python3 scripts/foundation_provenance.py --list-images > foundation-images.txt
+          python3 - <<'PY'
+          import json
+          import re
+          import subprocess
+          from pathlib import Path
+          refs = [line.strip() for line in Path("foundation-images.txt").read_text().splitlines() if line.strip()]
+          digests = {}
+          for ref in refs:
+              p = subprocess.run(["docker", "buildx", "imagetools", "inspect", ref], text=True, capture_output=True, check=True)
+              m = re.search(r"^Digest:\s+(sha256:[0-9a-f]{64})$", p.stdout, re.M)
+              if not m:
+                  raise SystemExit(f"Could not resolve manifest digest for {ref}")
+              digests[ref] = m.group(1)
+          Path("foundation-image-digests.json").write_text(json.dumps(digests, indent=2) + "\n")
+          PY
+          python3 scripts/foundation_provenance.py             --image-digests foundation-image-digests.json             --output foundation-provenance.json             > foundation-provenance.txt
+          test -s foundation-provenance.json
+          cat foundation-provenance.txt >> "$GITHUB_STEP_SUMMARY"
+      - name: Preserve Foundation provenance
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: foundation-provenance-${{ github.sha }}
+          path: |
+            foundation-provenance.json
+            foundation-provenance.txt
+            foundation-image-digests.json
+          retention-days: 14
       - name: HTTP smoke of development app (framework only)
         run: |
           curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-connrefused http://127.0.0.1:8000/up > /dev/null
