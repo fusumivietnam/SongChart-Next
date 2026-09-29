@@ -41,7 +41,9 @@ Vertical-slice completion is evaluated from its required capabilities and accept
 
 ## GitHub Projects and milestones
 
-GitHub Projects may be configured as a portfolio/Kanban **view** over Issues/PRs. Recommended fields, if a Project is created:
+GitHub Projects is the approved human-facing **derived visual layer** over Issues/PRs. The concrete field/view contract is [GitHub Project visual roadmap](PROJECT_VIEWS.md). It remains a projection, never lifecycle or evidence authority.
+
+Recommended fields:
 - Slice: FOUNDATION / VS-01a / VS-01b / VS-02 / VS-03 / VS-04 / Later
 - Capability: existing capability ID
 - Work state: Proposed / Ready / In progress / Blocked / In review / Done
