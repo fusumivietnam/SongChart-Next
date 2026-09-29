@@ -10,11 +10,11 @@ Give maintainers a visual, low-friction way to answer:
 - which acceptance gate is next;
 - what exact PR/CI evidence supports a claim.
 
-The Project must be reconstructible from repository authority plus live Issues/PRs. Dragging a card or editing a Project field never promotes a capability lifecycle state.
+The Project must be reconstructible from repository authority plus live Issues/PRs. `Slice` and `Capability` option vocabularies mirror their repository authorities and may evolve with reviewed roadmap/capability changes. Dragging a card or editing a Project field never promotes a capability lifecycle state.
 
 ## Required fields
-- `Slice`: FOUNDATION / VS-01a / VS-01b / VS-02 / VS-03 / VS-04 / Later
-- `Capability`: existing capability ID only
+- `Slice`: single-select projection of the current executable slice IDs declared by `docs/roadmap/VERTICAL_SLICES.md`, plus `Cross-cutting` for governance/work spanning slices and `Later` for activated-later work not yet assigned a concrete slice. Options are updated when the roadmap authority changes; they are not a fixed schema.
+- `Capability`: single-select projection of **all** current capability IDs in `governance/CAPABILITY_MAP.json`. Add/remove options only when that authority changes; do not maintain a smaller hand-picked vocabulary.
 - `Execution`: Proposed / Ready / In progress / Blocked / In review / Done
 - `Gate`: G0 / G1 / G2 / G3 / G4 / G5
 - `Decision`: None / Owner decision required / Approved / Rejected
