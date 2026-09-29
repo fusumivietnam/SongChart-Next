@@ -8,7 +8,7 @@ SongChart Next is a new, independent music knowledge and discovery project. **Th
 
 ## Current status
 - `main` contains the governance controller plus the pinned official Laravel React Starter source, real Composer/pnpm lockfiles and app + PostgreSQL 18.6 Docker development baseline merged from [PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6). Exact-SHA Foundation CI passed before merge; this verifies the local Foundation runtime only, not a SongChart product feature or production deployment.
-- Product scope, visual authority, public API declaration and production deployment decisions remain separate until accepted by their owning issue/ADR.
+- Product scope is approved (ADR-0004) and the authored OpenAPI declaration authority is decided (ADR-0005). Visual authority remains candidate pending rendered narrow/wide review; public API activation and production deployment remain separate later gates.
 - No provider integration, production deployment, approved visual baseline or passing end-to-end SongChart product feature is implied by the Foundation runtime verification.
 - Do not copy old source, stage numbering, generated authority or UI by default.
 
@@ -31,7 +31,7 @@ Project governance protocols and evidence ownership: [Project Control](docs/oper
 Git owns code and authored decisions; PostgreSQL will own canonical product data when installed; GitHub Issues/Projects own execution work when configured. Generated docs and AI contexts are **read-only projections** of their declared sources. A proposal is not an installed dependency, an approved design, a completed feature or a production release.
 
 ## First milestone
-Approve the remaining product/design/API decisions and implement the fixture-first Artist end-to-end slice with PostgreSQL and automated checks. Add live provider ingestion, search, admin and external infrastructure only when accepted capability triggers are met.
+Approve the remaining Design Authority rendered baselines, then implement the fixture-first Artist end-to-end slice with PostgreSQL and automated checks. Add live provider ingestion, search, admin and external infrastructure only when accepted capability triggers are met.
 
 ## Verification
 Run `python3 scripts/verify_project_os.py` to validate project registry links and lifecycle claims (Python standard library only).
