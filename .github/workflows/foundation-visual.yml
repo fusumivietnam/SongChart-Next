@@ -1,0 +1,109 @@
+name: Foundation visual render verification
+
+on:
+  pull_request:
+    paths:
+      - Dockerfile
+      - composer.json
+      - composer.lock
+      - package.json
+      - pnpm-lock.yaml
+      - resources/**
+      - routes/**
+      - design/**
+      - scripts/capture_foundation_baselines.mjs
+      - .github/workflows/foundation-visual.yml
+  workflow_dispatch:
+
+concurrency:
+  group: foundation-visual-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    env:
+      EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+    steps:
+      - name: Check out exact evidence revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.EVIDENCE_SHA }}
+
+      - name: Confirm browser availability
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+          (google-chrome --version || google-chrome-stable --version || chromium --version || chromium-browser --version)
+
+      - name: Build deterministic Foundation render image
+        run: docker build --target frontend-build --tag songchart-next:foundation-visual .
+
+      - name: Start local-only render server
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d             --name foundation-visual             -p 8000:8000             -e APP_ENV=local             -e APP_DEBUG=false             -e APP_URL=http://127.0.0.1:8000             -e APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=             -e DB_CONNECTION=sqlite             -e DB_DATABASE=:memory:             -e SESSION_DRIVER=array             -e CACHE_STORE=array             songchart-next:foundation-visual             php artisan serve --host=0.0.0.0 --port=8000
+
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8000/up >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          docker logs foundation-visual
+          exit 1
+
+      - name: Verify preview routes return HTML
+        shell: bash
+        run: |
+          set -euo pipefail
+          for route in             /_design/foundation/artist             /_design/foundation/artist-long             /_design/foundation/search             /_design/foundation/search-empty             /_design/foundation/search-error
+          do
+            curl --fail --silent --show-error "http://127.0.0.1:8000${route}" >/dev/null
+          done
+
+      - name: Render and verify narrow/wide baselines
+        env:
+          FOUNDATION_BASE_URL: http://127.0.0.1:8000
+          FOUNDATION_EVIDENCE_DIR: artifacts/foundation-baselines
+          FOUNDATION_EVIDENCE_SHA: ${{ env.EVIDENCE_SHA }}
+        run: node scripts/capture_foundation_baselines.mjs
+
+      - name: Publish evidence summary
+        if: success()
+        shell: bash
+        run: |
+          {
+            echo "### Foundation visual render evidence"
+            echo
+            echo "- Source revision: \`${EVIDENCE_SHA}\`"
+            echo "- Deterministic surfaces: 5"
+            echo "- Viewports per surface: 390x844 and 1440x1024 CSS px"
+            echo "- Rendered captures: 10"
+            echo "- Evidence artifact: \`foundation-render-${EVIDENCE_SHA}\`"
+            echo "- This verifies deterministic browser rendering only; human Design Authority approval is still required."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Preserve rendered evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: foundation-render-${{ env.EVIDENCE_SHA }}
+          path: artifacts/foundation-baselines/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Show server logs on failure
+        if: failure()
+        run: docker logs foundation-visual || true
+
+      - name: Cleanup
+        if: always()
+        run: docker rm -f foundation-visual || true
