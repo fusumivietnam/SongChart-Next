@@ -41,6 +41,16 @@ jobs:
           command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
           (google-chrome --version || google-chrome-stable --version || chromium --version || chromium-browser --version)
 
+      - name: Install deterministic international font coverage
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          fc-cache -f
+          fc-match ':lang=ja'
+          fc-list ':lang=ja' | grep -q 'Noto'
+
       - name: Build deterministic Foundation render image
         run: docker build --target frontend-build --tag songchart-next:foundation-visual .
 
