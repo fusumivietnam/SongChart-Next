@@ -36,9 +36,17 @@ The candidate is rendered from source only in `local` and `testing` environments
 
 The preview uses deterministic fixture copy only. It does not read or mutate canonical data and must not be treated as a public product surface.
 
+### Automated GitHub render evidence
+
+`.github/workflows/foundation-visual.yml` renders the five deterministic preview surfaces on a GitHub-hosted Ubuntu runner using the browser supplied by that runner image. It builds static frontend assets first, serves the Laravel preview only on runner-local port 8000, verifies expected hydrated fixture text, rejects accidental Vite development-server references, captures exact 390 × 844 and 1440 × 1024 PNG references, and uploads the PNG files plus rendered DOM and an evidence manifest as a short-lived workflow artifact.
+
+The workflow records the exact pull-request head SHA (or dispatched SHA) as evidence provenance. Passing automation proves that the candidate renders deterministically in a real headless browser at the required reference sizes. It does **not** approve token values, hierarchy, responsive behavior, accessibility, or the `design-authority` lifecycle state. Human keyboard/focus review and owner visual approval on Issue #10 remain required.
+
+This verification intentionally adds no browser-test package or second design-system runtime to the application dependency graph. If browser automation later becomes a maintained product test suite rather than Foundation evidence capture, adopt and register that tooling through the dependency policy first.
+
 ### Manual capture procedure
 
-1. Run the approved Docker development stack.
+1. Run the approved Docker development stack, or use the exact-SHA GitHub render artifact produced by `foundation-visual.yml`.
 2. Open the required preview route.
 3. Capture at exactly 390 × 844 CSS px and 1440 × 1024 CSS px.
 4. Record the exact Git commit SHA, route, viewport and review date with each screenshot/reference.
