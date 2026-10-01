@@ -20,6 +20,10 @@ Follow [Roadmap Governance](../roadmap/ROADMAP_GOVERNANCE.md). `VERTICAL_SLICES.
 - VERTICAL_SLICES defines slice scope; Issue/PR tracks work; ADR captures major architectural decisions; source and CI establish implementation/verification.
 - Local status report is regenerated per run. Never commit an auto-written CURRENT_STATUS file or manually maintain competing status flags.
 
+## CI workflow ownership
+
+GitHub Actions responsibilities are partitioned by [CI Workflow Ownership](CI_WORKFLOW_OWNERSHIP.md). One assertion has one owning workflow; exact-SHA PR/main evidence, concurrency isolation, runner/action pinning and the active workflow set are guarded by `scripts/verify_ci_ownership.py`. Adding a workflow or moving an assertion requires updating that contract in the same semantic change.
+
 ## PR review checklist
 Record: owning capability and issue, proposed vs approved boundary, affected source/contracts/registries, security/privacy/provider rights, dependency provenance, relevant acceptance gates, test command/results at SHA, outstanding unknown evidence and recovery implications. CI validates only registry consistency and its own regression tests; it cannot approve a business decision or prove production health.
 
