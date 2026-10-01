@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -24,5 +26,31 @@ class FoundationDesignPreviewTest extends TestCase
                     ->component('design/foundation-preview')
                     ->where('surface', $surface));
         }
+    }
+
+    public function test_local_preview_trusts_standard_reverse_proxy_headers(): void
+    {
+        Route::get('/_test/foundation-proxy', function (Request $request) {
+            return response()->json([
+                'scheme' => $request->getScheme(),
+                'host' => $request->getHost(),
+                'url' => url('/_design/foundation/artist'),
+            ]);
+        });
+
+        $this
+            ->withServerVariables(['REMOTE_ADDR' => '127.0.0.1'])
+            ->withHeaders([
+                'X-Forwarded-Host' => 'songchart-preview.example.test',
+                'X-Forwarded-Proto' => 'https',
+                'X-Forwarded-Port' => '443',
+            ])
+            ->get('/_test/foundation-proxy')
+            ->assertOk()
+            ->assertJson([
+                'scheme' => 'https',
+                'host' => 'songchart-preview.example.test',
+                'url' => 'https://songchart-preview.example.test/_design/foundation/artist',
+            ]);
     }
 }
