@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - Dockerfile
+      - compose.yaml
       - composer.json
       - composer.lock
       - package.json
@@ -22,6 +23,7 @@ on:
       - main
     paths:
       - Dockerfile
+      - compose.yaml
       - composer.json
       - composer.lock
       - package.json
@@ -45,6 +47,35 @@ permissions:
   contents: read
 
 jobs:
+  local-review-contract:
+    runs-on: ubuntu-24.04
+    env:
+      POSTGRES_PASSWORD: foundation-review-ci
+    steps:
+      - name: Check out exact review revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Validate local review script
+        run: bash -n scripts/design_review.sh
+
+      - name: Prove one-command local review workflow
+        run: bash scripts/design_review.sh
+
+      - name: Verify review reused Compose app only
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_id="$(docker compose ps -q app)"
+          test -n "$app_id"
+          test "$(docker inspect -f '{{.State.Running}}' "$app_id")" = "true"
+          test -z "$(docker ps -a --filter name='^/songchart-foundation-preview$' --format '{{.Names}}')"
+
+      - name: Cleanup Compose runtime
+        if: always()
+        run: docker compose down || true
+
   render:
     runs-on: ubuntu-24.04
     env:
@@ -59,10 +90,8 @@ jobs:
         with:
           ref: ${{ env.EVIDENCE_SHA }}
 
-      - name: Validate review scripts
-        run: |
-          bash -n scripts/design_review.sh
-          bash -n scripts/foundation_visual_ci.sh
+      - name: Validate CI visual script
+        run: bash -n scripts/foundation_visual_ci.sh
 
       - name: Confirm browser availability
         shell: bash
@@ -122,7 +151,7 @@ jobs:
             echo "- Rendered captures: 10"
             echo "- Reverse-proxy HTTPS/host asset generation: verified"
             echo "- CI runtime: isolated clean-runner visual server"
-            echo "- Local human review: separate existing Compose app workflow"
+            echo "- Local human review: verified separately against the existing Compose app"
             echo "- Evidence artifact: \`foundation-render-${EVIDENCE_SHA}\`"
             echo "- Artifact retention: 30 days"
             echo "- This verifies deterministic browser rendering only; human Design Authority approval is still required."
@@ -141,6 +170,6 @@ jobs:
         if: failure()
         run: docker logs "${FOUNDATION_VISUAL_CONTAINER}" || true
 
-      - name: Cleanup
+      - name: Cleanup CI visual server
         if: always()
         run: bash scripts/foundation_visual_ci.sh stop
