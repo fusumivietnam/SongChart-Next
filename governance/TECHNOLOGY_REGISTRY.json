@@ -188,6 +188,17 @@
       "implementation": ".devcontainer/devcontainer.json",
       "decision": "docs/adr/ADR-0006-codespaces-development-environment.md",
       "scope": "Development-shell features limited to Docker-outside-of-Docker and GitHub CLI; project PHP/Node/Composer/pnpm stay in SongChart Docker images."
+    },
+    {
+      "id": "understand-anything",
+      "capability": "developer-analysis",
+      "source": "https://github.com/Egonex-AI/Understand-Anything",
+      "status": "implemented",
+      "version_authority": ".devcontainer/install-understand-anything.sh pins upstream commit b05cc3b20990afca537b4fc0a49b4d7fbdc65bb0; upstream package manager is pnpm 10.6.2 at that revision",
+      "license_review": "MIT verified from upstream LICENSE at reviewed revision; no hosted service is required by the installed tooling itself, while LLM/provider use remains governed by the selected coding-agent provider",
+      "implementation": ".devcontainer/install-understand-anything.sh",
+      "decision": "docs/adr/ADR-0007-understand-anything-developer-analysis.md",
+      "scope": "Codespaces/Codex developer analysis only. Not a SongChart runtime dependency, canonical authority, production service, or automatic roadmap/status source."
     }
   ]
 }

@@ -56,3 +56,30 @@ The Codespaces shell may recreate disposable Compose containers through existing
 - run production deployment;
 - rotate production secrets;
 - mutate canonical product data.
+
+
+## Understand Anything developer analysis
+
+ADR-0007 allows a narrowly scoped Node 22/pnpm toolchain in the Codespaces shell for Understand Anything only. This does not change Docker Compose authority for the SongChart application.
+
+The post-create lifecycle runs:
+
+```bash
+bash .devcontainer/install-understand-anything.sh
+```
+
+The installer checks out the exact upstream SHA recorded in the script, builds the upstream core package and links its skills into `~/.agents/skills`. Installation failure is non-fatal to the Codespace.
+
+After installation, a Codex-compatible agent can invoke:
+
+```text
+$understand --language vi
+```
+
+or use natural language to request the `understand` skill. The first full analysis may ask for ignore/language confirmation and can use substantial model tokens.
+
+Output under `.ua/` is derived analysis. Never use generated summaries, inferred architecture or domain labels to update SongChart authority automatically. Compare conclusions against README/AGENTS, Product Charter, Architecture, governance registries, source, tests and live GitHub state.
+
+Ephemeral `.ua/intermediate/`, `.ua/tmp/`, `.ua/.trash-*` and `.ua/diff-overlay.json` are ignored. Do not enable upstream `--auto-update` until a separate review decides whether commit-hook mutation is acceptable.
+
+The dashboard commonly uses port 5173 or the next available port; port 5174 is predeclared as a private Codespaces forward for the fallback case. Keep graph dashboards private unless separately approved.

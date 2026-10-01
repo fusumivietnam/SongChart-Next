@@ -10,5 +10,6 @@ bash -n scripts/codespaces_doctor.sh
 bash -n .devcontainer/prebuild.sh
 bash -n .devcontainer/post-create.sh
 bash -n .devcontainer/post-start.sh
+bash -n .devcontainer/install-understand-anything.sh
 
 echo "Codespaces prebuild contract checks passed."

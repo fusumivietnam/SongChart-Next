@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - .devcontainer/**
+      - docs/adr/ADR-0007-understand-anything-developer-analysis.md
       - scripts/codespaces_doctor.sh
       - scripts/design_review.sh
       - compose.yaml
@@ -17,6 +18,7 @@ on:
       - main
     paths:
       - .devcontainer/**
+      - docs/adr/ADR-0007-understand-anything-developer-analysis.md
       - scripts/codespaces_doctor.sh
       - scripts/design_review.sh
       - compose.yaml
@@ -45,6 +47,8 @@ jobs:
           jq -e '.image == "mcr.microsoft.com/devcontainers/base:ubuntu-24.04"' .devcontainer/devcontainer.json >/dev/null
           jq -e '.features["ghcr.io/devcontainers/features/docker-outside-of-docker:1"] != null' .devcontainer/devcontainer.json >/dev/null
           jq -e '.features["ghcr.io/devcontainers/features/github-cli:1"] != null' .devcontainer/devcontainer.json >/dev/null
+          jq -e '.features["ghcr.io/devcontainers/features/node:1"].version == "22"' .devcontainer/devcontainer.json >/dev/null
+          jq -e '.forwardPorts | index(5174) != null' .devcontainer/devcontainer.json >/dev/null
           jq -e '.hostRequirements.cpus >= 4 and .hostRequirements.memory == "8gb" and .hostRequirements.storage == "32gb"' .devcontainer/devcontainer.json >/dev/null
 
       - name: Validate lifecycle scripts
@@ -54,6 +58,7 @@ jobs:
           bash -n .devcontainer/prebuild.sh
           bash -n .devcontainer/post-create.sh
           bash -n .devcontainer/post-start.sh
+          bash -n .devcontainer/install-understand-anything.sh
           bash -n scripts/codespaces_doctor.sh
           bash -n scripts/design_review.sh
 
@@ -61,10 +66,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for path in             .devcontainer/prebuild.sh             .devcontainer/post-create.sh             .devcontainer/post-start.sh             scripts/design_review.sh             scripts/codespaces_doctor.sh
+          for path in             .devcontainer/prebuild.sh             .devcontainer/post-create.sh             .devcontainer/post-start.sh             .devcontainer/install-understand-anything.sh             scripts/design_review.sh             scripts/codespaces_doctor.sh
           do
             test -f "$path"
           done
+
+      - name: Verify Understand Anything provenance contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'UA_REPO_URL="https://github.com/Egonex-AI/Understand-Anything.git"' .devcontainer/install-understand-anything.sh
+          grep -F 'UA_COMMIT="b05cc3b20990afca537b4fc0a49b4d7fbdc65bb0"' .devcontainer/install-understand-anything.sh
+          grep -F 'UA_PNPM_VERSION="10.6.2"' .devcontainer/install-understand-anything.sh
+          ! grep -E 'git (clone|checkout|pull).* (main|master)([[:space:]]|$)' .devcontainer/install-understand-anything.sh
 
       - name: Verify project governance
         run: python3 scripts/verify_project_os.py

@@ -228,6 +228,19 @@
         "production-deploy"
       ],
       "implementation": null
+    },
+    {
+      "id": "developer-analysis",
+      "plane": "governance",
+      "owner": "songchart",
+      "status": "implemented",
+      "depends_on": [
+        "project-os",
+        "local-docker-development"
+      ],
+      "implementation": ".devcontainer/install-understand-anything.sh",
+      "scope": "Developer-only codebase analysis in Codespaces using a pinned Understand Anything checkout. Generated .ua artifacts are derived analysis, not project/domain/design/roadmap authority; SongChart application runtime remains Docker Compose.",
+      "decision": "docs/adr/ADR-0007-understand-anything-developer-analysis.md"
     }
   ]
 }

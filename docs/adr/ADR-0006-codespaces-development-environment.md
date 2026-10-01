@@ -17,7 +17,7 @@ Use a repository-owned GitHub Codespaces dev container as an optional developmen
 The Codespaces shell:
 - uses a minimal Ubuntu dev-container base rather than the generic universal image;
 - adds only Docker-outside-of-Docker and GitHub CLI dev-container features;
-- does not install or own PHP, Node, pnpm, Composer, PostgreSQL or application dependencies on the Codespaces shell;
+- does not install or own SongChart application PHP, Node, pnpm, Composer, PostgreSQL or application dependencies on the Codespaces shell; ADR-0007 permits a separately pinned host Node/pnpm toolchain only for developer-analysis tooling, and that toolchain must not build or run SongChart;
 - continues to run the application and PostgreSQL through the repository's existing Dockerfile and `compose.yaml`;
 - forwards only the local application and optional Vite ports;
 - runs non-destructive repository checks during creation/prebuild;
