@@ -14,6 +14,24 @@ on:
       - tests/**
       - design/**
       - scripts/capture_foundation_baselines.mjs
+      - scripts/foundation_preview.sh
+      - .github/workflows/foundation-visual.yml
+  push:
+    branches:
+      - main
+    paths:
+      - Dockerfile
+      - composer.json
+      - composer.lock
+      - package.json
+      - pnpm-lock.yaml
+      - bootstrap/**
+      - resources/**
+      - routes/**
+      - tests/**
+      - design/**
+      - scripts/capture_foundation_baselines.mjs
+      - scripts/foundation_preview.sh
       - .github/workflows/foundation-visual.yml
   workflow_dispatch:
 
@@ -29,6 +47,9 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      FOUNDATION_PREVIEW_CONTAINER: foundation-visual
+      FOUNDATION_PREVIEW_IMAGE: songchart-next:foundation-visual
+      FOUNDATION_PREVIEW_PORT: "8000"
 
     steps:
       - name: Check out exact evidence revision
@@ -53,24 +74,8 @@ jobs:
           fc-match ':lang=ja'
           fc-list ':lang=ja' | grep -q 'Noto'
 
-      - name: Build deterministic Foundation render image
-        run: docker build --target frontend-build --tag songchart-next:foundation-visual .
-
-      - name: Start local-only render server
-        shell: bash
-        run: |
-          set -euo pipefail
-          docker run -d             --name foundation-visual             -p 8000:8000             -e APP_ENV=local             -e APP_DEBUG=false             -e APP_URL=http://127.0.0.1:8000             -e APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=             -e DB_CONNECTION=sqlite             -e DB_DATABASE=:memory:             -e SESSION_DRIVER=array             -e CACHE_STORE=array             songchart-next:foundation-visual             php artisan serve --host=0.0.0.0 --port=8000
-
-          for attempt in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:8000/up >/dev/null; then
-              exit 0
-            fi
-            sleep 1
-          done
-
-          docker logs foundation-visual
-          exit 1
+      - name: Start deterministic Foundation preview
+        run: bash scripts/foundation_preview.sh start
 
       - name: Verify preview routes return HTML
         shell: bash
@@ -110,6 +115,7 @@ jobs:
             echo "- Rendered captures: 10"
             echo "- Reverse-proxy HTTPS/host asset generation: verified"
             echo "- Evidence artifact: \`foundation-render-${EVIDENCE_SHA}\`"
+            echo "- Artifact retention: 30 days"
             echo "- This verifies deterministic browser rendering only; human Design Authority approval is still required."
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -120,12 +126,12 @@ jobs:
           name: foundation-render-${{ env.EVIDENCE_SHA }}
           path: artifacts/foundation-baselines/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 30
 
       - name: Show server logs on failure
         if: failure()
-        run: docker logs foundation-visual || true
+        run: docker logs "${FOUNDATION_PREVIEW_CONTAINER}" || true
 
       - name: Cleanup
         if: always()
-        run: docker rm -f foundation-visual || true
+        run: bash scripts/foundation_preview.sh stop

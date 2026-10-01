@@ -20,7 +20,15 @@ Once `composer.lock` and `pnpm-lock.yaml` are available:
 
 The Foundation Design Authority preview is intentionally available only in `local` and `testing` environments. Codespaces forwards port 8000 through an HTTPS reverse proxy, so local/testing runtime trusts the standard `X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Port` and `X-Forwarded-Proto` headers. This trust is deliberately not enabled for production; production ingress remains a separate release decision.
 
-For an existing Codespace using the source-mounted preview container, update `main`, rebuild static assets, and restart the preview process. The browser may then use the forwarded port-8000 URL directly; no `APP_URL`, `ASSET_URL` or proxy-header workaround is required for normal review.
+Use the repository-owned preview harness instead of manually composing Docker commands:
+
+```bash
+bash scripts/foundation_preview.sh start
+```
+
+The script builds the current revision with the same `frontend-build` Docker target used by Foundation visual CI, replaces only its dedicated preview container, waits for `/up`, and prints the correct localhost or Codespaces forwarded URL. It does not use or delete the PostgreSQL/dependency named volumes. Stop it with `bash scripts/foundation_preview.sh stop`; inspect it with `status` or print only the browser URL with `url`.
+
+No `APP_URL`, `ASSET_URL`, Vite HMR, source-mounted preview container or proxy-header workaround is required for normal Design Authority review.
 
 Review these deterministic routes:
 - `/_design/foundation/artist`
@@ -29,7 +37,7 @@ Review these deterministic routes:
 - `/_design/foundation/search-empty`
 - `/_design/foundation/search-error`
 
-Use the required 390 × 844 and 1440 × 1024 viewport references, then verify keyboard focus, skip-link behavior, long/mixed-script wrapping, no-artwork behavior and search empty/error semantics. Record the exact Git revision with the owner decision. These routes and proxy settings are development evidence only; they are not a production public surface or production proxy policy.
+Use the required 390 × 844 and 1440 × 1024 viewport references, then verify keyboard focus, skip-link behavior, long/mixed-script wrapping, no-artwork behavior and search empty/error semantics. Record the exact Git revision with the owner decision. Visual CI also runs on relevant `main` pushes so post-merge evidence is tied to the exact merged revision. These routes and proxy settings are development evidence only; they are not a production public surface or production proxy policy.
 
 ## PostgreSQL 18 volume and safety
 
