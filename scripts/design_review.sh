@@ -117,6 +117,12 @@ ensure_app_running() {
 }
 
 build_static_assets() {
+  if [[ "${DESIGN_REVIEW_SKIP_BUILD:-0}" == "1" ]]; then
+    echo "Reusing already-built Design Authority review assets."
+    rm -f public/hot
+    return 0
+  fi
+
   echo "Building Design Authority review assets in the existing app service..."
   docker compose exec -T app sh -ec '
     test -f vendor/autoload.php || composer install --prefer-dist --no-interaction --no-progress
