@@ -49,3 +49,14 @@ Project automation may mirror Issue/PR lifecycle into execution/project fields. 
 - close governance gates when source evidence is unknown.
 
 The read-only roadmap controller remains the reconciliation mechanism. A Project outage or stale card is a UI problem, not authority loss.
+
+
+## Repository automation
+
+`scripts/project_sync.py` and the `Project projection sync` workflow implement this projection contract for user Project #2. The writer is separate from the read-only Roadmap Controller.
+
+The writer may create/repair the required fields, append missing Slice/Capability/options, add roadmap Issues and mirror deterministic execution metadata. It never writes repository authority, deletes unrelated Project items or promotes capability lifecycle.
+
+`Gate` and `Decision` are copied only from explicit roadmap Issue metadata. `Evidence` is assembled from linked PRs plus explicit verification evidence. Required view names are audited, but view layout/filter configuration remains reviewable presentation configuration in the GitHub UI.
+
+Credential and recovery instructions: [GitHub Project #2 projection sync](../operations/GITHUB_PROJECT_SYNC.md).
