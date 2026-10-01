@@ -56,6 +56,9 @@ for name, content in contents.items():
     elif any(runner != "ubuntu-24.04" for runner in runners):
         errors.append(f"{name}: runners must be pinned to ubuntu-24.04, found {runners}")
 
+    if "timeout-minutes:" not in content:
+        errors.append(f"{name}: every workflow job must have a bounded timeout")
+
     for line in content.splitlines():
         match = re.search(r"\buses:\s*([^\s#]+)", line)
         if not match:
