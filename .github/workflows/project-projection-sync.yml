@@ -1,0 +1,101 @@
+name: Project projection sync
+
+on:
+  issues:
+    types: [opened, edited, closed, reopened, labeled, unlabeled]
+  pull_request_target:
+    types: [opened, synchronize, reopened, closed, ready_for_review, converted_to_draft, edited]
+  push:
+    branches: [main]
+    paths:
+      - docs/roadmap/**
+      - governance/CAPABILITY_MAP.json
+      - scripts/project_sync.py
+      - scripts/roadmap_health.py
+      - tests/governance/test_project_sync.py
+      - .github/ISSUE_TEMPLATE/roadmap_work.md
+      - .github/workflows/project-projection-sync.yml
+  schedule:
+    - cron: "37 1 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+  actions: read
+
+concurrency:
+  group: project-projection-sync
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      # Always execute trusted code from main. pull_request_target must never
+      # check out an untrusted PR head because this job may receive a PAT.
+      - name: Check out trusted main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+
+      - name: Run projection regression tests
+        run: python3 -m unittest tests.governance.test_project_sync tests.governance.test_roadmap_health -v
+
+      - name: Check Project sync credential
+        id: credential
+        shell: bash
+        env:
+          PROJECT_SYNC_TOKEN: ${{ secrets.PROJECT_SYNC_TOKEN }}
+        run: |
+          if [[ -z "$PROJECT_SYNC_TOKEN" ]]; then
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "## GitHub Project projection"
+              echo
+              echo "PROJECT_SYNC_TOKEN is not configured; no Project mutation was attempted."
+              echo "Create a classic PAT with only the project scope and save it as repository secret PROJECT_SYNC_TOKEN."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
+
+      - name: Reconcile user Project 2
+        if: steps.credential.outputs.configured == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PROJECT_SYNC_TOKEN: ${{ secrets.PROJECT_SYNC_TOKEN }}
+          PROJECT_OWNER: fusumivietnam
+          PROJECT_NUMBER: "2"
+        run: |
+          python3 scripts/project_sync.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --owner "$PROJECT_OWNER" \
+            --number "$PROJECT_NUMBER" \
+            --output-json project-sync.json \
+            | tee project-sync.txt
+
+      - name: Publish reconciliation summary
+        if: steps.credential.outputs.configured == 'true'
+        shell: bash
+        run: |
+          {
+            echo "## GitHub Project projection"
+            echo
+            echo '```json'
+            cat project-sync.json
+            echo '```'
+            echo
+            echo "Project fields are derived only; repository authority and live Issues/PRs remain authoritative."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Preserve sync report
+        if: steps.credential.outputs.configured == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: project-sync-${{ github.sha }}
+          path: |
+            project-sync.json
+            project-sync.txt
+          retention-days: 14
