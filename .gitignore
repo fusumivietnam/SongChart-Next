@@ -14,3 +14,7 @@
 /resources/js/wayfinder/
 /storage/inertia-devtools/
 /.codespaces/
+/.ua/intermediate/
+/.ua/tmp/
+/.ua/.trash-*/
+/.ua/diff-overlay.json
