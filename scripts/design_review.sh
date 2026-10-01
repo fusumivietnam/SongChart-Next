@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "\${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
-PORT="\${DESIGN_REVIEW_PORT:-8000}"
-LEGACY_PREVIEW_CONTAINER="\${DESIGN_REVIEW_LEGACY_CONTAINER:-songchart-foundation-preview}"
+PORT="${DESIGN_REVIEW_PORT:-8000}"
+LEGACY_PREVIEW_CONTAINER="${DESIGN_REVIEW_LEGACY_CONTAINER:-songchart-foundation-preview}"
 
 ensure_local_env() {
   local db_password app_key
@@ -18,20 +18,20 @@ ensure_local_env() {
 
   if grep -q '^POSTGRES_PASSWORD=REPLACE_WITH_UNIQUE_LOCAL_PASSWORD$' .env || grep -q '^DB_PASSWORD=REPLACE_WITH_UNIQUE_LOCAL_PASSWORD$' .env; then
     db_password="$(openssl rand -hex 24)"
-    sed -i "s/^POSTGRES_PASSWORD=REPLACE_WITH_UNIQUE_LOCAL_PASSWORD$/POSTGRES_PASSWORD=\${db_password}/" .env
-    sed -i "s/^DB_PASSWORD=REPLACE_WITH_UNIQUE_LOCAL_PASSWORD$/DB_PASSWORD=\${db_password}/" .env
+    sed -i "s/^POSTGRES_PASSWORD=REPLACE_WITH_UNIQUE_LOCAL_PASSWORD$/POSTGRES_PASSWORD=${db_password}/" .env
+    sed -i "s/^DB_PASSWORD=REPLACE_WITH_UNIQUE_LOCAL_PASSWORD$/DB_PASSWORD=${db_password}/" .env
     echo "Generated a local-only PostgreSQL password in untracked .env."
   fi
 
   if grep -q '^APP_KEY=$' .env; then
     app_key="$(openssl rand -base64 32 | tr -d '\n')"
-    sed -i "s|^APP_KEY=$|APP_KEY=base64:\${app_key}|" .env
+    sed -i "s|^APP_KEY=$|APP_KEY=base64:${app_key}|" .env
     echo "Generated a local-only Laravel APP_KEY in untracked .env."
   fi
 }
 
 review_url() {
-  if [[ -n "\${CODESPACE_NAME:-}" && -n "\${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-}" ]]; then
+  if [[ -n "${CODESPACE_NAME:-}" && -n "${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-}" ]]; then
     printf 'https://%s-%s.%s\n' "$CODESPACE_NAME" "$PORT" "$GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN"
   else
     printf 'http://127.0.0.1:%s\n' "$PORT"
@@ -78,27 +78,27 @@ verify_routes() {
     /_design/foundation/search-empty \
     /_design/foundation/search-error
   do
-    curl --fail --silent --show-error "http://127.0.0.1:\${PORT}\${route}" >/dev/null
+    curl --fail --silent --show-error "http://127.0.0.1:${PORT}${route}" >/dev/null
   done
 }
 
 verify_proxy_assets() {
-  if [[ -z "\${CODESPACE_NAME:-}" || -z "\${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-}" ]]; then
+  if [[ -z "${CODESPACE_NAME:-}" || -z "${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-}" ]]; then
     return 0
   fi
 
   local forwarded_host html
-  forwarded_host="\${CODESPACE_NAME}-\${PORT}.\${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
+  forwarded_host="${CODESPACE_NAME}-${PORT}.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
 
   html="$(curl --fail --silent --show-error \
-    -H "Host: 127.0.0.1:\${PORT}" \
-    -H "X-Forwarded-Host: \${forwarded_host}" \
+    -H "Host: 127.0.0.1:${PORT}" \
+    -H "X-Forwarded-Host: ${forwarded_host}" \
     -H "X-Forwarded-Proto: https" \
     -H "X-Forwarded-Port: 443" \
-    "http://127.0.0.1:\${PORT}/_design/foundation/artist")"
+    "http://127.0.0.1:${PORT}/_design/foundation/artist")"
 
-  grep -q "https://\${forwarded_host}/build/assets/" <<< "$html"
-  ! grep -q "http://127.0.0.1:\${PORT}/build/assets/" <<< "$html"
+  grep -q "https://${forwarded_host}/build/assets/" <<< "$html"
+  ! grep -q "http://127.0.0.1:${PORT}/build/assets/" <<< "$html"
 }
 
 main() {
