@@ -18,12 +18,18 @@ RETIRED = {"project-os.yml", "docker-scaffold.yml"}
 
 errors: list[str] = []
 
-present = {path.name for path in WORKFLOWS.glob("*.yml")}
+present = {path.name for path in WORKFLOWS.glob("*.y*ml")}
 missing = sorted(EXPECTED - present)
+unexpected = sorted(present - EXPECTED)
 unexpected_retired = sorted(RETIRED & present)
 
 if missing:
     errors.append(f"missing owned workflows: {', '.join(missing)}")
+if unexpected:
+    errors.append(
+        "workflow exists without an ownership-matrix entry: "
+        + ", ".join(unexpected)
+    )
 if unexpected_retired:
     errors.append(f"retired workflows still present: {', '.join(unexpected_retired)}")
 
@@ -96,6 +102,11 @@ if "github.event.pull_request.number || github.event.issue.number || github.sha"
 visual = contents.get("foundation-visual.yml", "")
 if "local-review-contract:" in visual:
     errors.append("foundation-visual.yml: local review contract belongs to foundation-app.yml")
+for required_path in ("      - app/**", "      - config/**"):
+    if visual.count(required_path) != 2:
+        errors.append(
+            f"foundation-visual.yml: {required_path.strip()} must cover both PR and main"
+        )
 
 app = contents.get("foundation-app.yml", "")
 if "DESIGN_REVIEW_SKIP_BUILD=1 bash scripts/design_review.sh" not in app:
