@@ -5,12 +5,20 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
 PORT="${DESIGN_REVIEW_PORT:-8000}"
+LEGACY_PREVIEW_CONTAINER="${DESIGN_REVIEW_LEGACY_CONTAINER:-songchart-foundation-preview}"
 
 review_url() {
   if [[ -n "${CODESPACE_NAME:-}" && -n "${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:-}" ]]; then
     printf 'https://%s-%s.%s\n' "$CODESPACE_NAME" "$PORT" "$GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN"
   else
     printf 'http://127.0.0.1:%s\n' "$PORT"
+  fi
+}
+
+cleanup_legacy_preview() {
+  if docker container inspect "$LEGACY_PREVIEW_CONTAINER" >/dev/null 2>&1; then
+    echo "Removing superseded Foundation preview container: $LEGACY_PREVIEW_CONTAINER"
+    docker rm -f "$LEGACY_PREVIEW_CONTAINER" >/dev/null
   fi
 }
 
@@ -59,6 +67,7 @@ verify_proxy_assets() {
 }
 
 main() {
+  cleanup_legacy_preview
   ensure_app_running
   build_static_assets
   verify_routes
