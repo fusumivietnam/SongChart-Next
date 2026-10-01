@@ -37,11 +37,15 @@ ensure_toolchain_image() {
 
   local context_dir
   context_dir="$(mktemp -d)"
-  trap 'rm -rf "$context_dir"' RETURN
   cp Dockerfile "$context_dir/Dockerfile"
 
   echo "Building cached Foundation toolchain image from Dockerfile only (no application COPY context)..."
-  docker build     --target php-toolchain     --tag "$TOOLCHAIN_IMAGE"     "$context_dir"
+  if ! docker build --target php-toolchain --tag "$TOOLCHAIN_IMAGE" "$context_dir"; then
+    rm -rf "$context_dir"
+    return 1
+  fi
+
+  rm -rf "$context_dir"
 }
 
 ensure_dependency_volumes() {
@@ -51,13 +55,13 @@ ensure_dependency_volumes() {
 
 build_workspace() {
   echo "Installing locked dependencies and building static assets..."
-  docker run --rm     -v "$ROOT_DIR:/var/www/html"     -v "$COMPOSER_VOLUME:/var/www/html/vendor"     -v "$NODE_VOLUME:/var/www/html/node_modules"     -w /var/www/html     "$TOOLCHAIN_IMAGE"     sh -ec '
-      composer install --prefer-dist --no-interaction --no-progress
-      CI=true pnpm install --frozen-lockfile
-      rm -f public/hot
-      pnpm run build
-      pnpm run types:check
-    '
+  docker run --rm -v "$ROOT_DIR:/var/www/html" -v "$COMPOSER_VOLUME:/var/www/html/vendor" -v "$NODE_VOLUME:/var/www/html/node_modules" -w /var/www/html "$TOOLCHAIN_IMAGE" sh -ec '
+    composer install --prefer-dist --no-interaction --no-progress
+    CI=true pnpm install --frozen-lockfile
+    rm -f public/hot
+    pnpm run build
+    pnpm run types:check
+  '
 }
 
 wait_for_preview() {
@@ -75,7 +79,7 @@ wait_for_preview() {
 start_server() {
   docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
 
-  docker run -d     --name "$CONTAINER"     -p "127.0.0.1:${PORT}:8000"     -e APP_ENV=local     -e APP_DEBUG=false     -e APP_URL="http://127.0.0.1:${PORT}"     -e APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=     -e DB_CONNECTION=sqlite     -e DB_DATABASE=:memory:     -e SESSION_DRIVER=array     -e CACHE_STORE=array     -v "$ROOT_DIR:/var/www/html"     -v "$COMPOSER_VOLUME:/var/www/html/vendor"     -v "$NODE_VOLUME:/var/www/html/node_modules"     -w /var/www/html     "$TOOLCHAIN_IMAGE"     php artisan serve --host=0.0.0.0 --port=8000 >/dev/null
+  docker run -d --name "$CONTAINER" -p "127.0.0.1:${PORT}:8000" -e APP_ENV=local -e APP_DEBUG=false -e APP_URL="http://127.0.0.1:${PORT}" -e APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA= -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: -e SESSION_DRIVER=array -e CACHE_STORE=array -v "$ROOT_DIR:/var/www/html" -v "$COMPOSER_VOLUME:/var/www/html/vendor" -v "$NODE_VOLUME:/var/www/html/node_modules" -w /var/www/html "$TOOLCHAIN_IMAGE" php artisan serve --host=0.0.0.0 --port=8000 >/dev/null
 
   if ! wait_for_preview; then
     echo "Foundation preview failed to become healthy." >&2
