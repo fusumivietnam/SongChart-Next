@@ -8,8 +8,10 @@ on:
       - composer.lock
       - package.json
       - pnpm-lock.yaml
+      - bootstrap/**
       - resources/**
       - routes/**
+      - tests/**
       - design/**
       - scripts/capture_foundation_baselines.mjs
       - .github/workflows/foundation-visual.yml
@@ -79,6 +81,15 @@ jobs:
             curl --fail --silent --show-error "http://127.0.0.1:8000${route}" >/dev/null
           done
 
+      - name: Verify reverse-proxy URL generation
+        shell: bash
+        run: |
+          set -euo pipefail
+          html="$(curl --fail --silent --show-error             -H 'Host: 127.0.0.1:8000'             -H 'X-Forwarded-Host: songchart-preview.example.test'             -H 'X-Forwarded-Proto: https'             -H 'X-Forwarded-Port: 443'             http://127.0.0.1:8000/_design/foundation/artist)"
+
+          grep -q 'https://songchart-preview.example.test/build/assets/' <<< "$html"
+          ! grep -q 'http://127.0.0.1:8000/build/assets/' <<< "$html"
+
       - name: Render and verify narrow/wide baselines
         env:
           FOUNDATION_BASE_URL: http://127.0.0.1:8000
@@ -97,6 +108,7 @@ jobs:
             echo "- Deterministic surfaces: 5"
             echo "- Viewports per surface: 390x844 and 1440x1024 CSS px"
             echo "- Rendered captures: 10"
+            echo "- Reverse-proxy HTTPS/host asset generation: verified"
             echo "- Evidence artifact: \`foundation-render-${EVIDENCE_SHA}\`"
             echo "- This verifies deterministic browser rendering only; human Design Authority approval is still required."
           } >> "$GITHUB_STEP_SUMMARY"
