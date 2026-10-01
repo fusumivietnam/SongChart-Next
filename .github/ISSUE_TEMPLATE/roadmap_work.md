@@ -10,6 +10,8 @@ assignees: []
 **Capability ID(s):**
 **Blocked by:** none / #issue(s)
 **Lifecycle claim:** none — Issue state does not change Capability Map
+**Project Gate:** none / G0 / G1 / G2 / G3 / G4 / G5
+**Project Decision:** None / Owner decision required / Approved / Rejected
 
 ## Scope
 **In scope:**

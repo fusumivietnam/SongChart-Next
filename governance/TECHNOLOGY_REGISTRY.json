@@ -199,6 +199,17 @@
       "implementation": ".devcontainer/install-understand-anything.sh",
       "decision": "docs/adr/ADR-0007-understand-anything-developer-analysis.md",
       "scope": "Codespaces/Codex developer analysis only. Not a SongChart runtime dependency, canonical authority, production service, or automatic roadmap/status source."
+    },
+    {
+      "id": "github-projects",
+      "capability": "project-os",
+      "source": "https://github.com/features/issues",
+      "status": "implemented",
+      "version_authority": ".github/workflows/project-projection-sync.yml + GitHub Projects v2 service API",
+      "license_review": "GitHub service terms apply; repository automation uses standard GraphQL Projects v2 API and a scoped user credential",
+      "implementation": "scripts/project_sync.py",
+      "decision": "docs/adr/ADR-0008-github-project-v2-projection-sync.md",
+      "scope": "User Project #2 is an automated human-facing projection of repository roadmap authority and live Issues/PRs; never a lifecycle or evidence authority."
     }
   ]
 }

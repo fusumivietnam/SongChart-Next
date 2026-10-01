@@ -67,6 +67,8 @@ The `Roadmap health` GitHub Actions workflow runs on relevant PR/main changes, m
 
 Warnings and blockers are information, not automatic roadmap edits. Controller **errors** fail the health job because they represent contradictory authority/evidence claims. A GitHub/API outage produces `unknown`, never a guessed status.
 
+The separate `scripts/project_sync.py` projection writer may mirror controller-derived execution into GitHub Project #2. It is intentionally not part of the controller and cannot mutate repository authorities, Issues or PRs. See [GitHub Project #2 projection sync](../operations/GITHUB_PROJECT_SYNC.md).
+
 ## Derived execution queue
 
 Roadmap Issues may declare `**Blocked by:** #issue` references. The controller combines these explicit blockers with PR ownership links (`Implements/Resolves/Closes/Fixes #issue` or the PR template owning-Issue field) to derive execution state:

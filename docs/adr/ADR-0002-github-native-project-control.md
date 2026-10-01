@@ -19,3 +19,8 @@ The new registries start empty rather than inventing past research or installed 
 
 ## Acceptance
 Review exact file ownership; run standard-library validator and regression tests on PR SHA; review CI permissions/action provenance; verify a new chat can independently query main and live Issues/PRs. Approval/merge is a separate human decision.
+
+
+## Follow-up
+
+ADR-0008 supersedes the earlier read-only-only Project view constraint by permitting a narrowly scoped **writeable derived projection** into GitHub Project #2. The authority rule is unchanged: Project mutations may mirror reconstructible Issue/PR/repository state but may not mutate or replace roadmap/lifecycle/evidence authorities.
