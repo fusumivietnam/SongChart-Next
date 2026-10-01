@@ -90,7 +90,7 @@
       "status": "implemented",
       "version_authority": "workflow action SHA",
       "license_review": "GitHub Actions service terms apply; external workflow actions require source/license review and full commit-SHA pinning.",
-      "implementation": ".github/workflows/",
+      "implementation": ".github/workflows/project-governance.yml",
       "decision": "docs/adr/ADR-0002-github-native-project-control.md",
       "scope": "Repository CI/evidence runner with consolidated workflow ownership, exact-SHA PR/main verification, pinned external actions and event-isolated concurrency; not a production deployment controller."
     },
