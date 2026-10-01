@@ -13,6 +13,12 @@ echo "SongChart Codespaces post-create bootstrap"
 echo "Repository: $ROOT_DIR"
 echo "Revision: $(git rev-parse HEAD 2>/dev/null || echo unknown)"
 
+if bash .devcontainer/install-understand-anything.sh; then
+  echo "Understand Anything developer analysis tooling is ready."
+else
+  echo "Understand Anything bootstrap failed. Codespace remains usable; retry bash .devcontainer/install-understand-anything.sh." >&2
+fi
+
 docker_ready=0
 for attempt in $(seq 1 30); do
   if docker info >/dev/null 2>&1; then
