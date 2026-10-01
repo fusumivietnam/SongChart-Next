@@ -69,15 +69,16 @@ jobs:
           PROJECT_OWNER: fusumivietnam
           PROJECT_NUMBER: "2"
         run: |
+          set -o pipefail
           python3 scripts/project_sync.py \
             --repo "$GITHUB_REPOSITORY" \
             --owner "$PROJECT_OWNER" \
             --number "$PROJECT_NUMBER" \
             --output-json project-sync.json \
-            | tee project-sync.txt
+            2>&1 | tee project-sync.txt
 
       - name: Publish reconciliation summary
-        if: steps.credential.outputs.configured == 'true'
+        if: steps.credential.outputs.configured == 'true' && hashFiles('project-sync.json') != ''
         shell: bash
         run: |
           python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
