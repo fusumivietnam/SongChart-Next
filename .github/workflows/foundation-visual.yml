@@ -74,8 +74,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+
+          apt_retry() {
+            local attempt
+            for attempt in 1 2 3; do
+              if sudo timeout 120s apt-get -o Acquire::Retries=3 -o Acquire::http::Timeout=20 "$@"; then
+                return 0
+              fi
+              echo "apt-get $* failed on attempt $attempt; retrying..." >&2
+              sleep $(( attempt * 5 ))
+            done
+            return 1
+          }
+
+          apt_retry update
+          DEBIAN_FRONTEND=noninteractive apt_retry install -y --no-install-recommends fonts-noto-cjk
           fc-cache -f
           fc-match ':lang=ja'
           fc-list ':lang=ja' | grep -q 'Noto'
