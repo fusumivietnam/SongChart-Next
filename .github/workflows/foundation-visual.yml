@@ -97,6 +97,20 @@ jobs:
           grep -q 'https://songchart-preview.example.test/build/assets/' <<< "$html"
           ! grep -q 'http://127.0.0.1:8000/build/assets/' <<< "$html"
 
+      - name: Verify compatible local toolchain fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          toolchain_hash="$(sha256sum Dockerfile | cut -c1-12)"
+          bash scripts/foundation_preview.sh stop
+
+          FOUNDATION_PREVIEW_TOOLCHAIN_IMAGE=songchart-next:deliberately-missing \
+          FOUNDATION_PREVIEW_FALLBACK_IMAGES="songchart-next:foundation-toolchain-${toolchain_hash}" \
+            bash scripts/foundation_preview.sh start | tee /tmp/foundation-preview-fallback.log
+
+          grep -q 'Using compatible existing local toolchain image:' /tmp/foundation-preview-fallback.log
+          curl --fail --silent --show-error http://127.0.0.1:8000/_design/foundation/artist >/dev/null
+
       - name: Render and verify narrow/wide baselines
         env:
           FOUNDATION_BASE_URL: http://127.0.0.1:8000
@@ -116,7 +130,7 @@ jobs:
             echo "- Viewports per surface: 390x844 and 1440x1024 CSS px"
             echo "- Rendered captures: 10"
             echo "- Reverse-proxy HTTPS/host asset generation: verified"
-            echo "- Preview build path: cached Docker toolchain + locked dependencies; no application COPY build context"
+            echo "- Preview build path: compatible cached/local Docker toolchain + locked dependencies; no application COPY build context"\n            echo "- Broken/missing preferred toolchain fallback: verified"
             echo "- Evidence artifact: `foundation-render-${EVIDENCE_SHA}`"
             echo "- Artifact retention: 30 days"
             echo "- This verifies deterministic browser rendering only; human Design Authority approval is still required."
