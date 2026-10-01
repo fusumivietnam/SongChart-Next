@@ -1,7 +1,14 @@
+import subprocess
+import sys
 import unittest
 from scripts import project_sync as sync
 
 class ProjectSyncTests(unittest.TestCase):
+    def test_cli_help_runs_directly(self):
+        result = subprocess.run([sys.executable, "scripts/project_sync.py", "--help"], capture_output=True, text=True, check=False)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("--owner", result.stdout)
+
     def test_projection_metadata(self):
         issue = {"body": "**Project Gate:** G2\n**Project Decision:** Approved\n**Verification evidence:** run-123"}
         self.assertEqual(sync.projection_metadata(issue), {"gate": "G2", "decision": "Approved", "verification": "run-123"})

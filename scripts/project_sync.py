@@ -14,7 +14,10 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-from scripts import roadmap_health as health
+try:
+    from scripts import roadmap_health as health
+except ModuleNotFoundError:  # Direct execution: python3 scripts/project_sync.py
+    import roadmap_health as health
 
 ROOT = Path(__file__).resolve().parents[1]
 CAPABILITY_MAP = ROOT / "governance" / "CAPABILITY_MAP.json"
