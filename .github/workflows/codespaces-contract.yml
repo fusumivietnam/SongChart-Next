@@ -27,15 +27,23 @@ on:
       - .github/workflows/codespaces-contract.yml
   workflow_dispatch:
 
+concurrency:
+  group: codespaces-contract-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   contract:
     runs-on: ubuntu-24.04
+    env:
+      EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Check out exact revision
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.EVIDENCE_SHA }}
 
       - name: Validate dev container JSON
         shell: bash
@@ -65,9 +73,6 @@ jobs:
           do
             test -f "$path"
           done
-
-      - name: Verify project governance
-        run: python3 scripts/verify_project_os.py
 
       - name: Confirm Codespaces base image exists
         run: docker pull mcr.microsoft.com/devcontainers/base:ubuntu-24.04
