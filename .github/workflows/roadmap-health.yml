@@ -30,6 +30,7 @@ concurrency:
 jobs:
   health:
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
     env:
       EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
