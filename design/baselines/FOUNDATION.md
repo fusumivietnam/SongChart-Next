@@ -38,15 +38,15 @@ The preview uses deterministic fixture copy only. It does not read or mutate can
 
 ### Automated GitHub render evidence
 
-`.github/workflows/foundation-visual.yml` renders the five deterministic preview surfaces on a GitHub-hosted Ubuntu runner using the browser supplied by that runner image. It starts the same repository-owned `scripts/foundation_preview.sh` harness used for manual review. That harness first reuses any compatible local SongChart toolchain/development image after checking the required PHP extensions, Node 22 and pnpm 10.17.1. If none exists, it builds only the cached Docker toolchain layer from a Dockerfile-only context. It then installs locked dependencies into dedicated preview cache volumes and builds the checked-out workspace without a full application `COPY . .` image step. CI then verifies expected hydrated fixture text, rejects accidental Vite development-server references, verifies HTTPS/host generation through standard reverse-proxy headers, captures exact 390 × 844 and 1440 × 1024 PNG references, and uploads the PNG files plus rendered DOM and an evidence manifest as a 30-day workflow artifact.
+`.github/workflows/foundation-visual.yml` now verifies two deliberately separate review paths. The `local-review-contract` job executes `scripts/design_review.sh` against the normal Compose `app` + PostgreSQL development runtime and asserts that no legacy preview container is created. The `render` job uses the CI-only `scripts/foundation_visual_ci.sh` on a clean GitHub-hosted runner to build static assets, serve the local-only preview, verify reverse-proxy asset generation, capture exact 390 × 844 and 1440 × 1024 PNG references, and upload the PNG files plus rendered DOM and evidence manifest as a 30-day artifact.
 
-The workflow runs for relevant pull requests, relevant pushes to `main`, and manual dispatches. It records the exact evaluated SHA as evidence provenance, so both review-head and post-merge evidence can be tied to an immutable revision. Passing automation proves that the candidate renders deterministically in a real headless browser at the required reference sizes. It does **not** approve token values, hierarchy, responsive behavior, accessibility, or the `design-authority` lifecycle state. Human keyboard/focus review and owner visual approval on Issue #10 remain required.
+The workflow runs for relevant pull requests, relevant pushes to `main`, and manual dispatches. It records the exact evaluated SHA as evidence provenance. Passing automation proves the local review command is operational and the candidate renders deterministically in a real headless browser at the required reference sizes. It does **not** approve token values, hierarchy, responsive behavior, accessibility, or the `design-authority` lifecycle state. Human keyboard/focus review and owner visual approval on Issue #10 remain required.
 
 This verification intentionally adds no browser-test package or second design-system runtime to the application dependency graph. If browser automation later becomes a maintained product test suite rather than Foundation evidence capture, adopt and register that tooling through the dependency policy first.
 
 ### Manual capture procedure
 
-1. Run `bash scripts/foundation_preview.sh start`, or use the exact-SHA GitHub render artifact produced by `foundation-visual.yml`.
+1. Run `bash scripts/design_review.sh`, or use the exact-SHA GitHub render artifact produced by `foundation-visual.yml`.
 2. Open the required preview route.
 3. Capture at exactly 390 × 844 CSS px and 1440 × 1024 CSS px.
 4. Record the exact Git commit SHA, route, viewport and review date with each screenshot/reference.

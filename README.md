@@ -8,7 +8,7 @@ SongChart Next is a new, independent music knowledge and discovery project. **Th
 
 ## Current status
 - `main` contains the governance controller plus the pinned official Laravel React Starter source, real Composer/pnpm lockfiles and app + PostgreSQL 18.6 Docker development baseline merged from [PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6). Exact-SHA Foundation CI passed before merge; this verifies the local Foundation runtime only, not a SongChart product feature or production deployment.
-- Product scope is approved (ADR-0004) and the authored OpenAPI declaration authority is decided (ADR-0005). Visual authority remains candidate pending owner review; deterministic narrow/wide rendering, mixed-script coverage and Codespaces reverse-proxy preview support are implemented as review evidence, while public API activation and production deployment remain separate later gates.
+- Product scope is approved (ADR-0004) and the authored OpenAPI declaration authority is decided (ADR-0005). Visual authority remains candidate pending owner review; deterministic narrow/wide rendering, mixed-script coverage, Codespaces reverse-proxy support and the one-command Compose-based human review flow are implemented as review evidence, while public API activation and production deployment remain separate later gates.
 - No provider integration, production deployment, approved visual baseline or passing end-to-end SongChart product feature is implied by the Foundation runtime verification.
 - Do not copy old source, stage numbering, generated authority or UI by default.
 
