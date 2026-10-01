@@ -166,6 +166,28 @@
       "implementation": ".github/workflows/foundation-app.yml",
       "decision": "docs/adr/ADR-0003-foundation-runtime.md",
       "scope": "CI-only SPDX SBOM generation for Foundation source dependencies and non-deployable production image; no dependency submission or release publishing"
+    },
+    {
+      "id": "github-codespaces",
+      "capability": "local-docker-development",
+      "source": "https://github.com/features/codespaces",
+      "status": "implemented",
+      "version_authority": ".devcontainer/devcontainer.json plus GitHub Codespaces service runtime",
+      "license_review": "GitHub Codespaces service/billing terms apply; repository configuration uses standard dev-container mechanisms",
+      "implementation": ".devcontainer/devcontainer.json",
+      "decision": "docs/adr/ADR-0006-codespaces-development-environment.md",
+      "scope": "Optional hosted developer shell around the approved Docker Compose runtime; prebuild-ready, not production infrastructure or product authority."
+    },
+    {
+      "id": "devcontainer-features",
+      "capability": "local-docker-development",
+      "source": "https://github.com/devcontainers/features",
+      "status": "implemented",
+      "version_authority": ".devcontainer/devcontainer.json feature major versions",
+      "license_review": "upstream feature licensing/provenance review required before controlled release use; development-only here",
+      "implementation": ".devcontainer/devcontainer.json",
+      "decision": "docs/adr/ADR-0006-codespaces-development-environment.md",
+      "scope": "Development-shell features limited to Docker-outside-of-Docker and GitHub CLI; project PHP/Node/Composer/pnpm stay in SongChart Docker images."
     }
   ]
 }
