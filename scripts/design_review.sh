@@ -45,6 +45,57 @@ cleanup_legacy_preview() {
   fi
 }
 
+compose_container_ids() {
+  docker compose ps -aq db app 2>/dev/null || true
+}
+
+remove_compose_containers_preserve_volumes() {
+  local ids
+
+  echo "Recreating only the SongChart app/db containers; named volumes are preserved."
+  ids="$(compose_container_ids)"
+
+  docker compose rm -sf app db >/dev/null 2>&1 || true
+
+  if [[ -n "$ids" ]]; then
+    while IFS= read -r id; do
+      [[ -n "$id" ]] || continue
+      docker rm -f "$id" >/dev/null 2>&1 || true
+    done <<< "$ids"
+  fi
+}
+
+start_compose_stack() {
+  local log_file status
+  log_file="$(mktemp)"
+
+  set +e
+  docker compose up -d --wait db app 2>&1 | tee "$log_file"
+  status=${PIPESTATUS[0]}
+  set -e
+
+  if [[ "$status" -eq 0 ]]; then
+    rm -f "$log_file"
+    return 0
+  fi
+
+  if grep -Eq 'RWLayer .* unexpectedly nil|parent snapshot .* does not exist|content digest .* not found|failed to prepare extraction snapshot' "$log_file"; then
+    echo "Detected a stale/corrupt Docker container layer. Retrying once with fresh app/db containers only."
+    remove_compose_containers_preserve_volumes
+
+    set +e
+    docker compose up -d --wait db app
+    status=$?
+    set -e
+
+    rm -f "$log_file"
+    return "$status"
+  fi
+
+  rm -f "$log_file"
+  return "$status"
+}
+
 ensure_app_running() {
   local app_id
   app_id="$(docker compose ps -q app 2>/dev/null || true)"
@@ -54,7 +105,7 @@ ensure_app_running() {
   fi
 
   echo "SongChart app service is not running; starting the approved local Compose stack..."
-  docker compose up -d --wait db app
+  start_compose_stack
 }
 
 build_static_assets() {
