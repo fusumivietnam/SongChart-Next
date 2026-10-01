@@ -80,18 +80,38 @@ jobs:
         if: steps.credential.outputs.configured == 'true'
         shell: bash
         run: |
-          {
-            echo "## GitHub Project projection"
-            echo
-            echo '```json'
-            cat project-sync.json
-            echo '```'
-            echo
-            echo "Project fields are derived only; repository authority and live Issues/PRs remain authoritative."
-          } >> "$GITHUB_STEP_SUMMARY"
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("project-sync.json").read_text(encoding="utf-8"))
+          project = report.get("project", {})
+          missing_views = report.get("required_views_missing") or []
+          changes = report.get("changes") or []
+
+          print("## GitHub Project projection")
+          print()
+          print(f"- Project: {project.get('owner', '?')} #{project.get('number', '?')} — {project.get('title', '?')}")
+          print(f"- Desired roadmap items: {report.get('desired_items', 0)}")
+          print(f"- Mutations: {report.get('mutations', 0)}")
+          print(f"- Missing required views: {len(missing_views)}")
+          if missing_views:
+              print("  - " + "\n  - ".join(missing_views))
+          print()
+          print("### Reconciliation changes (first 25)")
+          if changes:
+              for change in changes[:25]:
+                  print(f"- {change}")
+              if len(changes) > 25:
+                  print(f"- … {len(changes) - 25} more change(s) preserved in the artifact")
+          else:
+              print("- No changes; Project was already reconciled.")
+          print()
+          print("Project fields are derived only; repository authority and live Issues/PRs remain authoritative.")
+          PY
 
       - name: Preserve sync report
-        if: steps.credential.outputs.configured == 'true'
+        if: always() && steps.credential.outputs.configured == 'true'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: project-sync-${{ github.sha }}
