@@ -31,3 +31,4 @@ GitHub Codespaces, when used, is governed by [ADR-0006](docs/adr/ADR-0006-codesp
 - Tests and golden fixtures must not be weakened to make a change pass. Any contract-breaking change needs compatibility analysis and ADR.
 - For roadmap work: VERTICAL_SLICES owns planned slice scope, CAPABILITY_MAP owns lifecycle, Issues/PRs own execution, and Projects/Milestones are derived views only. Update only the owning authored authority; generated indexes and summaries must be reproducible and must not become a second source of truth.
 - Report precisely what changed, which checks ran, which did not run, and what remains unapproved.
+- Respect [CI Workflow Ownership](docs/operations/CI_WORKFLOW_OWNERSHIP.md): do not duplicate assertions across Actions workflows; PR acceptance evidence must use the exact head SHA and `main` evidence the exact merged SHA.
