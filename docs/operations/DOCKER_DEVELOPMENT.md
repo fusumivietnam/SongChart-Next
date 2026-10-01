@@ -26,9 +26,9 @@ Use the repository-owned preview harness instead of manually composing Docker co
 bash scripts/foundation_preview.sh start
 ```
 
-The script builds the current revision with the same `frontend-build` Docker target used by Foundation visual CI, replaces only its dedicated preview container, waits for `/up`, and prints the correct localhost or Codespaces forwarded URL. It does not use or delete the PostgreSQL/dependency named volumes. Stop it with `bash scripts/foundation_preview.sh stop`; inspect it with `status` or print only the browser URL with `url`.
+The script builds a cached `php-toolchain` image from a temporary Docker context containing only the Dockerfile, then installs the committed Composer/pnpm lockfiles into dedicated preview cache volumes, builds static assets from the current workspace, replaces only its dedicated preview container, waits for `/up`, and prints the correct localhost or Codespaces forwarded URL. This deliberately avoids the full application `COPY . .` Docker build path for visual review, so large workspace contexts and stale BuildKit application snapshots cannot block the review harness. It does not use or delete PostgreSQL volumes or the normal Compose dependency volumes. Stop it with `bash scripts/foundation_preview.sh stop`; inspect it with `status` or print only the browser URL with `url`.
 
-No `APP_URL`, `ASSET_URL`, Vite HMR, source-mounted preview container or proxy-header workaround is required for normal Design Authority review.
+No manual `APP_URL`, `ASSET_URL`, Vite HMR or proxy-header workaround is required for normal Design Authority review. The preview intentionally bind-mounts the current workspace after the toolchain is built; if tracked or untracked files are present, the script warns that the rendered result is not an exact clean-commit review.
 
 Review these deterministic routes:
 - `/_design/foundation/artist`
