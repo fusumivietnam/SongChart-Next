@@ -26,7 +26,9 @@ on:
       - composer.lock
       - package.json
       - pnpm-lock.yaml
+      - app/**
       - bootstrap/**
+      - config/**
       - resources/**
       - routes/**
       - design/**
