@@ -3,6 +3,7 @@
 SongChart Next is a new, independent music knowledge and discovery project. **This repository is its sole project authority.** Previous SongChart repositories, chat summaries, ZIP bundles and historical stage plans are not dependencies or implementation evidence.
 
 ## Docker-first local development
+- GitHub Codespaces is an optional repository-owned developer shell under [ADR-0006](docs/adr/ADR-0006-codespaces-development-environment.md). See the [Codespaces runbook](docs/operations/CODESPACES.md). The app/database still run through the approved Docker Compose baseline; Codespaces is not a production runtime.
 - ADR-0001 governs local Compose and [ADR-0003](docs/adr/ADR-0003-foundation-runtime.md) records the accepted Foundation app/toolchain baseline. The [Docker development runbook](docs/operations/DOCKER_DEVELOPMENT.md) documents app + PostgreSQL 18.6 startup after real lockfiles and checks are available.
 - [PR #1](https://github.com/fusumivietnam/SongChart-Next/pull/1), [PR #2](https://github.com/fusumivietnam/SongChart-Next/pull/2), [PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6) and [PR #8](https://github.com/fusumivietnam/SongChart-Next/pull/8) are merged; see [pinned upstream provenance](docs/engineering/UPSTREAM_STARTER.md).
 
