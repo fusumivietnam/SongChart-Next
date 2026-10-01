@@ -18,20 +18,47 @@ on:
       - routes/**
       - tests/**
       - scripts/foundation_provenance.py
+      - scripts/design_review.sh
+      - .github/workflows/foundation-app.yml
+  push:
+    branches:
+      - main
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - compose.yaml
+      - composer.json
+      - composer.lock
+      - package.json
+      - pnpm-lock.yaml
+      - .env.example
+      - app/**
+      - bootstrap/**
+      - config/**
+      - database/**
+      - resources/**
+      - routes/**
+      - tests/**
+      - scripts/foundation_provenance.py
+      - scripts/design_review.sh
       - .github/workflows/foundation-app.yml
   workflow_dispatch:
 concurrency:
-  group: foundation-app-${{ github.ref }}
+  group: foundation-app-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 permissions:
   contents: read
 jobs:
   application:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
+      EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       POSTGRES_PASSWORD: ci-ephemeral-only
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check out exact evidence revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.EVIDENCE_SHA }}
       - name: Confirm reproducible dependencies
         shell: bash
         run: |
@@ -63,6 +90,12 @@ jobs:
           docker compose exec -T app pnpm run build
           docker compose exec -T app pnpm run types:check
           docker compose exec -T -e APP_ENV=testing -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: app php artisan test
+      - name: Verify one-command Design Authority review contract
+        shell: bash
+        run: |
+          bash -n scripts/design_review.sh
+          DESIGN_REVIEW_SKIP_BUILD=1 bash scripts/design_review.sh
+
       - name: Generate dependency license inventory
         run: |
           docker compose exec -T app composer licenses --format=json > composer-licenses.json
@@ -72,7 +105,7 @@ jobs:
       - name: Preserve dependency license inventory
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: foundation-license-inventory-${{ github.sha }}
+          name: foundation-license-inventory-${{ env.EVIDENCE_SHA }}
           path: |
             composer-licenses.json
             pnpm-licenses.json
@@ -107,7 +140,7 @@ jobs:
       - name: Preserve Foundation provenance
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: foundation-provenance-${{ github.sha }}
+          name: foundation-provenance-${{ env.EVIDENCE_SHA }}
           path: |
             foundation-provenance.json
             foundation-provenance.txt
@@ -169,7 +202,7 @@ jobs:
       - name: Preserve Foundation SBOMs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: foundation-sbom-${{ github.sha }}
+          name: foundation-sbom-${{ env.EVIDENCE_SHA }}
           path: |
             foundation-source.spdx.json
             foundation-image.spdx.json
