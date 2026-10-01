@@ -98,6 +98,14 @@ start_compose_stack() {
 
 ensure_app_running() {
   local app_id
+
+  if [[ "${DESIGN_REVIEW_FORCE_CONTAINER_RECOVERY:-0}" == "1" ]]; then
+    remove_compose_containers_preserve_volumes
+    echo "Starting the approved local Compose stack after targeted container recreation..."
+    start_compose_stack
+    return 0
+  fi
+
   app_id="$(docker compose ps -q app 2>/dev/null || true)"
 
   if [[ -n "$app_id" ]] && [[ "$(docker inspect -f '{{.State.Running}}' "$app_id" 2>/dev/null || true)" == "true" ]]; then
