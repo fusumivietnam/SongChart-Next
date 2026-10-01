@@ -48,14 +48,18 @@ jobs:
     env:
       EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       FOUNDATION_PREVIEW_CONTAINER: foundation-visual
-      FOUNDATION_PREVIEW_IMAGE: songchart-next:foundation-visual
       FOUNDATION_PREVIEW_PORT: "8000"
+      FOUNDATION_PREVIEW_COMPOSER_VOLUME: foundation-visual-composer
+      FOUNDATION_PREVIEW_NODE_VOLUME: foundation-visual-node
 
     steps:
       - name: Check out exact evidence revision
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ env.EVIDENCE_SHA }}
+
+      - name: Validate preview harness syntax
+        run: bash -n scripts/foundation_preview.sh
 
       - name: Confirm browser availability
         shell: bash
@@ -81,8 +85,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for route in             /_design/foundation/artist             /_design/foundation/artist-long             /_design/foundation/search             /_design/foundation/search-empty             /_design/foundation/search-error
-          do
+          for route in /_design/foundation/artist /_design/foundation/artist-long /_design/foundation/search /_design/foundation/search-empty /_design/foundation/search-error; do
             curl --fail --silent --show-error "http://127.0.0.1:8000${route}" >/dev/null
           done
 
@@ -90,8 +93,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          html="$(curl --fail --silent --show-error             -H 'Host: 127.0.0.1:8000'             -H 'X-Forwarded-Host: songchart-preview.example.test'             -H 'X-Forwarded-Proto: https'             -H 'X-Forwarded-Port: 443'             http://127.0.0.1:8000/_design/foundation/artist)"
-
+          html="$(curl --fail --silent --show-error -H 'Host: 127.0.0.1:8000' -H 'X-Forwarded-Host: songchart-preview.example.test' -H 'X-Forwarded-Proto: https' -H 'X-Forwarded-Port: 443' http://127.0.0.1:8000/_design/foundation/artist)"
           grep -q 'https://songchart-preview.example.test/build/assets/' <<< "$html"
           ! grep -q 'http://127.0.0.1:8000/build/assets/' <<< "$html"
 
@@ -109,12 +111,13 @@ jobs:
           {
             echo "### Foundation visual render evidence"
             echo
-            echo "- Source revision: \`${EVIDENCE_SHA}\`"
+            echo "- Source revision: `${EVIDENCE_SHA}`"
             echo "- Deterministic surfaces: 5"
             echo "- Viewports per surface: 390x844 and 1440x1024 CSS px"
             echo "- Rendered captures: 10"
             echo "- Reverse-proxy HTTPS/host asset generation: verified"
-            echo "- Evidence artifact: \`foundation-render-${EVIDENCE_SHA}\`"
+            echo "- Preview build path: cached Docker toolchain + locked dependencies; no application COPY build context"
+            echo "- Evidence artifact: `foundation-render-${EVIDENCE_SHA}`"
             echo "- Artifact retention: 30 days"
             echo "- This verifies deterministic browser rendering only; human Design Authority approval is still required."
           } >> "$GITHUB_STEP_SUMMARY"
