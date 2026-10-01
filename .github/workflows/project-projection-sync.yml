@@ -27,7 +27,7 @@ permissions:
 
 concurrency:
   group: project-projection-sync
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   sync:
