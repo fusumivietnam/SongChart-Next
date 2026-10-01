@@ -1,0 +1,73 @@
+name: Codespaces contract
+
+on:
+  pull_request:
+    paths:
+      - .devcontainer/**
+      - scripts/codespaces_doctor.sh
+      - scripts/design_review.sh
+      - compose.yaml
+      - Dockerfile
+      - governance/TECHNOLOGY_REGISTRY.json
+      - docs/adr/ADR-0006-codespaces-development-environment.md
+      - docs/operations/CODESPACES.md
+      - .github/workflows/codespaces-contract.yml
+  push:
+    branches:
+      - main
+    paths:
+      - .devcontainer/**
+      - scripts/codespaces_doctor.sh
+      - scripts/design_review.sh
+      - compose.yaml
+      - Dockerfile
+      - governance/TECHNOLOGY_REGISTRY.json
+      - docs/adr/ADR-0006-codespaces-development-environment.md
+      - docs/operations/CODESPACES.md
+      - .github/workflows/codespaces-contract.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out exact revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Validate dev container JSON
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -e . .devcontainer/devcontainer.json >/dev/null
+          jq -e '.image == "mcr.microsoft.com/devcontainers/base:ubuntu-24.04"' .devcontainer/devcontainer.json >/dev/null
+          jq -e '.features["ghcr.io/devcontainers/features/docker-outside-of-docker:1"] != null' .devcontainer/devcontainer.json >/dev/null
+          jq -e '.features["ghcr.io/devcontainers/features/github-cli:1"] != null' .devcontainer/devcontainer.json >/dev/null
+          jq -e '.hostRequirements.cpus >= 4 and .hostRequirements.memory == "8gb" and .hostRequirements.storage == "32gb"' .devcontainer/devcontainer.json >/dev/null
+
+      - name: Validate lifecycle scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n .devcontainer/prebuild.sh
+          bash -n .devcontainer/post-create.sh
+          bash -n .devcontainer/post-start.sh
+          bash -n scripts/codespaces_doctor.sh
+          bash -n scripts/design_review.sh
+
+      - name: Verify referenced scripts exist
+        shell: bash
+        run: |
+          set -euo pipefail
+          for path in             .devcontainer/prebuild.sh             .devcontainer/post-create.sh             .devcontainer/post-start.sh             scripts/design_review.sh             scripts/codespaces_doctor.sh
+          do
+            test -f "$path"
+          done
+
+      - name: Verify project governance
+        run: python3 scripts/verify_project_os.py
+
+      - name: Confirm Codespaces base image exists
+        run: docker pull mcr.microsoft.com/devcontainers/base:ubuntu-24.04
