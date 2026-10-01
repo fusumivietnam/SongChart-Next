@@ -18,17 +18,17 @@ Once `composer.lock` and `pnpm-lock.yaml` are available:
 
 ## Codespaces Design Authority live review
 
-The Foundation Design Authority preview is intentionally available only in `local` and `testing` environments. Codespaces forwards port 8000 through an HTTPS reverse proxy, so local/testing runtime trusts the standard `X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Port` and `X-Forwarded-Proto` headers. This trust is deliberately not enabled for production; production ingress remains a separate release decision.
+The Foundation Design Authority preview is intentionally available only in `local` and `testing` environments. Codespaces forwards the existing app service on port 8000 through an HTTPS reverse proxy; local/testing runtime trusts the standard `X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Port` and `X-Forwarded-Proto` headers. Production proxy trust remains a separate release decision.
 
-Use the repository-owned preview harness instead of manually composing Docker commands:
+Human review deliberately reuses the approved local Compose app instead of creating a second preview runtime. Run:
 
 ```bash
-bash scripts/foundation_preview.sh start
+bash scripts/design_review.sh
 ```
 
-The script first reuses a compatible local SongChart toolchain image when one already exists (including the normal development image), verified against the required PHP extensions, Node 22 and pnpm 10.17.1. Only when no compatible image exists does it build the cached `php-toolchain` target from a temporary Docker context containing only the Dockerfile. It then installs the committed Composer/pnpm lockfiles into dedicated preview cache volumes, builds static assets from the current workspace, replaces only its dedicated preview container, waits for `/up`, and prints the correct localhost or Codespaces forwarded URL. This deliberately avoids the full application `COPY . .` Docker build path and also bypasses a damaged BuildKit image-export path whenever a compatible local development image is already available. It does not use or delete PostgreSQL volumes or the normal Compose dependency volumes. Stop it with `bash scripts/foundation_preview.sh stop`; inspect it with `status` or print only the browser URL with `url`.
+The script starts the normal `db` + `app` Compose services only when the app is not already running, installs locked frontend dependencies in the existing app dependency volume, removes any stale Vite `public/hot` marker, builds static assets, runs TypeScript checks, verifies all five local preview routes, verifies Codespaces HTTPS asset generation when applicable, and prints the exact review URLs. It creates no preview container, extra port binding, preview-specific Docker image or preview-specific dependency volume.
 
-No manual `APP_URL`, `ASSET_URL`, Vite HMR, proxy-header workaround, Docker cache prune, or volume deletion is required for normal Design Authority review. The preview intentionally bind-mounts the current workspace after the toolchain is built; if tracked or untracked files are present, the script warns that the rendered result is not an exact clean-commit review.
+This separation is intentional: local human review uses the long-lived Compose development runtime, while deterministic screenshot evidence uses a clean, isolated CI-only server in `scripts/foundation_visual_ci.sh`. The two paths validate different concerns and no longer share mutable local Docker state.
 
 Review these deterministic routes:
 - `/_design/foundation/artist`
@@ -37,7 +37,7 @@ Review these deterministic routes:
 - `/_design/foundation/search-empty`
 - `/_design/foundation/search-error`
 
-Use the required 390 × 844 and 1440 × 1024 viewport references, then verify keyboard focus, skip-link behavior, long/mixed-script wrapping, no-artwork behavior and search empty/error semantics. Record the exact Git revision with the owner decision. Visual CI also runs on relevant `main` pushes so post-merge evidence is tied to the exact merged revision. These routes and proxy settings are development evidence only; they are not a production public surface or production proxy policy.
+Use the required 390 × 844 and 1440 × 1024 viewport references, then verify keyboard focus, skip-link behavior, long/mixed-script wrapping, no-artwork behavior and search empty/error semantics. Record the exact Git revision with the owner decision. Visual CI runs on relevant pull requests and `main` pushes so automated evidence is tied to the exact evaluated revision.
 
 ## PostgreSQL 18 volume and safety
 
