@@ -16,6 +16,21 @@ Once `composer.lock` and `pnpm-lock.yaml` are available:
 6. Run `docker compose exec -e APP_ENV=testing -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: app php artisan test`; the upstream scaffold suite uses in-memory SQLite (pdo_sqlite extension). Never run the fixture test suite against a populated PostgreSQL development database. The app's *runtime* database is PostgreSQL and must be checked separately via `docker compose exec app php artisan db:show --database=pgsql`.
 7. Browse http://localhost:8000 only for framework smoke testing. Upstream welcome/auth/dashboard pages are **not** SongChart's approved design or released product.
 
+## Codespaces Design Authority live review
+
+The Foundation Design Authority preview is intentionally available only in `local` and `testing` environments. Codespaces forwards port 8000 through an HTTPS reverse proxy, so local/testing runtime trusts the standard `X-Forwarded-For`, `X-Forwarded-Host`, `X-Forwarded-Port` and `X-Forwarded-Proto` headers. This trust is deliberately not enabled for production; production ingress remains a separate release decision.
+
+For an existing Codespace using the source-mounted preview container, update `main`, rebuild static assets, and restart the preview process. The browser may then use the forwarded port-8000 URL directly; no `APP_URL`, `ASSET_URL` or proxy-header workaround is required for normal review.
+
+Review these deterministic routes:
+- `/_design/foundation/artist`
+- `/_design/foundation/artist-long`
+- `/_design/foundation/search`
+- `/_design/foundation/search-empty`
+- `/_design/foundation/search-error`
+
+Use the required 390 × 844 and 1440 × 1024 viewport references, then verify keyboard focus, skip-link behavior, long/mixed-script wrapping, no-artwork behavior and search empty/error semantics. Record the exact Git revision with the owner decision. These routes and proxy settings are development evidence only; they are not a production public surface or production proxy policy.
+
 ## PostgreSQL 18 volume and safety
 
 The postgres:18.6 image stores PGDATA at /var/lib/postgresql/18/docker; mount its parent at /var/lib/postgresql. Compose uses the **new** `postgres18_data` named volume. Never mount existing `postgres_data` from the PostgreSQL 17 scaffold into the 18 container. A PostgreSQL major upgrade requires a reviewed backup, restore/pg_upgrade plan and test; do not imply an automatic volume migration. Named volumes survive `docker compose down` but do **not** constitute backups. `docker compose down -v` destroys local database and dependency volumes; never run it on data you need.
