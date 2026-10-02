@@ -1,0 +1,71 @@
+name: Work management sync
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - governance/GITHUB_WORK_MANAGEMENT.json
+      - scripts/work_management_sync.py
+      - tests/governance/test_work_management_sync.py
+      - docs/operations/GITHUB_WORK_MANAGEMENT.md
+      - .github/workflows/work-management-sync.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: work-management-sync
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out trusted main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+
+      - name: Run work-management regression tests
+        run: python3 -m unittest tests.governance.test_work_management tests.governance.test_work_management_sync -v
+
+      - name: Reconcile labels and explicitly managed milestones
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -o pipefail
+          python3 scripts/work_management_sync.py \
+            --repo "$GITHUB_REPOSITORY" \
+            --output-json work-management-sync.json \
+            2>&1 | tee work-management-sync.txt
+
+      - name: Publish reconciliation summary
+        shell: bash
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("work-management-sync.json").read_text(encoding="utf-8"))
+          print("## GitHub work management")
+          print()
+          print(f"- Desired labels: {report['desired_labels']}")
+          print(f"- Managed milestones: {report['managed_milestones']}")
+          print(f"- Label changes: {len(report['label_changes'])}")
+          print(f"- Milestone changes: {len(report['milestone_changes'])}")
+          print("- Unmanaged labels/milestones deleted: no")
+          for change in report["applied"][:30]:
+              print(f"- {change}")
+          PY
+
+      - name: Preserve reconciliation report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: work-management-sync-${{ github.sha }}
+          path: |
+            work-management-sync.json
+            work-management-sync.txt
+          retention-days: 14

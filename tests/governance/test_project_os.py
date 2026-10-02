@@ -33,12 +33,25 @@ class RegistryTests(unittest.TestCase):
             "schema_version": 1, "project": "SongChart-Next",
             "issue_labels": {
                 "required": [
-                    {"name": "type:governance", "description": "governance"},
-                    {"name": "priority:p2", "description": "normal"}
+                    {"name": "type:governance", "description": "governance", "color": "8250df"},
+                    {"name": "priority:p2", "description": "normal", "color": "fbca04"}
                 ],
                 "constraints": {
                     "priority_is_human_decision": True,
                     "capability_lifecycle_authority": "governance/CAPABILITY_MAP.json"
+                },
+                "reconciliation": {
+                    "mode": "create-or-update-declared-only",
+                    "delete_unmanaged": False,
+                    "credential": "GITHUB_TOKEN with issues:write"
+                }
+            },
+            "milestones": {
+                "managed": [],
+                "reconciliation": {
+                    "mode": "create-or-update-explicit-managed-only",
+                    "delete_unmanaged": False,
+                    "credential": "GITHUB_TOKEN with issues:write"
                 }
             },
             "github_project": {

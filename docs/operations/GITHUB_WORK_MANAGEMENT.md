@@ -19,11 +19,13 @@ Use at most one `type:*` and one `priority:*` label per Issue/PR. Area/risk/stat
 
 Priority is a human decision. Labels never promote capability lifecycle and do not replace the structured Project fields.
 
-Repository automation may audit label drift, but it must not infer or assign priority automatically.
+Repository automation reconciles the declared catalog with `scripts/work_management_sync.py` and `Work management sync`. It may create missing labels and repair declared description/color drift, but it never deletes unmanaged labels and must not infer or assign priority automatically. The workflow uses only the ephemeral repository `GITHUB_TOKEN` with `contents: read` and `issues: write`; it never receives `PROJECT_SYNC_TOKEN`.
 
 ## Milestones
 
 Create a milestone only for a delivery checkpoint/release objective with a bounded completion meaning. Examples include `FOUNDATION`, `VS-01 Artist fixture-first`, a public alpha, or a quarter-specific delivery checkpoint.
+
+Automation manages milestones only when they are explicitly listed under `milestones.managed` in `governance/GITHUB_WORK_MANAGEMENT.json`. The default list is empty. Capability IDs, slices, labels or Project fields must never be converted into milestones implicitly.
 
 Do not use milestones for capability names, areas, priorities, or `verified/deployed` claims. Milestone completion is work aggregation only.
 
@@ -58,14 +60,10 @@ The profiles are **dormant configuration** until the GitHub account has an eligi
 
 ChatGPT and GitHub connector workflows can continue to operate against Issues/PRs/repository content without these Copilot agents.
 
-## Manual GitHub setup that remains external
+## Automation and external setup
 
-The connected GitHub integration can create/update Issues/PRs and repository files, but it does not expose repository-administration writes for label/milestone catalog creation or Project view configuration in this session.
+Required labels are reconciled automatically after contract changes on `main`; no PAT is used for label or milestone writes. Explicitly managed milestones use the same least-privilege workflow.
 
-After this contract merges:
-1. create any missing labels exactly as declared in `GITHUB_WORK_MANAGEMENT.json`;
-2. create milestones only when a real delivery checkpoint is approved;
-3. create any missing required Project views using `PROJECT_VIEWS.md`;
-4. run **Project projection sync** and confirm it reports no required-view drift.
+Project #2 continues to use the separate `PROJECT_SYNC_TOKEN` because it is user-owned. Project fields/items are reconciled by `Project projection sync`; required view presence is audited there. Any view layout/filter changes that are not represented by repository automation remain presentation configuration only.
 
 These UI/service objects are projections/classification. If they are deleted, repository roadmap/lifecycle authority remains intact.

@@ -10,6 +10,7 @@ on:
     paths:
       - docs/roadmap/**
       - governance/CAPABILITY_MAP.json
+      - governance/GITHUB_WORK_MANAGEMENT.json
       - scripts/project_sync.py
       - scripts/roadmap_health.py
       - tests/governance/test_project_sync.py

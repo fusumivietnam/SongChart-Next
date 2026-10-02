@@ -20,7 +20,7 @@ The sync automatically creates missing required fields and appends missing optio
 
 It adds SongChart roadmap Issues and updates their projected fields. It does not delete unrelated cards.
 
-Required view names are audited but not created or reconfigured automatically because view layout/grouping is presentation-only and should remain intentionally reviewable in the GitHub UI:
+Required view names are audited against `governance/GITHUB_WORK_MANAGEMENT.json`; Project field/item reconciliation remains separate from the repository label/milestone writer. View layout/grouping remains presentation-only unless a reviewed repository automation explicitly manages it:
 - Executive Roadmap
 - Delivery Board
 - Capability Matrix
