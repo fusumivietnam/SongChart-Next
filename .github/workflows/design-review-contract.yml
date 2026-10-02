@@ -1,0 +1,79 @@
+name: Design review contract
+
+on:
+  pull_request:
+    paths:
+      - Dockerfile
+      - compose.yaml
+      - .env.example
+      - composer.json
+      - composer.lock
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - scripts/design_review.sh
+      - .github/workflows/design-review-contract.yml
+  push:
+    branches: [main]
+    paths:
+      - Dockerfile
+      - compose.yaml
+      - .env.example
+      - composer.json
+      - composer.lock
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - scripts/design_review.sh
+      - .github/workflows/design-review-contract.yml
+  workflow_dispatch:
+
+concurrency:
+  group: design-review-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  local-review-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      POSTGRES_PASSWORD: foundation-review-ci
+    steps:
+      - name: Check out exact review revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      - name: Build cached development image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          target: development
+          load: true
+          tags: songchart-next:development
+          cache-from: type=gha,scope=foundation-buildkit
+
+      - name: Validate local review script
+        run: bash -n scripts/design_review.sh
+
+      - name: Prove one-command local review workflow
+        run: bash scripts/design_review.sh
+
+      - name: Verify review reused Compose app only
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_id="$(docker compose ps -q app)"
+          test -n "$app_id"
+          test "$(docker inspect -f '{{.State.Running}}' "$app_id")" = "true"
+          test -z "$(docker ps -a --filter name='^/songchart-foundation-preview$' --format '{{.Names}}')"
+
+      - name: Cleanup Compose runtime
+        if: always()
+        run: docker compose down --volumes --remove-orphans || true

@@ -22,7 +22,11 @@ wait_for_server() {
 }
 
 start_ci_server() {
-  docker build --target frontend-build --tag "$IMAGE" .
+  if [[ "${FOUNDATION_VISUAL_SKIP_BUILD:-0}" == "1" ]]; then
+    docker image inspect "$IMAGE" >/dev/null
+  else
+    docker build --target frontend-build --tag "$IMAGE" .
+  fi
 
   docker rm -f "$CONTAINER" >/dev/null 2>&1 || true
 

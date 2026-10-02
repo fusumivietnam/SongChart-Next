@@ -16,6 +16,7 @@ services:
       retries: 10
     networks: [songchart]
   app:
+    image: songchart-next:development
     build:
       context: .
       target: development

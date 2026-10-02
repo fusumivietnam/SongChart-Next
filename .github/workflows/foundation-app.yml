@@ -9,6 +9,7 @@ on:
       - composer.lock
       - package.json
       - pnpm-lock.yaml
+      - pnpm-workspace.yaml
       - .env.example
       - app/**
       - bootstrap/**
@@ -16,7 +17,34 @@ on:
       - database/**
       - resources/**
       - routes/**
-      - tests/**
+      - tests/Feature/**
+      - tests/Unit/**
+      - tests/TestCase.php
+      - tests/governance/test_foundation_provenance.py
+      - scripts/foundation_provenance.py
+      - .github/workflows/foundation-app.yml
+  push:
+    branches: [main]
+    paths:
+      - Dockerfile
+      - .dockerignore
+      - compose.yaml
+      - composer.json
+      - composer.lock
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - .env.example
+      - app/**
+      - bootstrap/**
+      - config/**
+      - database/**
+      - resources/**
+      - routes/**
+      - tests/Feature/**
+      - tests/Unit/**
+      - tests/TestCase.php
+      - tests/governance/test_foundation_provenance.py
       - scripts/foundation_provenance.py
       - .github/workflows/foundation-app.yml
   workflow_dispatch:
@@ -27,11 +55,16 @@ permissions:
   contents: read
 jobs:
   application:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
     env:
       POSTGRES_PASSWORD: ci-ephemeral-only
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
       - name: Confirm reproducible dependencies
         shell: bash
         run: |
@@ -39,36 +72,51 @@ jobs:
           test -s pnpm-lock.yaml
           python3 -m unittest tests.governance.test_foundation_provenance -v
           docker compose config --quiet
+
+      - name: Build cached development image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          target: development
+          load: true
+          tags: songchart-next:development
+          cache-from: type=gha,scope=foundation-buildkit
+
       - name: Prepare disposable CI application environment
         shell: bash
         run: |
           cp .env.example .env
           sed -i 's/REPLACE_WITH_UNIQUE_LOCAL_PASSWORD/ci-ephemeral-only/g' .env
-      - name: Build and boot app with PostgreSQL
+
+      - name: Boot cached app with PostgreSQL
         shell: bash
         run: |
-          if ! docker compose up -d --build --wait db app; then
+          if ! docker compose up -d --no-build --wait db app; then
             docker compose ps -a
             docker compose logs --no-color --tail=160 app db
             exit 1
           fi
+
       - name: Verify platform and initialize disposable database
         run: |
           docker compose exec -T app composer check-platform-reqs
           docker compose exec -T app php artisan key:generate --force
           docker compose exec -T app php artisan migrate --force
           docker compose exec -T app php artisan db:show --database=pgsql
+
       - name: Frontend assets, type checks and starter tests
         run: |
           docker compose exec -T app pnpm run build
           docker compose exec -T app pnpm run types:check
           docker compose exec -T -e APP_ENV=testing -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: app php artisan test
+
       - name: Generate dependency license inventory
         run: |
           docker compose exec -T app composer licenses --format=json > composer-licenses.json
           docker compose exec -T app pnpm licenses list --prod --json > pnpm-licenses.json
           test -s composer-licenses.json
           test -s pnpm-licenses.json
+
       - name: Preserve dependency license inventory
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -77,11 +125,13 @@ jobs:
             composer-licenses.json
             pnpm-licenses.json
           retention-days: 14
+
       - name: Audit locked dependencies
         run: |
           docker compose exec -T app composer audit --locked --no-interaction
           docker compose exec -T app pnpm audit --prod --audit-level=high
           echo "Locked Composer and production pnpm vulnerability audits passed; license inventories are retained as a review artifact." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Resolve Foundation image provenance
         shell: bash
         run: |
@@ -104,6 +154,7 @@ jobs:
           python3 scripts/foundation_provenance.py --image-digests foundation-image-digests.json --require-digests --output foundation-provenance.json > foundation-provenance.txt
           test -s foundation-provenance.json
           cat foundation-provenance.txt >> "$GITHUB_STEP_SUMMARY"
+
       - name: Preserve Foundation provenance
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -113,13 +164,24 @@ jobs:
             foundation-provenance.txt
             foundation-image-digests.json
           retention-days: 14
+
       - name: HTTP smoke of development app (framework only)
         run: |
           curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-connrefused http://127.0.0.1:8000/up > /dev/null
           curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-connrefused http://127.0.0.1:8000/ > /dev/null
-      - name: Build non-deployable PHP-FPM production target
+
+      - name: Build cached non-deployable production target
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          target: production
+          load: true
+          tags: songchart-next:foundation-ci
+          cache-from: type=gha,scope=foundation-buildkit
+          cache-to: ${{ github.event_name == 'push' && 'type=gha,scope=foundation-buildkit,mode=max' || '' }}
+
+      - name: Validate non-deployable PHP-FPM production target
         run: |
-          docker build --target production --tag songchart-next:foundation-ci .
           docker run --rm --entrypoint php songchart-next:foundation-ci -r 'foreach (["pdo_pgsql", "intl", "Zend OPcache"] as $ext) { if (!extension_loaded($ext)) exit(1); }'
           docker run --rm --entrypoint php-fpm songchart-next:foundation-ci -t
           docker run --rm --entrypoint sh songchart-next:foundation-ci -ec '
@@ -148,6 +210,7 @@ jobs:
             echo "- Production image: $prod_size bytes"
             echo "- Production/dev ratio: $(( prod_size * 100 / dev_size ))%"
           } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Generate source dependency SBOM
         uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
         with:
@@ -157,6 +220,7 @@ jobs:
           upload-artifact: false
           upload-release-assets: false
           dependency-snapshot: false
+
       - name: Generate production image SBOM
         uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
         with:
@@ -166,6 +230,7 @@ jobs:
           upload-artifact: false
           upload-release-assets: false
           dependency-snapshot: false
+
       - name: Preserve Foundation SBOMs
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -174,6 +239,7 @@ jobs:
             foundation-source.spdx.json
             foundation-image.spdx.json
           retention-days: 14
+
       - name: Cleanup CI only
         if: always()
         run: docker compose down --volumes --remove-orphans
