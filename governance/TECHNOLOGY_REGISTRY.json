@@ -190,7 +190,7 @@
       "license_review": "upstream feature licensing/provenance review required before controlled release use; development-only here",
       "implementation": ".devcontainer/devcontainer.json",
       "decision": "docs/adr/ADR-0006-codespaces-development-environment.md",
-      "scope": "Development-shell features limited to Docker-outside-of-Docker and GitHub CLI; project PHP/Node/Composer/pnpm stay in SongChart Docker images."
+      "scope": "Development-shell features limited to Docker-outside-of-Docker, GitHub CLI and Node 22 for the separately governed Understand Anything developer-analysis path. Project PHP/Composer/pnpm/PostgreSQL runtime remains in SongChart Docker images; blocking onCreate must not depend on undeclared shell runtimes."
     },
     {
       "id": "understand-anything",
