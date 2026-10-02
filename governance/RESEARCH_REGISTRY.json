@@ -3,5 +3,18 @@
   "project": "SongChart-Next",
   "authority": "governance/RESEARCH_REGISTRY.json",
   "rule": "Register research only with a retrievable source; registration/acceptance does not approve a technology or roadmap change. No historic chat or old SongChart artifacts become implementation authority.",
-  "research": []
+  "research": [
+    {
+      "id": "RES-0001",
+      "title": "MusicBrainz provider activation constraints",
+      "source": "docs/research/RES-0001-musicbrainz-provider-constraints.md",
+      "status": "accepted",
+      "capability_ids": [
+        "provider-policy",
+        "provider-adapters"
+      ],
+      "decision_ref": "docs/providers/MUSICBRAINZ.md",
+      "superseded_by": null
+    }
+  ]
 }

@@ -7,3 +7,7 @@ States: registered (not reviewed), evaluated (assessment exists), accepted (evid
 Research note minimum: claim and date, source references, version/edition, applicable capability IDs, relevant alternatives, license/provider rights, security/privacy, limitations and decision link when one exists. A document becomes implemented evidence only when a separate source-linked PR and tests exist. Deprecated research uses `superseded_by` pointing to an existing registered research ID.
 
 Before adding research: check duplicates by topic/source and whether it is already recorded; use unique ID without renumbering existing entries. The registry starts empty on purpose because no independent research corpus has been verified in this repository.
+
+## Current verified inventory
+
+As of 2026-10-02, the registry contains only research sets that have been independently retrievable and reviewed from the current repository context. `RES-0001` records the official MusicBrainz/MetaBrainz provider sources used by the VS-01b provider-policy decision. No historical SongChart chat, ZIP, offline research bundle or inaccessible source has been imported. Unknown/unavailable research remains unregistered until its source can be retrieved and reviewed.
