@@ -8,7 +8,7 @@ The repository uses `.devcontainer/devcontainer.json` so Codespaces no longer ha
 
 ## Automatic lifecycle
 
-On creation/prebuild, `.devcontainer/prebuild.sh` runs project-governance and shell-contract checks.
+On creation/prebuild, `.devcontainer/prebuild.sh` is a blocking devcontainer-owned check only: it verifies the declared shell/features and shell syntax. Project OS/governance verification remains in GitHub CI and is deliberately not allowed to make Codespaces creation depend on an undeclared host interpreter such as Python.
 
 After a user Codespace is created, `.devcontainer/post-create.sh` waits briefly for Docker, then runs `scripts/design_review.sh`. Failure is logged under ignored `.codespaces/logs/` but does not intentionally make the Codespace unusable.
 
@@ -36,7 +36,7 @@ bash scripts/codespaces_doctor.sh
 
 The doctor is read-only/non-destructive: it reports Git, disk, Docker, Compose, app health and GitHub CLI state without printing project secrets.
 
-If container creation repeatedly fails or the Codespace cannot leave the stopping/failed state, prefer deleting that broken Codespace and creating a fresh one from current `main`. Source changes must already be committed/pushed before deletion. Do not repair a failed Codespace by deleting SongChart database volumes unless data loss is explicitly accepted.
+If the creation log only shows a successful `--expect-existing-container` / `docker start` sequence while the UI says recovery mode, that log is the recovery container starting, not proof that the configured devcontainer built successfully. After a repository fix, run **Codespaces: Rebuild Container** (prefer **Full Rebuild** when a stale prebuild/container snapshot is suspected). If container creation repeatedly fails or the Codespace cannot leave the stopping/failed state, prefer deleting that broken Codespace and creating a fresh one from current `main`. Source changes must already be committed/pushed before deletion. Do not repair a failed Codespace by deleting SongChart database volumes unless data loss is explicitly accepted.
 
 ## Prebuilds
 
