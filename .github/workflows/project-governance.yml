@@ -5,17 +5,25 @@ on:
     branches: [main]
   workflow_dispatch:
 concurrency:
-  group: project-governance-${{ github.ref }}
+  group: project-governance-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 permissions:
   contents: read
 jobs:
   governance:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check out exact evidence revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.EVIDENCE_SHA }}
       - name: Run governance regression tests
         run: python3 -m unittest discover -s tests/governance -v
+      - name: Verify CI workflow ownership
+        run: python3 scripts/verify_ci_ownership.py
       - name: Generate read-only status snapshot
         run: python3 scripts/project_status.py --json > project-status.json
       - name: Show snapshot summary
