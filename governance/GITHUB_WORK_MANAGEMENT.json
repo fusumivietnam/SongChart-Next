@@ -52,7 +52,7 @@
       "verified/deployed evidence"
     ]
   },
-  "project": {
+  "github_project": {
     "owner": "fusumivietnam",
     "number": 2,
     "authority": "derived projection only",
