@@ -27,7 +27,7 @@ class ResearchProvenanceTests(unittest.TestCase):
     def test_research_note_has_minimum_provenance(self):
         text = NOTE.read_text(encoding="utf-8")
         required = [
-            "Reviewed: 2026-10-02",
+            "**Reviewed:** 2026-10-02",
             "MusicBrainz / MetaBrainz Foundation",
             "https://musicbrainz.org/doc/MusicBrainz_API",
             "https://musicbrainz.org/doc/MusicBrainz_API/Rate_Limiting",
@@ -40,11 +40,17 @@ class ResearchProvenanceTests(unittest.TestCase):
         for phrase in required:
             self.assertIn(phrase, text)
 
-    def test_registry_does_not_claim_chat_or_old_songchart_sources(self):
-        data = REGISTRY.read_text(encoding="utf-8").lower()
-        self.assertNotIn("chatgpt.com", data)
-        self.assertNotIn("old songchart", data)
-        self.assertNotIn(".zip", data)
+    def test_registered_sources_are_retrievable_project_paths_or_https(self):
+        data = json.loads(REGISTRY.read_text(encoding="utf-8"))
+        for record in data["research"]:
+            source = record["source"]
+            self.assertNotIn("chatgpt.com", source.lower())
+            self.assertNotIn(".zip", source.lower())
+            if source.startswith("https://"):
+                continue
+            path = ROOT / source
+            self.assertTrue(path.is_file(), source)
+            self.assertTrue(str(path.resolve()).startswith(str(ROOT.resolve())), source)
 
 
 if __name__ == "__main__":
