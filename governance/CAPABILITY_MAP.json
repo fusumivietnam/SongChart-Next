@@ -66,11 +66,13 @@
       "id": "design-authority",
       "plane": "experience",
       "owner": "songchart",
-      "status": "candidate",
+      "status": "approved",
       "depends_on": [
         "product-scope"
       ],
-      "implementation": null
+      "implementation": "design/DESIGN_AUTHORITY.md",
+      "scope": "Foundation Design Authority approved 2026-10-02 for VS-01a: identity direction, semantic tokens, responsive Shell, Artist/Search patterns, deterministic narrow/wide baselines and reviewed accessibility behavior. Baseline approval is not final-brand polish or public-web implementation.",
+      "decision": "design/decisions/FOUNDATION_BASELINE_APPROVAL.md"
     },
     {
       "id": "public-web",
