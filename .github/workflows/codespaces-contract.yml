@@ -71,6 +71,14 @@ jobs:
           bash -n scripts/codespaces_doctor.sh
           bash -n scripts/design_review.sh
 
+      - name: Enforce blocking onCreate dependency boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'for cmd in bash git docker gh node corepack' .devcontainer/prebuild.sh
+          ! grep -E '(^|[[:space:]])(python3|python|php|composer|pnpm)([[:space:]]|$)' .devcontainer/prebuild.sh
+          ! grep -F 'verify_project_os.py' .devcontainer/prebuild.sh
+
       - name: Verify referenced scripts exist
         shell: bash
         run: |
