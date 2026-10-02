@@ -224,6 +224,16 @@
       "implementation": ".github/workflows/foundation-app.yml",
       "decision": "docs/adr/ADR-0009-actions-trigger-cache-ownership.md",
       "scope": "CI-only BuildKit layer cache in one `foundation-buildkit` scope. Pull requests and secondary workflows read; the relevant main Foundation production build is the sole mode=max writer. Cache is never version or acceptance authority."
+    },
+    {
+      "id": "musicbrainz-web-service",
+      "capability": "provider-adapters",
+      "source": "https://musicbrainz.org/doc/MusicBrainz_API",
+      "status": "candidate",
+      "version_authority": "MusicBrainz Web Service v2 public API contract and provider-specific reviewed source URLs in docs/providers/MUSICBRAINZ.md",
+      "license_review": "Core MusicBrainz data is CC0; supplementary data is excluded pending separate rights review. Hosted web-service commercial use requires owner decision/commercial-plan review before commercial production.",
+      "implementation": "docs/providers/MUSICBRAINZ.md",
+      "scope": "Candidate VS-01b read-only metadata provider. Meaningful User-Agent; global <=1 request/second; bounded 503 backoff/jitter; core/CC0 fields only; no Cover Art Archive; persistent raw-response archival and commercial production remain blocked pending owner decision."
     }
   ]
 }
