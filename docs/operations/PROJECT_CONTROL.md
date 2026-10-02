@@ -8,7 +8,7 @@
 3. Read Roadmap Governance and roadmap scope. Run `python3 scripts/project_status.py` for an offline **read-only** inventory. For proactive roadmap reconciliation, use the latest `Roadmap health` Action report or run `python3 scripts/roadmap_health.py --live-github` with read-only GitHub credentials; offline/live-query failures remain unknown.
 4. Query **live** GitHub Issues, PRs, branch HEADs, CI, manifests and tests; identify existing active capability/slice/branch. If API unavailable report unknown; never infer from snapshot or chat memory.
 5. Resume an owning Issue/PR rather than duplicate it. Distinguish proposed/approved/implemented/verified/deployed; use referenced G0–G5 acceptance evidence. Obtain review for decisions and provider/data-impact changes.
-6. Commit bounded changes to a branch, run validation/tests, open/update PR with exact SHA and evidence. Do not merge/deploy/perform destructive changes without explicit review. Update owning authorities, not generated copies.
+6. Commit bounded changes to a branch, run validation/tests, open/update PR with exact SHA and evidence. Follow [CI Workflow Ownership](CI_WORKFLOW_OWNERSHIP.md) for required contexts, exact-SHA checkout, concurrency and credential boundaries. Do not merge/deploy/perform destructive changes without explicit review. Update owning authorities, not generated copies.
 
 ## Roadmap authority
 Follow [Roadmap Governance](../roadmap/ROADMAP_GOVERNANCE.md). `VERTICAL_SLICES.md` owns planned slice scope/dependencies/gates; `CAPABILITY_MAP.json` owns capability lifecycle; live GitHub Issues/PRs own execution; GitHub Projects/Milestones, if configured, are derived views only. Never create or hand-maintain a competing roadmap-status file.

@@ -25,13 +25,19 @@ permissions:
   pull-requests: read
   actions: read
 concurrency:
-  group: roadmap-health-${{ github.ref }}
+  group: roadmap-health-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.issue.number || github.sha }}
   cancel-in-progress: true
 jobs:
   health:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check out exact evidence revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.EVIDENCE_SHA }}
       - name: Run roadmap controller regressions
         run: python3 -m unittest tests.governance.test_roadmap_health -v
       - name: Derive live roadmap health

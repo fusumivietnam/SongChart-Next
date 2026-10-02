@@ -4,13 +4,19 @@ on:
   push:
     branches: [main]
 concurrency:
-  group: project-os-${{ github.ref }}
+  group: project-os-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 permissions:
   contents: read
 jobs:
   verify:
     runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check out exact evidence revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.EVIDENCE_SHA }}
       - run: python3 scripts/verify_project_os.py

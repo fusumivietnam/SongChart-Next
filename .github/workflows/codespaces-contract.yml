@@ -29,15 +29,24 @@ on:
       - .github/workflows/codespaces-contract.yml
   workflow_dispatch:
 
+concurrency:
+  group: codespaces-contract-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
   contract:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Check out exact revision
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.EVIDENCE_SHA }}
 
       - name: Validate dev container JSON
         shell: bash
@@ -79,9 +88,6 @@ jobs:
           grep -F 'UA_COMMIT="b05cc3b20990afca537b4fc0a49b4d7fbdc65bb0"' .devcontainer/install-understand-anything.sh
           grep -F 'UA_PNPM_VERSION="10.6.2"' .devcontainer/install-understand-anything.sh
           ! grep -E 'git (clone|checkout|pull).* (main|master)([[:space:]]|$)' .devcontainer/install-understand-anything.sh
-
-      - name: Verify project governance
-        run: python3 scripts/verify_project_os.py
 
       - name: Confirm Codespaces base image exists
         run: docker pull mcr.microsoft.com/devcontainers/base:ubuntu-24.04

@@ -35,7 +35,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: foundation-visual-${{ github.ref }}
+  group: foundation-visual-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 permissions:
