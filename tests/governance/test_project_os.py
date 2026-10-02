@@ -55,7 +55,7 @@ class RegistryTests(unittest.TestCase):
                     "design/DESIGN_AUTHORITY.md", "reference/README.md", "docs/roadmap/VERTICAL_SLICES.md",
                     "docs/engineering/DELIVERY_CONTRACT.md", "docs/roadmap/ROADMAP_GOVERNANCE.md", "docs/operations/ACCEPTANCE_GATES.md",
                     "docs/operations/DEPENDENCY_POLICY.md", "docs/operations/ENVIRONMENT_POLICY.md",
-                    "docs/operations/GITHUB_WORK_MANAGEMENT.md", "governance/GITHUB_WORK_MANAGEMENT.json",
+                    "docs/operations/GITHUB_WORK_MANAGEMENT.md",
                     ".github/agents/test.agent.md",
                     "docs/research/README.md", "governance/schemas/research.schema.json",
                     "governance/schemas/infrastructure.schema.json"):
