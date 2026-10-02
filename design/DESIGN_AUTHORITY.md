@@ -1,11 +1,11 @@
 # SongChart Next — Design Authority
 
-**Status: Foundation baseline candidate prepared; visual identity and rendered page baselines are NOT YET APPROVED.** Do not import prior SongChart visual styling as default. The project owner approved a new SongChart Next identity direction and Foundation scope of Shell + Artist + Search first; concrete rendered references still require visual review before lifecycle promotion.
+**Status: Foundation baseline approved on 2026-10-02 for VS-01a.** The approved threshold is sufficiently consistent, responsive, accessible and stable; this is not a final-brand-polish claim. Do not import prior SongChart visual styling as default.
 
 ## Decision priority
 Approved brand/design decisions -> semantic tokens -> approved component contracts -> page/pattern contracts -> linked reference screenshots/stories -> feature implementation. A design-tool prototype or AI-generated image is a candidate until approved and linked to code/baseline.
 
-## Current candidate assets
+## Current approved Foundation assets
 - `design/IDENTITY.md`
 - `design/tokens/foundation.json`
 - `design/patterns/SHELL.md`
@@ -14,7 +14,7 @@ Approved brand/design decisions -> semantic tokens -> approved component contrac
 - `design/patterns/RELEASE.md`
 - `design/baselines/FOUNDATION.md`
 
-These define the review surface but do not by themselves satisfy the rendered mobile+desktop approval gate.
+These assets, together with the reviewed narrow/wide evidence and decision record in `design/decisions/FOUNDATION_BASELINE_APPROVAL.md`, define the approved Foundation baseline.
 
 ## Required authored assets
 - design/IDENTITY.md: brand goals, prohibited motifs, typography/artwork principles, content tone.
@@ -30,5 +30,5 @@ Identify target surface -> retrieve owning requirements, tokens, related compone
 ## Cross-platform
 React web, Filament and future Flutter share identity, tokens, semantics and information hierarchy, not necessarily the same rendering/component implementation. Never equate screenshot similarity with accessibility or correct domain disclosure.
 
-## Approval gate
-Before first public UI: approve identity, semantic token values, responsive navigation/global shell, Artist/Search patterns and Foundation-level Release pattern, plus at least one narrow and one wide rendered baseline using deterministic fixtures. Until then visually novel UI is a proposal, not the SongChart style.
+## Approval state
+The Foundation gate is approved for VS-01a. Material changes to global layout, font, palette, page anatomy or accessibility behavior still require the normal Design Authority review loop and a new/updated decision record. Later Release/provider/admin/mobile surfaces remain separately scoped.
