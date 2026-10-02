@@ -40,6 +40,7 @@ def verify():
         "CAPABILITY_MAP.json", "TECHNOLOGY_REGISTRY.json", "ACTIVATION_TRIGGERS.json"
     ))
     research, infra = load("RESEARCH_REGISTRY.json"), load("INFRASTRUCTURE_REGISTRY.json")
+    work = load("GITHUB_WORK_MANAGEMENT.json")
     caps = cmap["capabilities"]
     capids = [c["id"] for c in caps]
     unique(capids, "capability IDs")
@@ -141,11 +142,35 @@ def verify():
         if i["status"] == "deployed":
             check(i["environment"] == "production", f"{i['id']}: deployed must be production")
 
+    labels = work["issue_labels"]["required"]
+    label_names = [item["name"] for item in labels]
+    unique(label_names, "GitHub work-management labels")
+    check(all(re.fullmatch(r"(type|area|priority|state|risk):[a-z0-9][a-z0-9-]*", name) for name in label_names),
+          "GitHub work-management labels must use approved namespaces")
+    check(work["issue_labels"]["constraints"].get("priority_is_human_decision") is True,
+          "GitHub priority must remain a human decision")
+    check(work["issue_labels"]["constraints"].get("capability_lifecycle_authority") == "governance/CAPABILITY_MAP.json",
+          "GitHub work management cannot own capability lifecycle")
+    project = work["github_project"]
+    check(project.get("owner") == "fusumivietnam" and project.get("number") == 2,
+          "GitHub Project projection target changed")
+    required_fields = ["Slice", "Capability", "Execution", "Gate", "Decision", "Evidence"]
+    check(project.get("required_fields") == required_fields, "GitHub Project required field contract drift")
+    unique(project.get("required_views", []), "GitHub Project required views")
+    agents = work["agents"]
+    check(agents.get("activation") == "dormant-until-eligible-copilot-plan",
+          "agent activation must not imply an enabled Copilot service")
+    for profile in agents.get("profiles", []):
+        text = local_file(profile).read_text(encoding="utf-8")
+        check("disable-model-invocation: true" in text, f"{profile}: automatic model invocation must stay disabled")
+        check("dormant-until-eligible-copilot-plan" in text, f"{profile}: missing dormant activation marker")
+
     for reference in (
         "AGENTS.md", "docs/product/PRODUCT_CHARTER.md", "docs/architecture/ARCHITECTURE.md",
         "design/DESIGN_AUTHORITY.md", "reference/README.md", "docs/roadmap/VERTICAL_SLICES.md",
         "docs/engineering/DELIVERY_CONTRACT.md", "docs/roadmap/ROADMAP_GOVERNANCE.md", "docs/operations/ACCEPTANCE_GATES.md",
         "docs/operations/DEPENDENCY_POLICY.md", "docs/operations/ENVIRONMENT_POLICY.md",
+        "docs/operations/GITHUB_WORK_MANAGEMENT.md", "governance/GITHUB_WORK_MANAGEMENT.json",
         "docs/research/README.md", "governance/schemas/research.schema.json",
         "governance/schemas/infrastructure.schema.json",
     ):
