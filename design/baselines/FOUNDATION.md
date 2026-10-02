@@ -1,6 +1,6 @@
 # Foundation rendered baseline checklist
 
-Status: candidate contract; rendered evidence still required before Issue #10 can close.
+Status: approved Foundation baseline contract, 2026-10-02. Issue #10 records owner approval; Issue #23 records the technical evidence packet.
 
 ## Deterministic fixtures
 Review at minimum:
@@ -40,7 +40,7 @@ The preview uses deterministic fixture copy only. It does not read or mutate can
 
 `.github/workflows/foundation-visual.yml` now verifies two deliberately separate review paths. The `local-review-contract` job executes `scripts/design_review.sh` against the normal Compose `app` + PostgreSQL development runtime and asserts that no legacy preview container is created. The `render` job uses the CI-only `scripts/foundation_visual_ci.sh` on a clean GitHub-hosted runner to build static assets, serve the local-only preview, verify reverse-proxy asset generation, capture exact 390 × 844 and 1440 × 1024 PNG references, and upload the PNG files plus rendered DOM and evidence manifest as a 30-day artifact.
 
-The workflow runs for relevant pull requests, relevant pushes to `main`, and manual dispatches. It records the exact evaluated SHA as evidence provenance. Passing automation proves the local review command is operational and the candidate renders deterministically in a real headless browser at the required reference sizes. It does **not** approve token values, hierarchy, responsive behavior, accessibility, or the `design-authority` lifecycle state. Human keyboard/focus review and owner visual approval on Issue #10 remain required.
+The workflow runs for relevant pull requests, relevant pushes to `main`, and manual dispatches. It records the exact evaluated SHA as evidence provenance. Passing automation proves the local review command is operational and the baseline renders deterministically in a real headless browser at the required reference sizes. The Foundation owner approval is recorded separately in Issue #10 and `design/decisions/FOUNDATION_BASELINE_APPROVAL.md`; CI alone never grants approval.
 
 This verification intentionally adds no browser-test package or second design-system runtime to the application dependency graph. If browser automation later becomes a maintained product test suite rather than Foundation evidence capture, adopt and register that tooling through the dependency policy first.
 
@@ -51,4 +51,4 @@ This verification intentionally adds no browser-test package or second design-sy
 3. Capture at exactly 390 × 844 CSS px and 1440 × 1024 CSS px.
 4. Record the exact Git commit SHA, route, viewport and review date with each screenshot/reference.
 5. Verify visible keyboard focus, skip link behavior, long-name wrapping, no-artwork layout, and search empty/error semantics.
-6. Human approval or requested changes are recorded on Issue #10 before any `design-authority` lifecycle promotion.
+6. Material baseline changes after approval require a new or updated Design Authority decision and evidence review.
