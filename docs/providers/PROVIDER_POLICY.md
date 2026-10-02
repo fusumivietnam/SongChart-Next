@@ -36,7 +36,7 @@ Metadata, artwork and media destinations are separate provider responsibilities.
 SongChart links to permitted listening/viewing destinations by default and does not redistribute audio/video unless a later explicit product/legal decision says otherwise.
 
 ## MusicBrainz activation
-MusicBrainz-shaped deterministic fixtures are permitted for VS-01a contract/testing. Live MusicBrainz HTTP integration belongs to VS-01b and requires the provider-specific policy review, quota/rate-limit behavior and raw-evidence retention decision before activation.
+MusicBrainz-shaped deterministic fixtures are permitted for VS-01a contract/testing. Live MusicBrainz HTTP integration belongs to VS-01b. The current provider-specific candidate review is [MusicBrainz provider-specific policy](MUSICBRAINZ.md); it records the reviewed rate-limit/licensing/privacy boundaries while intentionally leaving raw-evidence retention duration and commercial hosted-service posture as owner decisions before live activation.
 
 ## Canonical merge/split
 Provider identifiers can support identity resolution but are not SongChart canonical IDs. Merge/split must preserve history/redirects, pass deterministic domain validation and receive appropriate review. Provider or AI confidence alone never approves a canonical merge.
