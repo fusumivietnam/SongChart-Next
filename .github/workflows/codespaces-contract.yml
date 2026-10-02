@@ -99,3 +99,15 @@ jobs:
 
       - name: Confirm Codespaces base image exists
         run: docker pull mcr.microsoft.com/devcontainers/base:ubuntu-24.04
+
+      - name: Build authored devcontainer with declared features
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --version
+          npm --version
+          npx --yes @devcontainers/cli@0.83.3 build \
+            --workspace-folder . \
+            --config .devcontainer/devcontainer.json \
+            --log-level trace \
+            --log-format text
