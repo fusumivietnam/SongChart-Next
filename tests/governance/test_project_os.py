@@ -29,15 +29,42 @@ class RegistryTests(unittest.TestCase):
             "schema_version": 1, "project": "SongChart-Next", "research": []}))
         self.root.joinpath("governance").joinpath("INFRASTRUCTURE_REGISTRY.json").write_text(json.dumps({
             "schema_version": 1, "project": "SongChart-Next", "instances": []}))
+        self.root.joinpath("governance").joinpath("GITHUB_WORK_MANAGEMENT.json").write_text(json.dumps({
+            "schema_version": 1, "project": "SongChart-Next",
+            "issue_labels": {
+                "required": [
+                    {"name": "type:governance", "description": "governance"},
+                    {"name": "priority:p2", "description": "normal"}
+                ],
+                "constraints": {
+                    "priority_is_human_decision": True,
+                    "capability_lifecycle_authority": "governance/CAPABILITY_MAP.json"
+                }
+            },
+            "github_project": {
+                "owner": "fusumivietnam", "number": 2,
+                "required_fields": ["Slice", "Capability", "Execution", "Gate", "Decision", "Evidence"],
+                "required_views": ["Delivery Board"]
+            },
+            "agents": {
+                "activation": "dormant-until-eligible-copilot-plan",
+                "profiles": [".github/agents/test.agent.md"]
+            }
+        }))
         for ref in ("AGENTS.md", "docs/product/PRODUCT_CHARTER.md", "docs/architecture/ARCHITECTURE.md",
                     "design/DESIGN_AUTHORITY.md", "reference/README.md", "docs/roadmap/VERTICAL_SLICES.md",
                     "docs/engineering/DELIVERY_CONTRACT.md", "docs/roadmap/ROADMAP_GOVERNANCE.md", "docs/operations/ACCEPTANCE_GATES.md",
                     "docs/operations/DEPENDENCY_POLICY.md", "docs/operations/ENVIRONMENT_POLICY.md",
+                    "docs/operations/GITHUB_WORK_MANAGEMENT.md",
+                    ".github/agents/test.agent.md",
                     "docs/research/README.md", "governance/schemas/research.schema.json",
                     "governance/schemas/infrastructure.schema.json"):
             p = self.root / ref
             p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text("test")
+            if ref == ".github/agents/test.agent.md":
+                p.write_text("disable-model-invocation: true\nsongchart-status: dormant-until-eligible-copilot-plan\n")
+            else:
+                p.write_text("test")
         verify.ROOT = self.root
         verify.GOV = self.root / "governance"
 

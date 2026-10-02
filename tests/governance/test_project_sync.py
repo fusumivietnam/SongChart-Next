@@ -37,6 +37,8 @@ class ProjectSyncTests(unittest.TestCase):
         self.assertIn("Cross-cutting", specs["Slice"]["options"])
         self.assertIn("project-os", specs["Capability"]["options"])
         self.assertEqual(specs["Evidence"]["type"], "TEXT")
+        self.assertIn("Executive Roadmap", sync.required_views())
+        self.assertIn("Delivery Board", sync.required_views())
 
 if __name__ == "__main__":
     unittest.main()

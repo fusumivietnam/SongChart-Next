@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "project": "SongChart-Next",
+  "authority": "governance/GITHUB_WORK_MANAGEMENT.json",
+  "purpose": "Stable GitHub execution taxonomy and projection contract. This file does not own capability lifecycle, roadmap scope, verification, or deployment state.",
+  "issue_labels": {
+    "policy": "Labels classify and route work. They never promote capability lifecycle or replace structured Project fields.",
+    "required": [
+      {"name": "type:bug", "description": "Defect in implemented behavior or project tooling"},
+      {"name": "type:feature", "description": "Bounded product or platform implementation work"},
+      {"name": "type:governance", "description": "Project authority, contracts, registries or process"},
+      {"name": "type:research", "description": "Research/evaluation only; not implementation approval"},
+      {"name": "type:maintenance", "description": "Dependency, CI, documentation or operational maintenance"},
+      {"name": "area:architecture", "description": "Architecture, boundaries and ADR ownership"},
+      {"name": "area:backend", "description": "Laravel/domain/application backend"},
+      {"name": "area:frontend", "description": "Public web frontend implementation"},
+      {"name": "area:data", "description": "Canonical data, migrations or data contracts"},
+      {"name": "area:design", "description": "Design Authority, tokens, patterns or visual evidence"},
+      {"name": "area:infra", "description": "Development, CI or deployment infrastructure"},
+      {"name": "area:docs", "description": "Documentation-only change"},
+      {"name": "priority:p0", "description": "Immediate project-stopping priority; human assigned"},
+      {"name": "priority:p1", "description": "High priority; human assigned"},
+      {"name": "priority:p2", "description": "Normal priority; human assigned"},
+      {"name": "priority:p3", "description": "Low priority; human assigned"},
+      {"name": "state:blocked", "description": "Execution is blocked by an explicit dependency"},
+      {"name": "state:needs-decision", "description": "Owner/human decision is required"},
+      {"name": "state:needs-evidence", "description": "Implementation exists but required evidence is incomplete"},
+      {"name": "risk:security", "description": "Security-sensitive change or review"},
+      {"name": "risk:data-migration", "description": "Canonical or persistent data migration risk"},
+      {"name": "risk:breaking-change", "description": "Compatibility or contract-breaking risk"}
+    ],
+    "constraints": {
+      "max_type_labels_per_item": 1,
+      "max_priority_labels_per_item": 1,
+      "priority_is_human_decision": true,
+      "execution_state_authority": "live Issues/PRs plus scripts/roadmap_health.py",
+      "capability_lifecycle_authority": "governance/CAPABILITY_MAP.json"
+    }
+  },
+  "milestones": {
+    "policy": "Milestones represent delivery checkpoints or release objectives, not capabilities, areas, priorities or verification claims.",
+    "naming_examples": [
+      "FOUNDATION",
+      "VS-01 Artist fixture-first",
+      "Public Alpha",
+      "2026-Q4 Foundation"
+    ],
+    "forbidden_semantics": [
+      "capability lifecycle",
+      "area taxonomy",
+      "priority taxonomy",
+      "verified/deployed evidence"
+    ]
+  },
+  "github_project": {
+    "owner": "fusumivietnam",
+    "number": 2,
+    "authority": "derived projection only",
+    "required_fields": ["Slice", "Capability", "Execution", "Gate", "Decision", "Evidence"],
+    "optional_fields": ["Start", "Target"],
+    "required_views": [
+      "Executive Roadmap",
+      "Delivery Board",
+      "Capability Matrix",
+      "Decision Queue",
+      "Verification / Release Gates"
+    ],
+    "optional_views": [
+      "Blocked / Risk",
+      "Recently Completed"
+    ]
+  },
+  "agents": {
+    "policy": "Agent profiles are repository-owned instructions only. Their presence does not mean the service is enabled or that any agent action is verified.",
+    "activation": "dormant-until-eligible-copilot-plan",
+    "profiles": [
+      ".github/agents/roadmap-governor.agent.md",
+      ".github/agents/implementation.agent.md",
+      ".github/agents/architecture-reviewer.agent.md",
+      ".github/agents/quality-gate.agent.md"
+    ],
+    "rules": [
+      "Agents must read repository authority before acting.",
+      "Agents must work through bounded Issues and pull requests.",
+      "Agents must not mutate capability lifecycle from Project or Issue state.",
+      "Agents must not merge, deploy, rotate secrets or perform destructive actions without explicit human authorization.",
+      "Agents must report proposed, approved, implemented, verified and deployed as distinct states."
+    ]
+  }
+}

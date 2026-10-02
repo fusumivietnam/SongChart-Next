@@ -21,6 +21,7 @@ except ModuleNotFoundError:  # Direct execution: python3 scripts/project_sync.py
 
 ROOT = Path(__file__).resolve().parents[1]
 CAPABILITY_MAP = ROOT / "governance" / "CAPABILITY_MAP.json"
+WORK_MANAGEMENT = ROOT / "governance" / "GITHUB_WORK_MANAGEMENT.json"
 
 FIELD_SPECS = {
     "Slice": {"type": "SINGLE_SELECT"},
@@ -36,13 +37,16 @@ FIELD_SPECS = {
     },
     "Evidence": {"type": "TEXT"},
 }
-REQUIRED_VIEWS = [
-    "Executive Roadmap",
-    "Delivery Board",
-    "Capability Matrix",
-    "Decision Queue",
-    "Verification / Release Gates",
-]
+def load_work_management():
+    data = json.loads(WORK_MANAGEMENT.read_text(encoding="utf-8"))
+    if data.get("schema_version") != 1 or data.get("project") != "SongChart-Next":
+        raise RuntimeError("invalid GitHub work-management contract")
+    return data
+
+
+def required_views():
+    return list(load_work_management()["github_project"]["required_views"])
+
 META_GATE_RE = re.compile(r"\*\*Project Gate:\*\*\s*(G[0-5]|none)", re.I)
 META_DECISION_RE = re.compile(
     r"\*\*Project Decision:\*\*\s*(None|Owner decision required|Approved|Rejected)",
@@ -420,7 +424,7 @@ def reconcile(project_token, read_token, repo, owner, number, dry_run=False):
             "dry_run": True,
             "schema_gaps": schema_gaps,
             "desired_items": len(desired),
-            "required_views_missing": sorted(set(REQUIRED_VIEWS) - {v["name"] for v in project["views"]["nodes"]}),
+            "required_views_missing": sorted(set(required_views()) - {v["name"] for v in project["views"]["nodes"]}),
             "changes": [],
         }
 
@@ -463,7 +467,7 @@ def reconcile(project_token, read_token, repo, owner, number, dry_run=False):
         "desired_items": len(desired),
         "mutations": mutations,
         "changes": changes,
-        "required_views_missing": sorted(set(REQUIRED_VIEWS) - {v["name"] for v in project["views"]["nodes"]}),
+        "required_views_missing": sorted(set(required_views()) - {v["name"] for v in project["views"]["nodes"]}),
         "authority": "derived projection only; repository + live Issues/PRs remain authoritative",
     }
 
