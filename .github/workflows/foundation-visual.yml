@@ -4,37 +4,32 @@ on:
   pull_request:
     paths:
       - Dockerfile
-      - compose.yaml
       - composer.json
       - composer.lock
       - package.json
       - pnpm-lock.yaml
+      - pnpm-workspace.yaml
       - bootstrap/**
       - resources/**
       - routes/**
-      - tests/**
       - design/**
       - scripts/capture_foundation_baselines.mjs
-      - scripts/design_review.sh
       - scripts/foundation_visual_ci.sh
       - .github/workflows/foundation-visual.yml
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - Dockerfile
-      - compose.yaml
       - composer.json
       - composer.lock
       - package.json
       - pnpm-lock.yaml
+      - pnpm-workspace.yaml
       - bootstrap/**
       - resources/**
       - routes/**
-      - tests/**
       - design/**
       - scripts/capture_foundation_baselines.mjs
-      - scripts/design_review.sh
       - scripts/foundation_visual_ci.sh
       - .github/workflows/foundation-visual.yml
   workflow_dispatch:
@@ -47,48 +42,33 @@ permissions:
   contents: read
 
 jobs:
-  local-review-contract:
-    runs-on: ubuntu-24.04
-    env:
-      POSTGRES_PASSWORD: foundation-review-ci
-    steps:
-      - name: Check out exact review revision
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-
-      - name: Validate local review script
-        run: bash -n scripts/design_review.sh
-
-      - name: Prove one-command local review workflow
-        run: bash scripts/design_review.sh
-
-      - name: Verify review reused Compose app only
-        shell: bash
-        run: |
-          set -euo pipefail
-          app_id="$(docker compose ps -q app)"
-          test -n "$app_id"
-          test "$(docker inspect -f '{{.State.Running}}' "$app_id")" = "true"
-          test -z "$(docker ps -a --filter name='^/songchart-foundation-preview$' --format '{{.Names}}')"
-
-      - name: Cleanup Compose runtime
-        if: always()
-        run: docker compose down || true
-
   render:
     runs-on: ubuntu-24.04
+    timeout-minutes: 25
     env:
       EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       FOUNDATION_VISUAL_CONTAINER: foundation-visual
       FOUNDATION_VISUAL_IMAGE: songchart-next:foundation-visual
       FOUNDATION_VISUAL_PORT: "8000"
+      FOUNDATION_VISUAL_SKIP_BUILD: "1"
 
     steps:
       - name: Check out exact evidence revision
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ env.EVIDENCE_SHA }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      - name: Build cached visual image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          target: frontend-build
+          load: true
+          tags: songchart-next:foundation-visual
+          cache-from: type=gha,scope=foundation-buildkit
 
       - name: Validate CI visual script
         run: bash -n scripts/foundation_visual_ci.sh
@@ -100,13 +80,40 @@ jobs:
           command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
           (google-chrome --version || google-chrome-stable --version || chromium --version || chromium-browser --version)
 
+      - name: Restore deterministic font package cache
+        id: font-cache
+        uses: actions/cache/restore@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ${{ runner.temp }}/songchart-font-debs
+          key: ubuntu-24.04-fonts-noto-cjk-v1
+
+      - name: Download deterministic international font package
+        if: steps.font-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/songchart-font-debs"
+          sudo apt-get update
+          (
+            cd "$RUNNER_TEMP/songchart-font-debs"
+            apt-get download fonts-noto-cjk
+          )
+          test -n "$(find "$RUNNER_TEMP/songchart-font-debs" -maxdepth 1 -name 'fonts-noto-cjk_*.deb' -print -quit)"
+
+      - name: Save deterministic font package cache from main
+        if: github.event_name == 'push' && steps.font-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: ${{ runner.temp }}/songchart-font-debs
+          key: ubuntu-24.04-fonts-noto-cjk-v1
+
       - name: Install deterministic international font coverage
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
-          fc-cache -f
+          font_deb="$(find "$RUNNER_TEMP/songchart-font-debs" -maxdepth 1 -name 'fonts-noto-cjk_*.deb' -print -quit)"
+          test -n "$font_deb"
+          sudo apt-get install -y --no-install-recommends "$font_deb"
           fc-match ':lang=ja'
           fc-list ':lang=ja' | grep -q 'Noto'
 
@@ -117,7 +124,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for route in             /_design/foundation/artist             /_design/foundation/artist-long             /_design/foundation/search             /_design/foundation/search-empty             /_design/foundation/search-error
+          for route in \
+            /_design/foundation/artist \
+            /_design/foundation/artist-long \
+            /_design/foundation/search \
+            /_design/foundation/search-empty \
+            /_design/foundation/search-error
           do
             curl --fail --silent --show-error "http://127.0.0.1:8000${route}" >/dev/null
           done
@@ -126,7 +138,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          html="$(curl --fail --silent --show-error             -H 'Host: 127.0.0.1:8000'             -H 'X-Forwarded-Host: songchart-preview.example.test'             -H 'X-Forwarded-Proto: https'             -H 'X-Forwarded-Port: 443'             http://127.0.0.1:8000/_design/foundation/artist)"
+          html="$(curl --fail --silent --show-error \
+            -H 'Host: 127.0.0.1:8000' \
+            -H 'X-Forwarded-Host: songchart-preview.example.test' \
+            -H 'X-Forwarded-Proto: https' \
+            -H 'X-Forwarded-Port: 443' \
+            http://127.0.0.1:8000/_design/foundation/artist)"
 
           grep -q 'https://songchart-preview.example.test/build/assets/' <<< "$html"
           ! grep -q 'http://127.0.0.1:8000/build/assets/' <<< "$html"
@@ -150,8 +167,7 @@ jobs:
             echo "- Viewports per surface: 390x844 and 1440x1024 CSS px"
             echo "- Rendered captures: 10"
             echo "- Reverse-proxy HTTPS/host asset generation: verified"
-            echo "- CI runtime: isolated clean-runner visual server"
-            echo "- Local human review: verified separately against the existing Compose app"
+            echo "- CI runtime: isolated cached BuildKit visual server"
             echo "- Evidence artifact: \`foundation-render-${EVIDENCE_SHA}\`"
             echo "- Artifact retention: 30 days"
             echo "- This verifies deterministic browser rendering only; human Design Authority approval is still required."

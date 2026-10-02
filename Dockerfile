@@ -36,23 +36,35 @@ FROM app-source AS development
 EXPOSE 8000 5173
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
 
-FROM app-source AS build-deps
-RUN composer install --prefer-dist --no-interaction --no-progress \
+# Resolve package payloads from lockfiles before application source is copied.
+# BuildKit can therefore reuse this layer when source changes but lockfiles do not.
+FROM php-toolchain AS build-dependency-cache
+COPY composer.json composer.lock package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN composer install --prefer-dist --no-interaction --no-progress --no-scripts --no-autoloader \
     && pnpm install --frozen-lockfile
+
+FROM build-dependency-cache AS build-deps
+COPY . .
+RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
+    && composer dump-autoload --optimize --no-interaction
 
 FROM build-deps AS frontend-build
 RUN pnpm run build && pnpm run types:check
 
-FROM php-runtime AS production-deps
+FROM php-runtime AS production-vendor-cache
 COPY --from=composer-bin /usr/bin/composer /usr/local/bin/composer
-COPY composer.json composer.lock artisan ./
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --no-scripts --no-autoloader
+
+FROM production-vendor-cache AS production-deps
+COPY artisan ./
 COPY app ./app
 COPY bootstrap ./bootstrap
 COPY config ./config
 COPY database ./database
 COPY routes ./routes
 RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
-    && composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader \
+    && composer dump-autoload --no-dev --optimize --no-interaction \
     && composer check-platform-reqs \
     && rm -rf /root/.composer/cache
 

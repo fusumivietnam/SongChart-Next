@@ -87,9 +87,12 @@
       "id": "github-actions",
       "capability": "project-os",
       "source": "https://github.com/features/actions",
-      "status": "candidate",
-      "version_authority": "workflow action SHA",
-      "license_review": "workflow action review required"
+      "status": "implemented",
+      "version_authority": "Workflow action commit SHAs pinned in .github/workflows/; actions/cache v5.1.0 pinned at caa296126883cff596d87d8935842f9db880ef25 where used",
+      "license_review": "GitHub Actions service terms apply; third-party workflow actions require pinned-SHA license/provenance review; reviewed actions/cache v5.1.0 revision is MIT",
+      "implementation": ".github/workflows/project-governance.yml",
+      "decision": "docs/adr/ADR-0009-actions-trigger-cache-ownership.md",
+      "scope": "Repository CI/controller automation with required governance/verify/health checks, path-owned heavy verification and exact-main evidence."
     },
     {
       "id": "renovate",
@@ -210,6 +213,17 @@
       "implementation": "scripts/project_sync.py",
       "decision": "docs/adr/ADR-0008-github-project-v2-projection-sync.md",
       "scope": "User Project #2 is an automated human-facing projection of repository roadmap authority and live Issues/PRs; never a lifecycle or evidence authority."
+    },
+    {
+      "id": "docker-buildx-actions-cache",
+      "capability": "local-docker-development",
+      "source": "https://github.com/docker/build-push-action",
+      "status": "implemented",
+      "version_authority": "Pinned docker/setup-buildx-action v4.3.0 SHA 37fe631027851001ddb9b187196cc803df7f5f0e and docker/build-push-action v7.4.0 SHA c3c9e263c25d99ce0380d002d59b67737d91b0dc",
+      "license_review": "Apache-2.0 verified at both reviewed pinned revisions; GitHub Actions cache service quotas/terms apply",
+      "implementation": ".github/workflows/foundation-app.yml",
+      "decision": "docs/adr/ADR-0009-actions-trigger-cache-ownership.md",
+      "scope": "CI-only BuildKit layer cache in one `foundation-buildkit` scope. Pull requests and secondary workflows read; the relevant main Foundation production build is the sole mode=max writer. Cache is never version or acceptance authority."
     }
   ]
 }

@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, closed, ready_for_review, converted_to_draft, edited]
   issues:
-    types: [opened, edited, closed, reopened, labeled, unlabeled]
+    types: [opened, edited, closed, reopened]
   push:
     branches: [main]
     paths:
@@ -38,6 +38,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
+          set -o pipefail
           python3 scripts/roadmap_health.py \
             --live-github \
             --fail-on-error \
