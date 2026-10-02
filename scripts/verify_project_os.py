@@ -147,10 +147,28 @@ def verify():
     unique(label_names, "GitHub work-management labels")
     check(all(re.fullmatch(r"(type|area|priority|state|risk):[a-z0-9][a-z0-9-]*", name) for name in label_names),
           "GitHub work-management labels must use approved namespaces")
+    check(all(re.fullmatch(r"[0-9a-fA-F]{6}", item.get("color", "")) for item in labels),
+          "GitHub work-management labels must declare six-digit colors")
     check(work["issue_labels"]["constraints"].get("priority_is_human_decision") is True,
           "GitHub priority must remain a human decision")
     check(work["issue_labels"]["constraints"].get("capability_lifecycle_authority") == "governance/CAPABILITY_MAP.json",
           "GitHub work management cannot own capability lifecycle")
+    label_reconciliation = work["issue_labels"].get("reconciliation", {})
+    check(label_reconciliation.get("mode") == "create-or-update-declared-only" and
+          label_reconciliation.get("delete_unmanaged") is False and
+          label_reconciliation.get("credential") == "GITHUB_TOKEN with issues:write",
+          "GitHub label reconciliation must stay least-privilege and non-destructive")
+    milestones = work["milestones"]
+    check(isinstance(milestones.get("managed"), list), "managed milestones must be an explicit list")
+    milestone_titles = [item.get("title") for item in milestones["managed"]]
+    unique(milestone_titles, "managed milestone titles")
+    check(all(isinstance(title, str) and title.strip() for title in milestone_titles),
+          "managed milestone title missing")
+    milestone_reconciliation = milestones.get("reconciliation", {})
+    check(milestone_reconciliation.get("mode") == "create-or-update-explicit-managed-only" and
+          milestone_reconciliation.get("delete_unmanaged") is False and
+          milestone_reconciliation.get("credential") == "GITHUB_TOKEN with issues:write",
+          "GitHub milestone reconciliation must stay explicit, least-privilege and non-destructive")
     project = work["github_project"]
     check(project.get("owner") == "fusumivietnam" and project.get("number") == 2,
           "GitHub Project projection target changed")
