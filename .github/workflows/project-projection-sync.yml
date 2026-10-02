@@ -32,7 +32,8 @@ concurrency:
 
 jobs:
   sync:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
     steps:
       # Always execute trusted code from main. pull_request_target must never
       # check out an untrusted PR head because this job may receive a PAT.
