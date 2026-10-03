@@ -35,6 +35,9 @@
       "visibility": "private"
     }
   },
+  "remoteEnv": {
+    "LOCAL_WORKSPACE_FOLDER": "${localWorkspaceFolder}"
+  },
   "onCreateCommand": "bash .devcontainer/prebuild.sh",
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "postStartCommand": "bash .devcontainer/post-start.sh",
