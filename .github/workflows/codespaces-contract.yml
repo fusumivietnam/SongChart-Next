@@ -63,6 +63,8 @@ jobs:
 
       - name: Validate Codespaces Docker bind contract
         shell: bash
+        env:
+          POSTGRES_PASSWORD: ci-local-only-not-a-secret
         run: |
           set -euo pipefail
           grep -F '${LOCAL_WORKSPACE_FOLDER:-.}:/var/www/html' compose.yaml
