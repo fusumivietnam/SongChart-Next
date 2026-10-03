@@ -6,6 +6,8 @@ Status: repository-owned Codespaces configuration is optional developer infrastr
 
 The repository uses `.devcontainer/devcontainer.json` so Codespaces no longer has to infer a generic universal environment. The Codespaces shell intentionally contains only the tooling needed to operate the repository and its Docker Compose runtime. PHP, Node, pnpm, Composer and PostgreSQL remain owned by the project Docker images rather than the host shell.
 
+Because the Codespaces shell uses Docker-outside-of-Docker, bind mounts are resolved by the external Docker daemon against the host workspace path, not the `/workspaces/...` path visible inside the devcontainer. `.devcontainer/devcontainer.json` therefore exports Dev Containers' `${localWorkspaceFolder}` as `LOCAL_WORKSPACE_FOLDER`, and `compose.yaml` uses `${LOCAL_WORKSPACE_FOLDER:-.}` for the application source bind. The fallback preserves normal local Docker usage outside Codespaces.
+
 ## Automatic lifecycle
 
 On creation/prebuild, `.devcontainer/prebuild.sh` is a blocking devcontainer-owned check only: it verifies the declared shell/features and shell syntax. Project OS/governance verification remains in GitHub CI and is deliberately not allowed to make Codespaces creation depend on an undeclared host interpreter such as Python.
@@ -36,6 +38,8 @@ bash scripts/codespaces_doctor.sh
 
 The doctor is read-only/non-destructive: it reports Git, disk, Docker, Compose, app health and GitHub CLI state without printing project secrets.
 
+If the Compose `app` exits with `Composer could not find a composer.json file in /var/www/html`, inspect its source mount before deleting volumes. In Codespaces, the mount source must resolve to the host workspace path supplied through `LOCAL_WORKSPACE_FOLDER`; recreating the app container alone cannot repair an incorrect bind source.
+
 If the creation log only shows a successful `--expect-existing-container` / `docker start` sequence while the UI says recovery mode, that log is the recovery container starting, not proof that the configured devcontainer built successfully. After a repository fix, run **Codespaces: Rebuild Container** (prefer **Full Rebuild** when a stale prebuild/container snapshot is suspected). If container creation repeatedly fails or the Codespace cannot leave the stopping/failed state, prefer deleting that broken Codespace and creating a fresh one from current `main`. Source changes must already be committed/pushed before deletion. Do not repair a failed Codespace by deleting SongChart database volumes unless data loss is explicitly accepted.
 
 ## Prebuilds
@@ -56,7 +60,6 @@ The Codespaces shell may recreate disposable Compose containers through existing
 - run production deployment;
 - rotate production secrets;
 - mutate canonical product data.
-
 
 ## Understand Anything developer analysis
 
