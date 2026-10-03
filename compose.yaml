@@ -36,7 +36,7 @@ services:
       - "127.0.0.1:8000:8000"
       - "127.0.0.1:5173:5173"
     volumes:
-      - ./:/var/www/html
+      - ${LOCAL_WORKSPACE_FOLDER:-.}:/var/www/html
       - composer_vendor:/var/www/html/vendor
       - pnpm_node_modules:/var/www/html/node_modules
     healthcheck:

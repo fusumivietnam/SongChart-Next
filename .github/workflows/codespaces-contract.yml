@@ -57,8 +57,21 @@ jobs:
           jq -e '.features["ghcr.io/devcontainers/features/docker-outside-of-docker:1"] != null' .devcontainer/devcontainer.json >/dev/null
           jq -e '.features["ghcr.io/devcontainers/features/github-cli:1"] != null' .devcontainer/devcontainer.json >/dev/null
           jq -e '.features["ghcr.io/devcontainers/features/node:1"].version == "22"' .devcontainer/devcontainer.json >/dev/null
+          jq -e '.remoteEnv.LOCAL_WORKSPACE_FOLDER == "${localWorkspaceFolder}"' .devcontainer/devcontainer.json >/dev/null
           jq -e '.forwardPorts | index(5174) != null' .devcontainer/devcontainer.json >/dev/null
           jq -e '.hostRequirements.cpus >= 4 and .hostRequirements.memory == "8gb" and .hostRequirements.storage == "32gb"' .devcontainer/devcontainer.json >/dev/null
+
+      - name: Validate Codespaces Docker bind contract
+        shell: bash
+        env:
+          POSTGRES_PASSWORD: ci-local-only-not-a-secret
+        run: |
+          set -euo pipefail
+          grep -F '${LOCAL_WORKSPACE_FOLDER:-.}:/var/www/html' compose.yaml
+          LOCAL_WORKSPACE_FOLDER="$PWD" docker compose config --quiet
+          rendered="$(LOCAL_WORKSPACE_FOLDER="$PWD" docker compose config)"
+          grep -F "$PWD" <<< "$rendered"
+          grep -F 'target: /var/www/html' <<< "$rendered"
 
       - name: Validate lifecycle scripts
         shell: bash
