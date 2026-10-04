@@ -11,13 +11,13 @@ return new class extends Migration
     {
         Schema::create('provider_request_gates', function (Blueprint $table): void {
             $table->string('provider')->primary();
-            $table->timestampTz('next_allowed_at')->nullable();
+            $table->unsignedBigInteger('next_allowed_at_ms')->nullable();
             $table->timestampsTz();
         });
 
         DB::table('provider_request_gates')->insert([
             'provider' => 'musicbrainz',
-            'next_allowed_at' => null,
+            'next_allowed_at_ms' => null,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
