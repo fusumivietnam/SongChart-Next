@@ -141,7 +141,7 @@ jobs:
 
       - name: Preserve VS-01a browser evidence
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: vs01a-artist-${{ env.EVIDENCE_SHA }}
           path: artifacts/vs01a-artist/
