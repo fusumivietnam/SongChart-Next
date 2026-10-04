@@ -12,6 +12,13 @@ final class ArtistPageTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->withoutVite();
+    }
+
     public function test_public_artist_page_renders_typed_canonical_read_view(): void
     {
         $artist = app(ImportArtist::class)->handle($this->claim());
