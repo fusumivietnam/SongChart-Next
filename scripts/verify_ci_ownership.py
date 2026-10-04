@@ -17,6 +17,7 @@ EXPECTED = {
     "project-os.yml",
     "project-projection-sync.yml",
     "roadmap-health.yml",
+    "vs01a-artist.yml",
     "work-management-sync.yml",
 }
 RETIRED = {"docker-scaffold.yml"}
@@ -27,6 +28,7 @@ PR_MAIN_EVIDENCE = {
     "foundation-visual.yml",
     "project-governance.yml",
     "project-os.yml",
+    "vs01a-artist.yml",
 }
 
 
