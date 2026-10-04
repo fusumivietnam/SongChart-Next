@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Music\Providers\DatabaseProviderRequestGate;
+use App\Music\Providers\ProviderDelay;
+use App\Music\Providers\ProviderRequestGate;
+use App\Music\Providers\SystemProviderDelay;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -15,7 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(ProviderDelay::class, SystemProviderDelay::class);
+        $this->app->bind(ProviderRequestGate::class, DatabaseProviderRequestGate::class);
     }
 
     /**

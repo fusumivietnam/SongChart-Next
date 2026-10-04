@@ -23,7 +23,7 @@
       "license_review": "required",
       "decision": "docs/adr/ADR-0003-foundation-runtime.md",
       "implementation": "composer.json",
-      "scope": "Laravel 13 family installed from composer.lock on main as the accepted Foundation runtime baseline; canonical music domain implementation remains separate."
+      "scope": "Laravel 13 family installed from composer.lock on main as the accepted Foundation runtime baseline; SongChart-owned Artist domain/application source is implemented separately under app/Music/Artists."
     },
     {
       "id": "laravel-react-starter",
@@ -45,7 +45,7 @@
       "license_review": "required",
       "decision": "docs/adr/ADR-0003-foundation-runtime.md",
       "implementation": "package.json",
-      "scope": "Installed frontend framework baseline on main; Design Authority approval remains separate."
+      "scope": "Installed frontend framework baseline on main; approved SongChart Artist page is implemented under the Design Authority boundary."
     },
     {
       "id": "filament",
@@ -64,7 +64,7 @@
       "license_review": "required",
       "decision": "docs/adr/ADR-0003-foundation-runtime.md",
       "implementation": "compose.yaml",
-      "scope": "PostgreSQL 18.6 development baseline with new postgres18_data volume; no PG17 in-place volume migration"
+      "scope": "PostgreSQL 18.6 development baseline with canonical Artist/external-identity persistence and VS-01b provider coordination/evidence tables; production restore/deployment gates remain separate."
     },
     {
       "id": "meilisearch",
@@ -229,11 +229,12 @@
       "id": "musicbrainz-web-service",
       "capability": "provider-adapters",
       "source": "https://musicbrainz.org/doc/MusicBrainz_API",
-      "status": "candidate",
+      "status": "implemented",
       "version_authority": "MusicBrainz Web Service v2 public API contract and provider-specific reviewed source URLs in docs/providers/MUSICBRAINZ.md",
-      "license_review": "Core MusicBrainz data is CC0; supplementary data is excluded pending separate rights review. Hosted web-service commercial use requires owner decision/commercial-plan review before commercial production.",
-      "implementation": "docs/providers/MUSICBRAINZ.md",
-      "scope": "Candidate VS-01b read-only metadata provider. Meaningful User-Agent; global <=1 request/second; bounded 503 backoff/jitter; core/CC0 fields only; no Cover Art Archive; persistent raw-response archival and commercial production remain blocked pending owner decision."
+      "license_review": "Core MusicBrainz data is CC0; supplementary data and Cover Art Archive are excluded. Owner B2 approves development/testing/bounded non-commercial evaluation only; commercial/public production remains blocked pending a recorded MetaBrainz commercial-support/licensing posture.",
+      "implementation": "app/Music/Providers/MusicBrainz/MusicBrainzArtistClient.php",
+      "decision": "docs/adr/ADR-0012-vs-01b-musicbrainz-adapter-and-evidence.md",
+      "scope": "VS-01b read-only Artist metadata provider behind SongChart contracts. Meaningful User-Agent; PostgreSQL deployment-wide >=1 second spacing; bounded 503 backoff/jitter; core/CC0 normalized fields only; content-addressed evidence with 30-day success and 7-day error/malformed retention; live access disabled by default; no automatic CI/live probe; no commercial production approval."
     }
   ]
 }
