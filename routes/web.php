@@ -1,8 +1,13 @@
 <?php
 
+use App\Http\Controllers\ArtistController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
+
+Route::get('artists/{artist}/{slug?}', ArtistController::class)
+    ->whereUlid('artist')
+    ->name('artists.show');
 
 if (app()->environment(['local', 'testing'])) {
     Route::inertia('_design/foundation/artist', 'design/foundation-preview', [
