@@ -103,7 +103,7 @@ jobs:
 
       - name: Verify provider source types
         shell: bash
-        run: docker compose exec -T app ./vendor/bin/phpstan analyse app/Music/Providers app/Console/Commands/FetchMusicBrainzArtistCommand.php app/Console/Commands/PurgeProviderEvidenceCommand.php --no-progress
+        run: docker compose exec -T app ./vendor/bin/phpstan analyse app/Music/Providers app/Console/Commands/FetchMusicBrainzArtistCommand.php app/Console/Commands/PurgeProviderEvidenceCommand.php --no-progress --memory-limit=512M
 
       - name: Confirm live network remains disabled in CI
         shell: bash
