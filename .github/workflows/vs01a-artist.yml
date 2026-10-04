@@ -95,6 +95,7 @@ jobs:
             app php artisan test \
               tests/Unit/MusicBrainzArtistNormalizerTest.php \
               tests/Feature/ArtistImportTest.php \
+              tests/Feature/ArtistFixtureCommandTest.php \
               tests/Feature/ArtistPageTest.php
 
       - name: Build production-style frontend assets
