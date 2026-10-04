@@ -10,14 +10,15 @@ ROADMAP = ROOT / "docs" / "roadmap" / "VERTICAL_SLICES.md"
 
 
 class DesignAuthorityApprovalTests(unittest.TestCase):
-    def test_design_authority_is_approved_without_public_web_promotion(self):
+    def test_design_authority_remains_approved_after_first_public_web_implementation(self):
         data = json.loads(CAPS.read_text(encoding="utf-8"))
         caps = {item["id"]: item for item in data["capabilities"]}
         design = caps["design-authority"]
         self.assertEqual(design["status"], "approved")
         self.assertEqual(design["implementation"], "design/DESIGN_AUTHORITY.md")
         self.assertEqual(design["decision"], "design/decisions/FOUNDATION_BASELINE_APPROVAL.md")
-        self.assertEqual(caps["public-web"]["status"], "candidate")
+        self.assertEqual(caps["public-web"]["status"], "implemented")
+        self.assertIn("Artist", caps["public-web"]["scope"])
 
     def test_approved_docs_do_not_claim_final_polish_or_product_completion(self):
         authority = DESIGN.read_text(encoding="utf-8")
@@ -26,7 +27,7 @@ class DesignAuthorityApprovalTests(unittest.TestCase):
         self.assertIn("Foundation baseline approved", authority)
         self.assertIn("not a final-brand-polish claim", authority)
         self.assertIn("sufficiently consistent, responsive, accessible and stable", decision)
-        self.assertIn("does not imply VS-01a implementation", roadmap)
+        self.assertIn("Broader MVP public journey remains incomplete", roadmap)
         self.assertNotIn("NOT YET APPROVED", authority)
 
 
