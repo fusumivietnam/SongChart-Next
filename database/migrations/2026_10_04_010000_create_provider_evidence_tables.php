@@ -23,12 +23,13 @@ return new class extends Migration
         ]);
 
         Schema::create('provider_evidence_blobs', function (Blueprint $table): void {
-            $table->char('payload_hash', 64)->primary();
             $table->string('provider');
+            $table->char('payload_hash', 64);
             $table->text('payload');
             $table->timestampTz('expires_at');
             $table->timestampsTz();
 
+            $table->primary(['provider', 'payload_hash']);
             $table->index(['provider', 'expires_at']);
         });
 
@@ -44,8 +45,8 @@ return new class extends Migration
             $table->timestampTz('expires_at');
             $table->timestampsTz();
 
-            $table->foreign('payload_hash')
-                ->references('payload_hash')
+            $table->foreign(['provider', 'payload_hash'])
+                ->references(['provider', 'payload_hash'])
                 ->on('provider_evidence_blobs')
                 ->nullOnDelete();
             $table->index(['provider', 'fetched_at']);
