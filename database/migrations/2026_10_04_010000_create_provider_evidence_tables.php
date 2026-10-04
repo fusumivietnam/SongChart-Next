@@ -48,7 +48,7 @@ return new class extends Migration
             $table->foreign(['provider', 'payload_hash'])
                 ->references(['provider', 'payload_hash'])
                 ->on('provider_evidence_blobs')
-                ->nullOnDelete();
+                ->restrictOnDelete();
             $table->index(['provider', 'fetched_at']);
             $table->index('expires_at');
         });
