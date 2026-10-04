@@ -12,7 +12,8 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `project-projection-sync.yml` | serialized Project #2 field/item projection | read-only repository token + `PROJECT_SYNC_TOKEN` |
 | `work-management-sync.yml` | declared labels and explicitly managed milestones | contents read + issues write; no Project PAT |
 | `foundation-app.yml` | Docker app/PostgreSQL/tests/audit/SBOM/production-target evidence | contents read |
-| `foundation-visual.yml` | deterministic render evidence | contents read |
+| `foundation-visual.yml` | deterministic Foundation design render evidence | contents read |
+| `vs01a-artist.yml` | VS-01a canonical Artist PostgreSQL integration, canonical URL and narrow/wide browser evidence | contents read |
 | `design-review-contract.yml` | one-command local Design Authority review contract | contents read |
 | `codespaces-contract.yml` | devcontainer/Codespaces developer-shell contract | contents read |
 
@@ -30,6 +31,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 8. `PROJECT_SYNC_TOKEN` is available only to `project-projection-sync.yml`.
 9. Work-management reconciliation gets only `issues: write` plus `contents: read`, is serialized, and never receives the Project PAT.
 10. Mutating projection workflows are serialized rather than cancelled mid-write.
+11. Foundation runtime evidence and VS-01a product-slice evidence have separate workflow owners; neither workflow may silently become the other's lifecycle authority.
 
 ## Automated drift check
 
