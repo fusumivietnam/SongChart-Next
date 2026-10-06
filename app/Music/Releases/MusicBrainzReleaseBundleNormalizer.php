@@ -13,24 +13,7 @@ final class MusicBrainzReleaseBundleNormalizer
         $group = $this->entity($payload['release-group'] ?? null, 'release-group');
         $release = $this->entity($payload['release'] ?? null, 'release');
         $date = $this->partialDate($release['date'] ?? null);
-
-        $credits = [];
-        foreach ($payload['artist-credit'] ?? [] as $index => $credit) {
-            if (! is_array($credit) || ! is_array($credit['artist'] ?? null)) {
-                throw new InvalidArgumentException('Artist credit must contain an artist object.');
-            }
-            $artistId = (string) ($credit['artist']['id'] ?? '');
-            if (! Str::isUuid($artistId)) {
-                throw new InvalidArgumentException('Artist credit id must be a UUID.');
-            }
-            $credits[] = [
-                'artist_external_id' => strtolower($artistId),
-                'credited_as' => trim((string) ($credit['name'] ?? $credit['artist']['name'] ?? '')),
-                'join_phrase' => (string) ($credit['joinphrase'] ?? ''),
-                'role' => 'primary',
-                'position' => $index + 1,
-            ];
-        }
+        $credits = $this->credits($payload['artist-credit'] ?? [], 'release');
 
         $media = [];
         foreach ($payload['media'] ?? [] as $medium) {
@@ -64,6 +47,7 @@ final class MusicBrainzReleaseBundleNormalizer
                         'title' => (string) $recording['title'],
                         'length_ms' => isset($recording['length']) ? (int) $recording['length'] : null,
                         'disambiguation' => $this->nullableString($recording['disambiguation'] ?? null),
+                        'credits' => $this->credits($recording['artist-credit'] ?? [], 'recording'),
                         'isrcs' => $isrcs,
                         'work' => $work === null ? null : [
                             'external_id' => strtolower((string) $work['id']),
@@ -103,6 +87,32 @@ final class MusicBrainzReleaseBundleNormalizer
             credits: $credits,
             media: $media,
         );
+    }
+
+    /** @return list<array{artist_external_id:string,credited_as:string,join_phrase:string,role:string,position:int}> */
+    private function credits(mixed $value, string $label): array
+    {
+        if (! is_array($value)) {
+            throw new InvalidArgumentException("{$label} artist-credit must be an array.");
+        }
+        $credits = [];
+        foreach ($value as $index => $credit) {
+            if (! is_array($credit) || ! is_array($credit['artist'] ?? null)) {
+                throw new InvalidArgumentException("{$label} artist credit must contain an artist object.");
+            }
+            $artistId = (string) ($credit['artist']['id'] ?? '');
+            if (! Str::isUuid($artistId)) {
+                throw new InvalidArgumentException("{$label} artist credit id must be a UUID.");
+            }
+            $credits[] = [
+                'artist_external_id' => strtolower($artistId),
+                'credited_as' => $this->requiredString($credit['name'] ?? $credit['artist']['name'] ?? null, "{$label}.credited_as"),
+                'join_phrase' => (string) ($credit['joinphrase'] ?? ''),
+                'role' => 'primary',
+                'position' => $index + 1,
+            ];
+        }
+        return $credits;
     }
 
     /** @return array<string,mixed> */
