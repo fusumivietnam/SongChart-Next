@@ -19,6 +19,7 @@ EXPECTED = {
     "roadmap-health.yml",
     "vs01a-artist.yml",
     "vs01b-musicbrainz.yml",
+    "vs02-release-recording.yml",
     "work-management-sync.yml",
 }
 RETIRED = {"docker-scaffold.yml"}
@@ -31,6 +32,7 @@ PR_MAIN_EVIDENCE = {
     "project-os.yml",
     "vs01a-artist.yml",
     "vs01b-musicbrainz.yml",
+    "vs02-release-recording.yml",
 }
 
 
