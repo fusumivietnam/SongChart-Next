@@ -46,7 +46,7 @@ final class ReleaseRecordingPageTest extends TestCase
                 ->where('release.media.0.tracks.1.recording_title', 'Northern Static'));
     }
 
-    public function test_recording_page_exposes_isrc_work_and_release_relationship(): void
+    public function test_recording_page_exposes_credit_isrc_work_and_release_relationship(): void
     {
         ['recording' => $recording] = $this->fixture();
         $this->get(route('recordings.show', ['recording' => $recording->id, 'slug' => $recording->slug]))
@@ -54,6 +54,7 @@ final class ReleaseRecordingPageTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('recordings/show')
                 ->where('recording.id', $recording->id)
+                ->where('recording.credits.0.credited_as', 'Aster Echo')
                 ->where('recording.isrcs.0', 'FIABC2400001')
                 ->where('recording.works.0.title', 'Signals at Dawn')
                 ->where('recording.releases.0.title', 'Signals at Dawn'));
