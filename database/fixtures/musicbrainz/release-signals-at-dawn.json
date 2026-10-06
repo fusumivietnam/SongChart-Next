@@ -36,6 +36,16 @@
             "id": "33333333-3333-4333-8333-333333333333",
             "title": "Signals at Dawn",
             "length": 252000,
+            "artist-credit": [
+              {
+                "artist": {
+                  "id": "8f3a5f22-4d6b-4d3f-9a62-4ca0f36a2a10",
+                  "name": "Aster Echo"
+                },
+                "name": "Aster Echo",
+                "joinphrase": ""
+              }
+            ],
             "isrcs": ["FIABC2400001"],
             "work": {
               "id": "55555555-5555-4555-8555-555555555555",
@@ -53,6 +63,16 @@
             "id": "44444444-4444-4444-8444-444444444444",
             "title": "Northern Static",
             "length": 201000,
+            "artist-credit": [
+              {
+                "artist": {
+                  "id": "8f3a5f22-4d6b-4d3f-9a62-4ca0f36a2a10",
+                  "name": "Aster Echo"
+                },
+                "name": "Aster Echo",
+                "joinphrase": ""
+              }
+            ],
             "isrcs": ["FIABC2400002"]
           }
         }
