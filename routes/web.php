@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ArtistController;
+use App\Http\Controllers\RecordingController;
+use App\Http\Controllers\ReleaseController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -8,6 +10,14 @@ Route::inertia('/', 'welcome')->name('home');
 Route::get('artists/{artist}/{slug?}', ArtistController::class)
     ->whereUlid('artist')
     ->name('artists.show');
+
+Route::get('releases/{release}/{slug?}', ReleaseController::class)
+    ->whereUlid('release')
+    ->name('releases.show');
+
+Route::get('recordings/{recording}/{slug?}', RecordingController::class)
+    ->whereUlid('recording')
+    ->name('recordings.show');
 
 if (app()->environment(['local', 'testing'])) {
     Route::inertia('_design/foundation/artist', 'design/foundation-preview', [
