@@ -37,7 +37,9 @@ final class ReleaseBundleImportTest extends TestCase
         $this->assertDatabaseCount('works', 1);
         $this->assertDatabaseCount('release_media', 1);
         $this->assertDatabaseCount('release_tracks', 2);
-        $this->assertDatabaseCount('entity_credits', 1);
+        $this->assertDatabaseCount('entity_credits', 3);
+        $this->assertDatabaseHas('entity_credits', ['subject_type' => 'release', 'credited_as' => 'Aster Echo', 'position' => 1]);
+        $this->assertSame(2, DB::table('entity_credits')->where('subject_type', 'recording')->count());
         $this->assertDatabaseCount('recording_work', 1);
         $this->assertDatabaseCount('recording_isrcs', 2);
         $this->assertSame('month', $release->date_precision);
@@ -63,7 +65,7 @@ final class ReleaseBundleImportTest extends TestCase
         $this->assertDatabaseCount('recordings', 2);
         $this->assertDatabaseCount('works', 1);
         $this->assertDatabaseCount('release_tracks', 2);
-        $this->assertDatabaseCount('entity_credits', 1);
+        $this->assertDatabaseCount('entity_credits', 3);
     }
 
     public function test_same_title_with_different_provider_id_does_not_merge_release(): void
