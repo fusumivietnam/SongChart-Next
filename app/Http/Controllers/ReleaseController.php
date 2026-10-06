@@ -10,7 +10,7 @@ use Inertia\Response;
 
 final class ReleaseController
 {
-    public function __invoke(Release $release, ?string $slug, ReleaseReadView $view): Response|RedirectResponse
+    public function __invoke(Release $release, ReleaseReadView $view, ?string $slug = null): Response|RedirectResponse
     {
         if ($slug !== $release->slug) {
             return redirect()->route('releases.show', ['release' => $release->id, 'slug' => $release->slug], 301);
