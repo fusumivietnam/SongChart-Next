@@ -37,28 +37,7 @@ final class ImportReleaseBundle
                 'barcode' => $claim->release['barcode'],
             ]);
 
-            DB::table('entity_credits')->where('subject_type', 'release')->where('subject_id', $release->getKey())->delete();
-            foreach ($claim->credits as $credit) {
-                $artistIdentity = ExternalIdentity::query()
-                    ->where('provider', 'musicbrainz')
-                    ->where('entity_type', 'artist')
-                    ->where('external_id', $credit['artist_external_id'])
-                    ->first();
-                if ($artistIdentity === null) {
-                    throw new RuntimeException('Release credit references an Artist that has not been admitted yet.');
-                }
-                DB::table('entity_credits')->insert([
-                    'subject_type' => 'release',
-                    'subject_id' => $release->getKey(),
-                    'artist_id' => $artistIdentity->artist_id,
-                    'role' => $credit['role'],
-                    'credited_as' => $credit['credited_as'],
-                    'join_phrase' => $credit['join_phrase'],
-                    'position' => $credit['position'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            }
+            $this->replaceCredits('release', (string) $release->getKey(), $claim->credits);
 
             DB::table('release_media')->where('release_id', $release->getKey())->delete();
             foreach ($claim->media as $mediumData) {
@@ -81,6 +60,8 @@ final class ImportReleaseBundle
                         'length_ms' => $recordingData['length_ms'],
                         'disambiguation' => $recordingData['disambiguation'],
                     ]);
+
+                    $this->replaceCredits('recording', (string) $recording->getKey(), $recordingData['credits']);
 
                     foreach ($recordingData['isrcs'] as $isrc) {
                         DB::table('recording_isrcs')->updateOrInsert(
@@ -120,6 +101,34 @@ final class ImportReleaseBundle
 
             return $release->fresh() ?? $release;
         });
+    }
+
+    /** @param list<array{artist_external_id:string,credited_as:string,join_phrase:string,role:string,position:int}> $credits */
+    private function replaceCredits(string $subjectType, string $subjectId, array $credits): void
+    {
+        DB::table('entity_credits')->where('subject_type', $subjectType)->where('subject_id', $subjectId)->delete();
+
+        foreach ($credits as $credit) {
+            $artistIdentity = ExternalIdentity::query()
+                ->where('provider', 'musicbrainz')
+                ->where('entity_type', 'artist')
+                ->where('external_id', $credit['artist_external_id'])
+                ->first();
+            if ($artistIdentity === null) {
+                throw new RuntimeException(ucfirst($subjectType).' credit references an Artist that has not been admitted yet.');
+            }
+            DB::table('entity_credits')->insert([
+                'subject_type' => $subjectType,
+                'subject_id' => $subjectId,
+                'artist_id' => $artistIdentity->artist_id,
+                'role' => $credit['role'],
+                'credited_as' => $credit['credited_as'],
+                'join_phrase' => $credit['join_phrase'],
+                'position' => $credit['position'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
     }
 
     /**
