@@ -10,7 +10,7 @@ use Inertia\Response;
 
 final class RecordingController
 {
-    public function __invoke(Recording $recording, ?string $slug, RecordingReadView $view): Response|RedirectResponse
+    public function __invoke(Recording $recording, RecordingReadView $view, ?string $slug = null): Response|RedirectResponse
     {
         if ($slug !== $recording->slug) {
             return redirect()->route('recordings.show', ['recording' => $recording->id, 'slug' => $recording->slug], 301);
