@@ -5,6 +5,17 @@ import { resolve } from 'node:path';
 const baseUrl = process.env.VS03_BASE_URL ?? 'http://127.0.0.1:8000';
 const evidenceDir = resolve(process.env.VS03_EVIDENCE_DIR ?? 'artifacts/vs03-search');
 const evidenceSha = process.env.VS03_EVIDENCE_SHA ?? 'unknown';
+const artistPath = process.env.VS03_ARTIST_PATH;
+const releasePath = process.env.VS03_RELEASE_PATH;
+const recordingPath = process.env.VS03_RECORDING_PATH;
+
+for (const [name, path, prefix] of [
+    ['VS03_ARTIST_PATH', artistPath, '/artists/'],
+    ['VS03_RELEASE_PATH', releasePath, '/releases/'],
+    ['VS03_RECORDING_PATH', recordingPath, '/recordings/'],
+]) {
+    if (!path?.startsWith(prefix)) throw new Error(`${name} must be a canonical ${prefix} path.`);
+}
 
 const viewports = [
     { width: 390, height: 844, label: 'narrow' },
@@ -14,13 +25,33 @@ const viewports = [
 const surfaces = [
     {
         label: 'results',
-        path: '/search?q=Signals%20at%20Dawn',
-        expected: ['SongChart Next', 'Music knowledge results', 'Signals at Dawn', 'Release', 'Recording'],
+        path: '/search?q=Aster%20Echo',
+        expected: ['SongChart Next', 'Music knowledge results', 'Aster Echo', 'Artist'],
+        expectedLinks: [artistPath],
+    },
+    {
+        label: 'artist',
+        path: artistPath,
+        expected: ['SongChart Next', 'Aster Echo', 'Releases and relationships', 'Signals at Dawn', '2024'],
+        expectedLinks: [releasePath],
+    },
+    {
+        label: 'release',
+        path: releasePath,
+        expected: ['SongChart Next', 'Signals at Dawn', 'Tracklist', 'Recording: Signals at Dawn'],
+        expectedLinks: [recordingPath],
+    },
+    {
+        label: 'recording',
+        path: recordingPath,
+        expected: ['SongChart Next', 'Signals at Dawn', 'Works', 'Appears on releases'],
+        expectedLinks: [releasePath],
     },
     {
         label: 'empty',
         path: '/search?q=definitely-not-canonical',
         expected: ['SongChart Next', 'Music knowledge results', 'No results', 'Unknown data is not replaced with guessed matches'],
+        expectedLinks: [],
     },
 ];
 
@@ -45,7 +76,7 @@ function pngDimensions(path) {
 mkdirSync(evidenceDir, { recursive: true });
 const chromePath = findChrome();
 const browserVersion = spawnSync(chromePath, ['--version'], { encoding: 'utf8' }).stdout.trim();
-const evidence = { schemaVersion: 1, sourceRevision: evidenceSha, browser: browserVersion, generatedAt: new Date().toISOString(), captures: [] };
+const evidence = { schemaVersion: 2, sourceRevision: evidenceSha, browser: browserVersion, generatedAt: new Date().toISOString(), journey: [artistPath, releasePath, recordingPath], captures: [] };
 
 for (const surface of surfaces) {
     const url = new URL(surface.path, baseUrl).toString();
@@ -60,6 +91,9 @@ for (const surface of surfaces) {
 
         for (const text of surface.expected) {
             if (!dom.includes(text)) throw new Error(`${surface.label} did not hydrate expected text: ${text}`);
+        }
+        for (const path of surface.expectedLinks) {
+            if (!dom.includes(`href="${path}"`)) throw new Error(`${surface.label} is missing canonical journey link: ${path}`);
         }
         if (!dom.includes('role="search"')) throw new Error(`${surface.label} is missing the search landmark.`);
         if (!dom.includes('Skip to content')) throw new Error(`${surface.label} is missing the skip link.`);
