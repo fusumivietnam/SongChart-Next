@@ -6,32 +6,39 @@ on:
       - .github/workflows/pnpm-lock-refresh.yml
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   refresh:
     runs-on: ubuntu-24.04
     env:
       EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
     steps:
       - name: Check out exact branch revision
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: ${{ env.EVIDENCE_SHA }}
+          ref: ${{ env.HEAD_BRANCH }}
       - name: Activate repository pnpm
         shell: bash
         run: |
           corepack enable
           corepack prepare pnpm@10.17.1 --activate
           pnpm --version
-      - name: Regenerate lockfile from manifest overrides
+      - name: Regenerate and verify lockfile
         shell: bash
         run: |
           pnpm install --lockfile-only --no-frozen-lockfile
           grep -q "shell-quote@1.11.0" pnpm-lock.yaml
           grep -q "source-map-js@1.2.2" pnpm-lock.yaml
-      - name: Upload regenerated lockfile
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: pnpm-lock-refresh-${{ env.EVIDENCE_SHA }}
-          path: pnpm-lock.yaml
-          retention-days: 1
+          ! grep -q "shell-quote@1.9.0" pnpm-lock.yaml
+          ! grep -q "source-map-js@1.2.1" pnpm-lock.yaml
+      - name: Commit generated lockfile and remove temporary workflow
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          rm .github/workflows/pnpm-lock-refresh.yml
+          git add package.json pnpm-lock.yaml .github/workflows/pnpm-lock-refresh.yml
+          git diff --cached --check
+          git commit -m "fix: refresh pnpm lockfile after security overrides"
+          git push origin "HEAD:${HEAD_BRANCH}"
