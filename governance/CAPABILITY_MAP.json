@@ -106,17 +106,21 @@
         "canonical-music-core"
       ],
       "implementation": "resources/js/pages",
-      "scope": "VS-01a and VS-02 implement responsive public Artist, Release and Recording read pages with canonical SongChart ID+slug routes and stale-slug redirects under the approved Foundation Design Authority. Discovery/search, editorial/legal surfaces and the broader MVP public journey remain incomplete.",
+      "scope": "VS-01a and VS-02 implement responsive public Artist, Release and Recording read pages with canonical SongChart ID+slug routes and stale-slug redirects. VS-03a adds the primary home/search discovery entry over canonical PostgreSQL Artist, Release and Recording data with deterministic exact/prefix/substring ranking, disambiguated mixed-entity results, bounded query behavior and canonical entity links. Dedicated search-index activation, official destination policy, editorial/legal surfaces and the broader MVP public journey remain incomplete.",
       "verification_evidence": {
         "type": "github-actions",
-        "pr": 76,
-        "head_sha": "161311e989d9c0e120b0cf2a9f3649b59b92c900",
-        "merge_sha": "f47a41b708ff91682c052d68b7d0a2c6e00833bc",
+        "pr": 81,
+        "head_sha": "4726f121956fc11e146073f8c3bb17232f97bfc3",
+        "merge_sha": "6203fd637d388021484462be293292b0b2b42d83",
         "workflows": [
-          "VS-02 Release Recording verification #37814711361",
-          "VS-01a Artist verification #37814711403",
-          "Foundation visual render verification #37814711491",
-          "Design review contract #37814711377"
+          "VS-03a discovery search verification #37817361759",
+          "Foundation application checks #37817361781",
+          "Foundation visual render verification #37817361649",
+          "VS-02 Release Recording verification #37817361659",
+          "VS-01a Artist verification #37817361579",
+          "Project governance #37817361739",
+          "Project OS contracts #37817361546",
+          "Roadmap health #37817361532"
         ],
         "verified_at": "2026-10-08"
       }
