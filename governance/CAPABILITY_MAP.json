@@ -25,13 +25,29 @@
       "id": "canonical-music-core",
       "plane": "domain",
       "owner": "songchart",
-      "status": "implemented",
+      "status": "verified",
       "depends_on": [
         "product-scope"
       ],
-      "implementation": "app/Music/Artists",
-      "scope": "VS-01a implements canonical Artist identity/admission with SongChart ULIDs and stable external-identity resolution. Release/Recording/Credits remain future slices.",
-      "decision": "docs/adr/ADR-0011-vs-01a-artist-identity-and-persistence.md"
+      "implementation": "app/Music",
+      "scope": "VS-01a and VS-02 implement canonical Artist, Work, Recording, Release and Release Group identities with SongChart ULIDs, stable external-identity resolution, explicit Recording-to-Work relationships and ordered structured credits. Search/API activation, live Release/Recording provider traffic and later canonical domains remain separate capabilities/slices. Model decisions are recorded by ADR-0011 and ADR-0013.",
+      "decision": "docs/adr/ADR-0013-vs-02-release-recording-credits-model.md",
+      "verification_evidence": {
+        "type": "github-actions",
+        "pr": 76,
+        "head_sha": "161311e989d9c0e120b0cf2a9f3649b59b92c900",
+        "merge_sha": "f47a41b708ff91682c052d68b7d0a2c6e00833bc",
+        "workflows": [
+          "VS-02 Release Recording verification #37814711361",
+          "Foundation application checks #37814711371",
+          "VS-01a Artist verification #37814711403",
+          "Foundation visual render verification #37814711491",
+          "Design review contract #37814711377",
+          "Project governance #37814711391",
+          "Project OS contracts #37814711605"
+        ],
+        "verified_at": "2026-10-08"
+      }
     },
     {
       "id": "provider-adapters",
@@ -84,13 +100,26 @@
       "id": "public-web",
       "plane": "experience",
       "owner": "songchart",
-      "status": "implemented",
+      "status": "verified",
       "depends_on": [
         "design-authority",
         "canonical-music-core"
       ],
-      "implementation": "resources/js/pages/artists/show.tsx",
-      "scope": "VS-01a implements the first responsive public Artist read page and canonical ID+slug route. Broader MVP public journey remains incomplete."
+      "implementation": "resources/js/pages",
+      "scope": "VS-01a and VS-02 implement responsive public Artist, Release and Recording read pages with canonical SongChart ID+slug routes and stale-slug redirects under the approved Foundation Design Authority. Discovery/search, editorial/legal surfaces and the broader MVP public journey remain incomplete.",
+      "verification_evidence": {
+        "type": "github-actions",
+        "pr": 76,
+        "head_sha": "161311e989d9c0e120b0cf2a9f3649b59b92c900",
+        "merge_sha": "f47a41b708ff91682c052d68b7d0a2c6e00833bc",
+        "workflows": [
+          "VS-02 Release Recording verification #37814711361",
+          "VS-01a Artist verification #37814711403",
+          "Foundation visual render verification #37814711491",
+          "Design review contract #37814711377"
+        ],
+        "verified_at": "2026-10-08"
+      }
     },
     {
       "id": "admin-review",
@@ -107,13 +136,26 @@
       "id": "canonical-database",
       "plane": "data",
       "owner": "postgresql",
-      "status": "implemented",
+      "status": "verified",
       "depends_on": [
         "canonical-music-core"
       ],
-      "implementation": "database/migrations/2026_10_04_000000_create_artists_and_external_identities_tables.php",
-      "scope": "VS-01a instantiates canonical Artist and external identity persistence on PostgreSQL 18.6. Backup/restore and production persistence gates remain separate.",
-      "decision": "docs/adr/ADR-0011-vs-01a-artist-identity-and-persistence.md"
+      "implementation": "database/migrations",
+      "scope": "VS-01a and VS-02 instantiate canonical Artist, Work, Recording, Release, Release Group, release structure, credits, relationships and external identity persistence on PostgreSQL 18.6 with idempotent deterministic fixture import and integrity constraints. Backup/restore and production persistence gates remain separate.",
+      "decision": "docs/adr/ADR-0013-vs-02-release-recording-credits-model.md",
+      "verification_evidence": {
+        "type": "github-actions",
+        "pr": 76,
+        "head_sha": "161311e989d9c0e120b0cf2a9f3649b59b92c900",
+        "merge_sha": "f47a41b708ff91682c052d68b7d0a2c6e00833bc",
+        "workflows": [
+          "VS-02 Release Recording verification #37814711361",
+          "Foundation application checks #37814711371",
+          "Project governance #37814711391",
+          "Project OS contracts #37814711605"
+        ],
+        "verified_at": "2026-10-08"
+      }
     },
     {
       "id": "internal-jobs",
