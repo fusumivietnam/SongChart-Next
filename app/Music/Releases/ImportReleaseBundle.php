@@ -148,6 +148,7 @@ final class ImportReleaseBundle
             ->first();
 
         if ($identity !== null) {
+            /** @var TModel $model */
             $model = $modelClass::query()->findOrFail($identity->canonical_id);
             $model->fill($attributes)->save();
             return $model;
