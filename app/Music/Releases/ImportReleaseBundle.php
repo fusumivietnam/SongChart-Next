@@ -132,9 +132,11 @@ final class ImportReleaseBundle
     }
 
     /**
+     * @template TModel of Model
      * @param array<string,mixed> $source
-     * @param class-string<Model> $modelClass
+     * @param class-string<TModel> $modelClass
      * @param array<string,mixed> $attributes
+     * @return TModel
      */
     private function resolveEntity(string $canonicalType, array $source, string $modelClass, array $attributes): Model
     {
