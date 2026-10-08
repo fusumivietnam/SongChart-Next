@@ -134,7 +134,23 @@ jobs:
         run: docker compose exec -T app composer audit --locked --no-interaction
 
       - name: Audit production pnpm dependencies
-        run: docker compose exec -T app pnpm audit --prod --audit-level=high
+        shell: bash
+        run: |
+          set +e
+          docker compose exec -T app pnpm audit --prod --audit-level=high --json > pnpm-audit.json
+          audit_status=$?
+          set -e
+          cat pnpm-audit.json
+          exit "$audit_status"
+
+      - name: Preserve pnpm audit diagnostics
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: foundation-pnpm-audit-${{ github.sha }}
+          path: pnpm-audit.json
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Record dependency audit evidence
         run: echo "Locked Composer and production pnpm vulnerability audits passed; license inventories are retained as a review artifact." >> "$GITHUB_STEP_SUMMARY"
