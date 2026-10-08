@@ -20,6 +20,7 @@ EXPECTED = {
     "vs01a-artist.yml",
     "vs01b-musicbrainz.yml",
     "vs02-release-recording.yml",
+    "vs03-discovery-search.yml",
     "work-management-sync.yml",
 }
 RETIRED = {"docker-scaffold.yml"}
@@ -33,6 +34,7 @@ PR_MAIN_EVIDENCE = {
     "vs01a-artist.yml",
     "vs01b-musicbrainz.yml",
     "vs02-release-recording.yml",
+    "vs03-discovery-search.yml",
 }
 
 
