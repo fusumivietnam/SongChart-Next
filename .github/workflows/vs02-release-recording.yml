@@ -114,8 +114,8 @@ jobs:
           recording_path="$(docker compose exec -T app php -r '
             require "vendor/autoload.php";
             $app = require "bootstrap/app.php";
-            $app->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap();
-            $r = App\\Models\\Recording::query()->where("title", "Signals at Dawn")->firstOrFail();
+            $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+            $r = App\Models\Recording::query()->where("title", "Signals at Dawn")->firstOrFail();
             echo route("recordings.show", ["recording" => $r->id, "slug" => $r->slug], false);
           ' | tr -d '\r')"
           [[ "$recording_path" == /recordings/* ]]
