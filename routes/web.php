@@ -3,9 +3,11 @@
 use App\Http\Controllers\ArtistController;
 use App\Http\Controllers\RecordingController;
 use App\Http\Controllers\ReleaseController;
+use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 
-Route::inertia('/', 'welcome')->name('home');
+Route::get('/', SearchController::class)->name('home');
+Route::get('search', SearchController::class)->name('search');
 
 Route::get('artists/{artist}/{slug?}', ArtistController::class)
     ->whereUlid('artist')
