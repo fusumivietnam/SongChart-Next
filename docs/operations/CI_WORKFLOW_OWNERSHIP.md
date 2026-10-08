@@ -15,6 +15,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `foundation-visual.yml` | deterministic Foundation design render evidence | contents read |
 | `vs01a-artist.yml` | VS-01a canonical Artist PostgreSQL integration, canonical URL and narrow/wide browser evidence | contents read |
 | `vs01b-musicbrainz.yml` | VS-01b MusicBrainz adapter contracts, evidence retention and deployment-wide request-spacing verification on PostgreSQL; never automatic live provider traffic | contents read |
+| `vs02-release-recording.yml` | VS-02 Release/Recording/Credits canonical relationships, PostgreSQL integration, canonical redirects and narrow/wide browser evidence | contents read |
 | `design-review-contract.yml` | one-command local Design Authority review contract | contents read |
 | `codespaces-contract.yml` | devcontainer/Codespaces developer-shell contract | contents read |
 
@@ -32,8 +33,9 @@ This contract defines who owns each CI concern and the controls that prevent wor
 8. `PROJECT_SYNC_TOKEN` is available only to `project-projection-sync.yml`.
 9. Work-management reconciliation gets only `issues: write` plus `contents: read`, is serialized, and never receives the Project PAT.
 10. Mutating projection workflows are serialized rather than cancelled mid-write.
-11. Foundation runtime evidence, VS-01a product-slice evidence and VS-01b provider-contract evidence have separate workflow owners; none may silently become another lifecycle authority.
+11. Foundation runtime evidence, VS-01a Artist evidence, VS-01b provider-contract evidence and VS-02 Release/Recording evidence have separate workflow owners; none may silently become another lifecycle authority.
 12. `vs01b-musicbrainz.yml` must keep live MusicBrainz network access disabled. A bounded live probe is a separate explicitly approved action, not scheduled CI.
+13. `vs02-release-recording.yml` owns deterministic VS-02 PostgreSQL/browser evidence and must not activate live provider traffic.
 
 ## Automated drift check
 

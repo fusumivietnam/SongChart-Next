@@ -1,0 +1,189 @@
+name: VS-02 Release Recording verification
+
+on:
+  pull_request:
+    paths:
+      - app/**
+      - database/**
+      - resources/**
+      - routes/**
+      - tests/Feature/Release**
+      - docs/adr/ADR-0013-vs-02-release-recording-credits-model.md
+      - scripts/capture_vs02_entities.mjs
+      - .github/workflows/vs02-release-recording.yml
+  push:
+    branches: [main]
+    paths:
+      - app/**
+      - database/**
+      - resources/**
+      - routes/**
+      - tests/Feature/Release**
+      - docs/adr/ADR-0013-vs-02-release-recording-credits-model.md
+      - scripts/capture_vs02_entities.mjs
+      - .github/workflows/vs02-release-recording.yml
+  workflow_dispatch:
+
+concurrency:
+  group: vs02-release-recording-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify-vs02:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      POSTGRES_PASSWORD: ci-ephemeral-only
+
+    steps:
+      - name: Check out exact evidence revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ env.EVIDENCE_SHA }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e
+
+      - name: Build cached development image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc
+        with:
+          context: .
+          target: development
+          load: true
+          tags: songchart-next:development
+          cache-from: |
+            type=gha,scope=vs02-buildkit
+            type=gha,scope=foundation-buildkit
+          cache-to: type=gha,scope=vs02-buildkit,mode=max
+
+      - name: Prepare disposable Compose environment
+        shell: bash
+        run: |
+          cp .env.example .env
+          sed -i 's/REPLACE_WITH_UNIQUE_LOCAL_PASSWORD/ci-ephemeral-only/g' .env
+          docker compose config --quiet
+
+      - name: Boot PostgreSQL and application
+        shell: bash
+        run: |
+          if ! docker compose up -d --no-build --wait db app; then
+            docker compose ps -a
+            docker compose logs --no-color --tail=160 app db
+            exit 1
+          fi
+          docker compose exec -T app php artisan key:generate --force
+          docker compose exec -T app php artisan migrate --force
+          docker compose exec -T app php artisan db:show --database=pgsql
+
+      - name: Run VS-02 PostgreSQL and HTTP contracts
+        shell: bash
+        run: |
+          docker compose exec -T \
+            -e APP_ENV=testing \
+            -e DB_CONNECTION=pgsql \
+            -e DB_HOST=db \
+            -e DB_PORT=5432 \
+            -e DB_DATABASE=songchart \
+            -e DB_USERNAME=songchart \
+            -e DB_PASSWORD=ci-ephemeral-only \
+            app php artisan test \
+              tests/Feature/ReleaseBundleImportTest.php \
+              tests/Feature/ReleaseRecordingPageTest.php
+
+      - name: Verify VS-02 source types
+        run: docker compose exec -T app php -d memory_limit=512M vendor/bin/phpstan analyse app/Music/Releases app/Music/Recordings app/Http/Controllers/ReleaseController.php app/Http/Controllers/RecordingController.php app/Models/Release.php app/Models/ReleaseGroup.php app/Models/Recording.php app/Models/Work.php
+
+      - name: Build production-style frontend assets
+        run: docker compose exec -T app pnpm run build
+
+      - name: Prepare deterministic VS-02 entities
+        id: fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker compose exec -T app php artisan migrate:fresh --force
+          docker compose exec -T app php artisan songchart:fixture:import-artist
+          output="$(docker compose exec -T app php artisan songchart:fixture:import-release)"
+          printf '%s\n' "$output"
+          release_path="$(printf '%s\n' "$output" | tail -n 1 | tr -d '\r')"
+          [[ "$release_path" == /releases/* ]]
+          recording_path="$(docker compose exec -T app php -r '
+            require "vendor/autoload.php";
+            $app = require "bootstrap/app.php";
+            $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+            $r = App\Models\Recording::query()->where("title", "Signals at Dawn")->firstOrFail();
+            echo route("recordings.show", ["recording" => $r->id, "slug" => $r->slug], false);
+          ' | tr -d '\r')"
+          [[ "$recording_path" == /recordings/* ]]
+          echo "release_path=$release_path" >> "$GITHUB_OUTPUT"
+          echo "recording_path=$recording_path" >> "$GITHUB_OUTPUT"
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-connrefused "http://127.0.0.1:8000${release_path}" > /dev/null
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-connrefused "http://127.0.0.1:8000${recording_path}" > /dev/null
+
+      - name: Verify canonical redirects
+        shell: bash
+        env:
+          RELEASE_PATH: ${{ steps.fixture.outputs.release_path }}
+          RECORDING_PATH: ${{ steps.fixture.outputs.recording_path }}
+        run: |
+          set -euo pipefail
+          release_id="$(cut -d/ -f3 <<< "$RELEASE_PATH")"
+          recording_id="$(cut -d/ -f3 <<< "$RECORDING_PATH")"
+          curl --silent --show-error --head "http://127.0.0.1:8000/releases/${release_id}/stale" | grep -qE '^HTTP/.* 301'
+          curl --silent --show-error --head "http://127.0.0.1:8000/recordings/${recording_id}/stale" | grep -qE '^HTTP/.* 301'
+
+      - name: Confirm browser availability
+        shell: bash
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+          (google-chrome --version || google-chrome-stable --version || chromium --version || chromium-browser --version)
+
+      - name: Render narrow and wide VS-02 evidence
+        env:
+          VS02_BASE_URL: http://127.0.0.1:8000
+          VS02_RELEASE_PATH: ${{ steps.fixture.outputs.release_path }}
+          VS02_RECORDING_PATH: ${{ steps.fixture.outputs.recording_path }}
+          VS02_EVIDENCE_DIR: artifacts/vs02-entities
+          VS02_EVIDENCE_SHA: ${{ env.EVIDENCE_SHA }}
+        run: node scripts/capture_vs02_entities.mjs
+
+      - name: Preserve VS-02 browser evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: vs02-entities-${{ env.EVIDENCE_SHA }}
+          path: artifacts/vs02-entities/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Publish evidence summary
+        if: success()
+        shell: bash
+        env:
+          RELEASE_PATH: ${{ steps.fixture.outputs.release_path }}
+          RECORDING_PATH: ${{ steps.fixture.outputs.recording_path }}
+        run: |
+          {
+            echo "### VS-02 Release / Recording evidence"
+            echo
+            echo "- Source revision: \`${EVIDENCE_SHA}\`"
+            echo "- PostgreSQL migrations + canonical relationship tests: passed"
+            echo "- Idempotency and same-title isolation: passed"
+            echo "- Release route: \`${RELEASE_PATH}\`"
+            echo "- Recording route: \`${RECORDING_PATH}\`"
+            echo "- Canonical 301 redirects: passed"
+            echo "- Browser renders: Release + Recording at 390x844 and 1440x1024"
+            echo "- Evidence artifact: \`vs02-entities-${EVIDENCE_SHA}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Show runtime logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail=200 app db || true
+
+      - name: Cleanup disposable runtime
+        if: always()
+        run: docker compose down --volumes --remove-orphans

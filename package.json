@@ -62,6 +62,12 @@
     "lightningcss-linux-x64-gnu": "^1.29.1",
     "lightningcss-win32-x64-msvc": "^1.29.1"
   },
+  "pnpm": {
+    "overrides": {
+      "shell-quote": "1.11.0",
+      "source-map-js": "1.2.2"
+    }
+  },
   "name": "songchart-next",
   "packageManager": "pnpm@10.17.1"
 }
