@@ -11,8 +11,10 @@ final class SearchController
 {
     public function __invoke(Request $request, DiscoverySearch $search): Response
     {
+        $rawQuery = $request->query('q');
+
         return Inertia::render('search/index', [
-            'search' => $search->search($request->query('q'))->toArray(),
+            'search' => $search->search(is_string($rawQuery) ? $rawQuery : null)->toArray(),
         ]);
     }
 }
