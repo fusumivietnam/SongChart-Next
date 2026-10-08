@@ -138,8 +138,8 @@ final class MusicBrainzReleaseBundleNormalizer
         if (! preg_match('/^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?$/', trim($value), $matches)) {
             throw new InvalidArgumentException('release.date must be YYYY, YYYY-MM or YYYY-MM-DD.');
         }
-        $month = isset($matches[2]) && $matches[2] !== '' ? (int) $matches[2] : null;
-        $day = isset($matches[3]) && $matches[3] !== '' ? (int) $matches[3] : null;
+        $month = isset($matches[2]) ? (int) $matches[2] : null;
+        $day = isset($matches[3]) ? (int) $matches[3] : null;
         return [
             'year' => (int) $matches[1],
             'month' => $month,
