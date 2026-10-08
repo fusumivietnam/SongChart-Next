@@ -10,15 +10,17 @@ ROADMAP = ROOT / "docs" / "roadmap" / "VERTICAL_SLICES.md"
 
 
 class DesignAuthorityApprovalTests(unittest.TestCase):
-    def test_design_authority_remains_approved_after_first_public_web_implementation(self):
+    def test_design_authority_remains_approved_after_public_web_verification(self):
         data = json.loads(CAPS.read_text(encoding="utf-8"))
         caps = {item["id"]: item for item in data["capabilities"]}
         design = caps["design-authority"]
         self.assertEqual(design["status"], "approved")
         self.assertEqual(design["implementation"], "design/DESIGN_AUTHORITY.md")
         self.assertEqual(design["decision"], "design/decisions/FOUNDATION_BASELINE_APPROVAL.md")
-        self.assertEqual(caps["public-web"]["status"], "implemented")
+        self.assertEqual(caps["public-web"]["status"], "verified")
         self.assertIn("Artist", caps["public-web"]["scope"])
+        self.assertIn("Release", caps["public-web"]["scope"])
+        self.assertIn("Recording", caps["public-web"]["scope"])
 
     def test_approved_docs_do_not_claim_final_polish_or_product_completion(self):
         authority = DESIGN.read_text(encoding="utf-8")
