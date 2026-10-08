@@ -16,7 +16,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `vs01a-artist.yml` | VS-01a canonical Artist PostgreSQL integration, canonical URL and narrow/wide browser evidence | contents read |
 | `vs01b-musicbrainz.yml` | VS-01b MusicBrainz adapter contracts, evidence retention and deployment-wide request-spacing verification on PostgreSQL; never automatic live provider traffic | contents read |
 | `vs02-release-recording.yml` | VS-02 Release/Recording/Credits canonical relationships, PostgreSQL integration, canonical redirects and narrow/wide browser evidence | contents read |
-| `vs03-discovery-search.yml` | VS-03a PostgreSQL-first mixed-entity discovery contracts, bounded query-plan/latency evidence and narrow/wide search renders; never activates a dedicated search index | contents read |
+| `vs03-discovery-search.yml` | VS-03 PostgreSQL-first mixed-entity discovery plus canonical Search -> Artist -> Release -> Recording journey evidence, bounded query-plan/latency evidence and narrow/wide renders; never activates a dedicated search index or provider destination policy | contents read |
 | `design-review-contract.yml` | one-command local Design Authority review contract | contents read |
 | `codespaces-contract.yml` | devcontainer/Codespaces developer-shell contract | contents read |
 
@@ -37,7 +37,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 11. Foundation runtime evidence and each vertical-slice evidence workflow have separate owners; none may silently become another lifecycle authority.
 12. `vs01b-musicbrainz.yml` must keep live MusicBrainz network access disabled. A bounded live probe is a separate explicitly approved action, not scheduled CI.
 13. `vs02-release-recording.yml` owns deterministic VS-02 PostgreSQL/browser evidence and must not activate live provider traffic.
-14. `vs03-discovery-search.yml` owns PostgreSQL-first discovery evidence only; measured CI evidence may inform a later `search-index` activation review but must not activate Meilisearch, another search service or production deployment.
+14. `vs03-discovery-search.yml` owns PostgreSQL-first discovery and canonical journey continuity evidence only; measured CI evidence may inform a later `search-index` activation review, but the workflow must not activate Meilisearch, another search service, provider-destination policy or production deployment.
 
 ## Automated drift check
 
