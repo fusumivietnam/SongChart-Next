@@ -39,6 +39,8 @@ Promotion requires a reviewed PR that updates the map and cites evidence require
 
 Vertical-slice completion is evaluated from its required capabilities and acceptance evidence. Because slice status is derived, do not write a second `status` field into VERTICAL_SLICES. If evidence is incomplete or live GitHub cannot be queried, report the slice as **unknown/incomplete**, not completed from memory.
 
+`verification_evidence` records the latest accepted exact-SHA evidence for a verified capability. `verification_history`, when present, retains earlier accepted evidence entries for auditability. History is evidence lineage only; it is not a second lifecycle field and cannot promote a capability by itself.
+
 ## GitHub Projects and milestones
 
 GitHub Projects is the approved human-facing **derived visual layer** over Issues/PRs. The concrete field/view contract is [GitHub Project visual roadmap](PROJECT_VIEWS.md), while the stable Labels/Milestones/agent activation taxonomy is owned by `governance/GITHUB_WORK_MANAGEMENT.json` and documented in [GitHub work management](../operations/GITHUB_WORK_MANAGEMENT.md). These surfaces remain projections/classification, never lifecycle or evidence authority.
@@ -58,16 +60,48 @@ GitHub Milestones may group Issues by a release objective, but a milestone perce
 
 `scripts/roadmap_health.py` is the read-only reconciliation engine. It derives planned slices from this repository, capability lifecycle from the Capability Map and, when a GitHub token is available, current execution from live Issues/PRs. It never mutates Issues, Projects, registries or lifecycle state.
 
-The `Roadmap health` GitHub Actions workflow runs on relevant PR/main changes, manual dispatch and a daily schedule. It:
-- runs controller regression tests;
+The `Roadmap health` GitHub Actions workflow runs on relevant PR/Issue events, **every push to main**, manual dispatch and a daily schedule. It:
+- runs controller and reconciliation regression tests;
 - queries GitHub with read-only contents/issues/pull-requests/actions permissions;
 - reports active execution and conservative blockers;
 - flags missing capability links, lifecycle/evidence inconsistencies and unknown/truncated live state;
+- runs `scripts/roadmap_reconcile_health.py` to flag merged PRs whose reviewed reconciliation contract has not yet appeared in repository authorities;
 - preserves JSON/text reports as short-lived artifacts for review.
 
 Warnings and blockers are information, not automatic roadmap edits. Controller **errors** fail the health job because they represent contradictory authority/evidence claims. A GitHub/API outage produces `unknown`, never a guessed status.
 
 The separate `scripts/project_sync.py` projection writer may mirror controller-derived execution into GitHub Project #2. It is intentionally not part of the controller and cannot mutate repository authorities, Issues or PRs. See [GitHub Project #2 projection sync](../operations/GITHUB_PROJECT_SYNC.md).
+
+## Post-merge reconciliation proposals
+
+`scripts/roadmap_reconcile.py` is a separate proposal writer. It does **not** replace the read-only controller and never writes protected `main` directly.
+
+A PR may carry one hidden `songchart-reconcile` JSON object from `.github/PULL_REQUEST_TEMPLATE.md`. That metadata is reviewed as part of the source PR and may describe only factual post-merge updates such as:
+- retaining exact-head verification evidence for an already approved/implemented capability;
+- promoting an already approved capability to implemented/verified when the reviewed scope and exact evidence support it;
+- appending factual implementation notes to the owning vertical-slice section;
+- refreshing the concise README status pointer.
+
+Automatic reconciliation fails closed when metadata declares or implies:
+- a new product/roadmap scope decision;
+- an unresolved owner/ADR decision;
+- provider or technology activation;
+- any deployment effect;
+- promotion from `candidate` or `watch`;
+- lifecycle demotion or a change to `deployed`;
+- unknown capability identifiers.
+
+`roadmap-reconcile.yml` runs after a merged PR or by explicit replay of a merged PR number. For safe metadata it:
+1. checks out trusted `main`;
+2. collects successful exact-head pull-request workflow evidence for the merged source SHA;
+3. applies the deterministic writer locally;
+4. creates/updates `automation/roadmap-reconcile-pr-<number>` and a bounded reconciliation PR;
+5. explicitly dispatches protected `governance`, `verify`, and `health` workflows on that exact reconciliation SHA because PRs created with `GITHUB_TOKEN` must not rely on implicit workflow recursion;
+6. stops automatic merge if a human review has intervened, the PR is draft/unmergeable, or any protected check fails/times out;
+7. merges only the generated factual reconciliation PR through normal branch protection;
+8. explicitly refreshes Project #2 as a derived projection and deletes the generated branch after successful merge.
+
+Generated reconciliation PRs mark themselves `skip` to prevent recursive reconciliation. Replay exists for deterministic repair/backfill of already merged PRs after metadata is authored; it cannot bypass the same safety gates.
 
 ## Derived execution queue
 
@@ -87,8 +121,9 @@ These are execution projections only. They do not rank political/product choices
 4. Update Capability Map only when capability definition/dependency/lifecycle changes, with required evidence.
 5. Create/reuse bounded GitHub Issues for execution; check duplicates/open PRs first.
 6. Implement via PR and exact-SHA CI evidence.
-7. Promote capability lifecycle through reviewed repository change when evidence satisfies the gate.
-8. Generated/project dashboards refresh from authorities; no manual back-propagation from chat.
+7. If the merged PR contains safe reconciliation metadata, let `roadmap-reconcile.yml` prepare the factual follow-up PR; otherwise perform the reviewed authority update manually.
+8. Promote capability lifecycle only through a reviewed repository change whose evidence satisfies the gate.
+9. Generated/project dashboards refresh from authorities; no manual back-propagation from chat.
 
 ## Conflict resolution
 
