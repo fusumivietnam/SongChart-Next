@@ -13,9 +13,9 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
   issues: read
-  pull-requests: write
+  pull-requests: read
   actions: write
 
 concurrency:
@@ -110,11 +110,22 @@ jobs:
             exit 1
           fi
 
+      - name: Require dedicated reconciliation credential
+        if: steps.source.outputs.skip != 'true' && steps.patch.outputs.skip != 'true' && steps.patch.outputs.count != '0'
+        env:
+          BOT_TOKEN: ${{ secrets.ROADMAP_RECONCILE_TOKEN }}
+        shell: bash
+        run: |
+          if [[ -z "$BOT_TOKEN" ]]; then
+            echo "ROADMAP_RECONCILE_TOKEN is not configured. Add a repository-scoped fine-grained token with Contents and Pull requests read/write permissions. Do not reuse PROJECT_SYNC_TOKEN." >&2
+            exit 1
+          fi
+
       - name: Create or update reconciliation PR
         if: steps.source.outputs.skip != 'true' && steps.patch.outputs.skip != 'true' && steps.patch.outputs.count != '0'
         id: pr
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.ROADMAP_RECONCILE_TOKEN }}
           SOURCE_PR: ${{ steps.source.outputs.pr_number }}
         shell: bash
         run: |
@@ -122,6 +133,7 @@ jobs:
           branch="automation/roadmap-reconcile-pr-${SOURCE_PR}"
           git config user.name "songchart-roadmap-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git fetch origin "$branch" || true
           git switch -C "$branch"
           git add governance/CAPABILITY_MAP.json docs/roadmap/VERTICAL_SLICES.md README.md
@@ -145,28 +157,16 @@ jobs:
             pr_number="$existing"
             gh pr edit "$pr_number" --title "GOVERNANCE: reconcile roadmap after PR #${SOURCE_PR}" --body-file "$body_file"
           fi
-          reconcile_sha="$(git rev-parse HEAD)"
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
           echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
-          echo "reconcile_sha=$reconcile_sha" >> "$GITHUB_OUTPUT"
+          echo "reconcile_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - name: Dispatch protected reconciliation checks
-        if: steps.pr.outputs.pr_number != ''
-        env:
-          GH_TOKEN: ${{ github.token }}
-          BRANCH: ${{ steps.pr.outputs.branch }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          gh workflow run project-governance.yml --ref "$BRANCH"
-          gh workflow run project-os.yml --ref "$BRANCH"
-          gh workflow run roadmap-health.yml --ref "$BRANCH"
-
-      - name: Wait for protected contexts on exact reconciliation SHA
+      - name: Wait for protected PR contexts on exact reconciliation SHA
         if: steps.pr.outputs.pr_number != ''
         env:
           GH_TOKEN: ${{ github.token }}
           SHA: ${{ steps.pr.outputs.reconcile_sha }}
+          PR_NUMBER: ${{ steps.pr.outputs.pr_number }}
         shell: bash
         run: |
           set -euo pipefail
@@ -176,7 +176,7 @@ jobs:
             pending=0
             failed=0
             for name in "${required[@]}"; do
-              conclusion="$(jq -r --arg name "$name" '[.check_runs[] | select(.name == $name)] | last | .conclusion // "missing"' <<< "$checks")"
+              conclusion="$(jq -r --arg name "$name" --argjson pr "$PR_NUMBER" '[.check_runs[] | select(.name == $name and any(.pull_requests[]?; .number == $pr))] | last | .conclusion // "missing"' <<< "$checks")"
               case "$conclusion" in
                 success) ;;
                 failure|cancelled|timed_out|action_required|startup_failure|stale)
@@ -187,12 +187,10 @@ jobs:
               esac
             done
             [[ "$failed" == "0" ]] || exit 1
-            if [[ "$pending" == "0" ]]; then
-              exit 0
-            fi
+            [[ "$pending" == "0" ]] && exit 0
             sleep 15
           done
-          echo "Timed out waiting for governance/verify/health on $SHA" >&2
+          echo "Timed out waiting for PR-associated governance/verify/health on $SHA" >&2
           exit 1
 
       - name: Enforce no human review intervention
@@ -211,22 +209,21 @@ jobs:
             exit 1
           fi
 
-      - name: Merge safe reconciliation PR
+      - name: Merge safe reconciliation PR and refresh projection
         if: steps.pr.outputs.pr_number != ''
         env:
-          GH_TOKEN: ${{ github.token }}
+          BOT_TOKEN: ${{ secrets.ROADMAP_RECONCILE_TOKEN }}
+          READ_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ steps.pr.outputs.pr_number }}
           SHA: ${{ steps.pr.outputs.reconcile_sha }}
           BRANCH: ${{ steps.pr.outputs.branch }}
         shell: bash
         run: |
           set -euo pipefail
-          gh api --method PUT "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/merge" \
-            -f sha="$SHA" \
-            -f merge_method=merge \
-            --jq '.merged' | grep -qx true
-          gh workflow run project-projection-sync.yml --ref main || true
-          gh api --method DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$BRANCH" || true
+          GH_TOKEN="$BOT_TOKEN" gh api --method PUT "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/merge" \
+            -f sha="$SHA" -f merge_method=merge --jq '.merged' | grep -qx true
+          GH_TOKEN="$READ_TOKEN" gh workflow run project-projection-sync.yml --ref main || true
+          GH_TOKEN="$BOT_TOKEN" gh api --method DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$BRANCH" || true
 
       - name: Publish reconciliation summary
         if: always()
@@ -243,5 +240,5 @@ jobs:
               echo "No reconciliation patch was prepared."
             fi
             echo
-            echo "Authority is never written directly to protected main; reconciliation uses a bounded PR and protected checks."
+            echo "Authority is never written directly to protected main; generated PR mutations require the dedicated ROADMAP_RECONCILE_TOKEN and normal pull-request protected checks."
           } >> "$GITHUB_STEP_SUMMARY"
