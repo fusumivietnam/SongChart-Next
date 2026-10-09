@@ -69,17 +69,19 @@ jobs:
           echo "skip=false" >> "$GITHUB_OUTPUT"
           echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
           echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
+          echo "merged_at=$merged_at" >> "$GITHUB_OUTPUT"
 
       - name: Collect exact-head workflow evidence
         if: steps.source.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           HEAD_SHA: ${{ steps.source.outputs.head_sha }}
+          MERGED_AT: ${{ steps.source.outputs.merged_at }}
         shell: bash
         run: |
           set -euo pipefail
           gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$HEAD_SHA&event=pull_request&per_page=100" \
-            --jq '[.workflow_runs[] | select(.conclusion == "success") | (.name + " #" + (.id|tostring))] | unique | sort' \
+            --jq --arg merged_at "$MERGED_AT" '[.workflow_runs[] | select(.conclusion == "success" and .created_at <= $merged_at) | (.name + " #" + (.id|tostring))] | unique | sort' \
             > source-workflows.json
           jq -e 'length > 0' source-workflows.json > /dev/null
 
