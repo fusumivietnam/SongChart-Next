@@ -2,7 +2,7 @@ name: Roadmap reconciliation
 
 on:
   pull_request:
-    types: [closed]
+    types: [closed, edited]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -110,6 +110,7 @@ jobs:
           branch="automation/roadmap-reconcile-pr-${SOURCE_PR}"
           git config user.name "songchart-roadmap-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin "$branch" || true
           git switch -C "$branch"
           git add governance/CAPABILITY_MAP.json docs/roadmap/VERTICAL_SLICES.md README.md
           git commit -m "GOVERNANCE: reconcile roadmap after PR #${SOURCE_PR}"
