@@ -138,6 +138,8 @@ def main() -> int:
         "cancel-in-progress: false",
         "ref: main",
         "scripts/roadmap_reconcile.py",
+        "merged_at=$merged_at",
+        ".created_at <= $merged_at",
         "project-governance.yml",
         "project-os.yml",
         "roadmap-health.yml",
