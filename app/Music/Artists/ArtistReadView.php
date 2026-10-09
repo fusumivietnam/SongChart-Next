@@ -27,17 +27,16 @@ final readonly class ArtistReadView
     {
         $artist->loadMissing('externalIdentities');
 
-        $provenance = $artist->externalIdentities
+        $provenance = array_values($artist->externalIdentities
             ->map(static fn (ExternalIdentity $identity): array => [
                 'provider' => $identity->provider,
                 'entity_type' => $identity->entity_type,
                 'external_id' => $identity->external_id,
                 'source_name' => $identity->source_name,
             ])
-            ->values()
-            ->all();
+            ->all());
 
-        $releases = DB::table('entity_credits')
+        $releases = array_values(DB::table('entity_credits')
             ->join('releases', 'releases.id', '=', 'entity_credits.subject_id')
             ->where('entity_credits.subject_type', 'release')
             ->where('entity_credits.artist_id', $artist->id)
@@ -67,8 +66,7 @@ final readonly class ArtistReadView
                     'slug' => (string) $release->slug,
                 ], false),
             ])
-            ->values()
-            ->all();
+            ->all());
 
         return new self(
             id: $artist->id,
