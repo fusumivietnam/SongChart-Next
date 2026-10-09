@@ -8,9 +8,14 @@ SongChart Next is a new, independent music knowledge and discovery project. **Th
 - [PR #1](https://github.com/fusumivietnam/SongChart-Next/pull/1), [PR #2](https://github.com/fusumivietnam/SongChart-Next/pull/2), [PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6) and [PR #8](https://github.com/fusumivietnam/SongChart-Next/pull/8) are merged; see [pinned upstream provenance](docs/engineering/UPSTREAM_STARTER.md).
 
 ## Current status
-- `main` contains the governance controller plus the pinned official Laravel React Starter source, real Composer/pnpm lockfiles and app + PostgreSQL 18.6 Docker development baseline merged from [PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6). Exact-SHA Foundation CI passed before merge; this verifies the local Foundation runtime only, not a SongChart product feature or production deployment.
-- Product scope is approved (ADR-0004), the authored OpenAPI declaration authority is decided (ADR-0005), and the Foundation Design Authority baseline is approved for VS-01a after deterministic narrow/wide evidence and owner review. Public API activation, later visual surfaces and production deployment remain separate gates.
-- No provider integration, production deployment or passing end-to-end SongChart product feature is implied by the Foundation runtime verification. The approved visual baseline is a separate Design Authority decision, not runtime verification.
+<!-- roadmap-reconcile:start -->
+Repository lifecycle authority remains `governance/CAPABILITY_MAP.json`; planned scope remains `docs/roadmap/VERTICAL_SLICES.md`; live execution remains GitHub Issues/PRs.
+
+Latest merged product evidence includes the VS-03 canonical discovery journey through deterministic provider-destination rendering. Exact lifecycle/evidence claims must be read from the Capability Map and exact-SHA Actions records rather than inferred from this README.
+<!-- roadmap-reconcile:end -->
+
+- The repository contains the approved Foundation runtime/design baseline and implemented canonical Artist, Release, Recording, Work/credits relationships, PostgreSQL-first mixed-entity discovery, Artist-to-Release journey continuity and deterministic fixture-only provider-destination rendering.
+- Live provider production access, public API, dedicated search-index, recommendation/ranking, production deployment target and deployment remain separately gated and unactivated unless their owning authorities say otherwise.
 - Do not copy old source, stage numbering, generated authority or UI by default.
 
 ## Project control (read-only status, no chat authority)
@@ -29,10 +34,10 @@ Project governance protocols and evidence ownership: [Project Control](docs/oper
 10. [Vertical slices](docs/roadmap/VERTICAL_SLICES.md)
 
 ## Authority rule
-Git owns code and authored decisions; PostgreSQL will own canonical product data when installed; GitHub Issues/Projects own execution work when configured. Generated docs and AI contexts are **read-only projections** of their declared sources. A proposal is not an installed dependency, an approved design, a completed feature or a production release.
+Git owns code and authored decisions; PostgreSQL owns canonical product data where installed; GitHub Issues/Projects own execution work when configured. Generated docs and AI contexts are **read-only projections** of their declared sources. A proposal is not an installed dependency, an approved design, a completed feature or a production release.
 
-## First milestone
-Approve the remaining Design Authority rendered baselines, then implement the fixture-first Artist end-to-end slice with PostgreSQL and automated checks. Add live provider ingestion, search, admin and external infrastructure only when accepted capability triggers are met.
+## Current delivery frontier
+Use live roadmap Issues plus the Capability Map to select the next executable work. At this repository revision, VS-03 parent acceptance still requires explicit reconciliation of any remaining Home/discovery scope before VS-04 launch-proof work can be treated as the next completed slice. Production target selection remains a separate decision.
 
 ## Verification
 Run `python3 scripts/verify_project_os.py` to validate project registry links and lifecycle claims (Python standard library only).

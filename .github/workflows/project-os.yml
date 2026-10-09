@@ -3,6 +3,7 @@ on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 concurrency:
   group: project-os-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true

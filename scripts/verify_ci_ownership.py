@@ -17,6 +17,7 @@ EXPECTED = {
     "project-os.yml",
     "project-projection-sync.yml",
     "roadmap-health.yml",
+    "roadmap-reconcile.yml",
     "vs01a-artist.yml",
     "vs01b-musicbrainz.yml",
     "vs02-release-recording.yml",
@@ -118,6 +119,31 @@ def main() -> int:
         fail(errors, "roadmap-health.yml: exact event SHA expression missing")
     if "ref: ${{ env.EVIDENCE_SHA }}" not in roadmap:
         fail(errors, "roadmap-health.yml: checkout must use EVIDENCE_SHA")
+    if "push:\n    branches: [main]\n    paths:" in roadmap:
+        fail(errors, "roadmap-health.yml: main push must not be path-filtered")
+    if "scripts/roadmap_reconcile_health.py" not in roadmap:
+        fail(errors, "roadmap-health.yml: reconciliation drift detector missing")
+
+    reconcile = contents.get("roadmap-reconcile.yml", "")
+    for required in (
+        "types: [closed]",
+        "workflow_dispatch:",
+        "contents: write",
+        "pull-requests: write",
+        "actions: write",
+        "cancel-in-progress: false",
+        "ref: main",
+        "scripts/roadmap_reconcile.py",
+        "project-governance.yml",
+        "project-os.yml",
+        "roadmap-health.yml",
+        "git push --force-with-lease",
+        "project-projection-sync.yml",
+    ):
+        if required not in reconcile:
+            fail(errors, f"roadmap-reconcile.yml: missing safe-writer control: {required}")
+    if "PROJECT_SYNC_TOKEN" in reconcile:
+        fail(errors, "roadmap-reconcile.yml must never receive PROJECT_SYNC_TOKEN")
 
     projection = contents.get("project-projection-sync.yml", "")
     for required in (

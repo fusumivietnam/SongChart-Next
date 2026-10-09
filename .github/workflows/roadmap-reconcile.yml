@@ -1,0 +1,234 @@
+name: Roadmap reconciliation
+
+on:
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Merged PR number to replay through reconciliation"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: roadmap-reconcile-writer
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out trusted main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Resolve merged source PR
+        id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPLAY_PR: ${{ inputs.pr_number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
+            jq '{pull_request: .pull_request}' "$GITHUB_EVENT_PATH" > source-event.json
+          else
+            gh api "repos/$GITHUB_REPOSITORY/pulls/$REPLAY_PR" | jq '{pull_request: .}' > source-event.json
+          fi
+          pr_number="$(jq -r '.pull_request.number' source-event.json)"
+          merged_at="$(jq -r '.pull_request.merged_at // empty' source-event.json)"
+          head_ref="$(jq -r '.pull_request.head.ref' source-event.json)"
+          head_sha="$(jq -r '.pull_request.head.sha' source-event.json)"
+          if [[ -z "$merged_at" ]]; then
+            echo "PR #$pr_number is not merged; reconciliation is not permitted." >&2
+            exit 1
+          fi
+          if [[ "$head_ref" == automation/roadmap-reconcile-pr-* ]]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Reconciliation PR detected; recursion intentionally stopped."
+            exit 0
+          fi
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$head_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Collect exact-head workflow evidence
+        if: steps.source.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ steps.source.outputs.head_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$HEAD_SHA&event=pull_request&per_page=100" \
+            --jq '[.workflow_runs[] | select(.conclusion == "success") | (.name + " #" + (.id|tostring))] | unique | sort' \
+            > source-workflows.json
+          jq -e 'length > 0' source-workflows.json > /dev/null
+
+      - name: Prepare deterministic authority patch
+        if: steps.source.outputs.skip != 'true'
+        id: patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/roadmap_reconcile.py \
+            --event source-event.json \
+            --workflows-json "$(cat source-workflows.json)" \
+            --apply \
+            --output-json roadmap-reconcile.json
+          safe="$(jq -r '.safe' roadmap-reconcile.json)"
+          skip="$(jq -r '.skip' roadmap-reconcile.json)"
+          count="$(jq -r '.changed_files | length' roadmap-reconcile.json)"
+          echo "safe=$safe" >> "$GITHUB_OUTPUT"
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          if [[ "$skip" == "true" ]]; then
+            echo "Source PR has no automatic reconciliation contract; no repository mutation attempted."
+          elif [[ "$safe" != "true" ]]; then
+            echo "Source PR reconciliation metadata is not safe for automation." >&2
+            exit 1
+          fi
+
+      - name: Create or update reconciliation PR
+        if: steps.source.outputs.skip != 'true' && steps.patch.outputs.skip != 'true' && steps.patch.outputs.count != '0'
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_PR: ${{ steps.source.outputs.pr_number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          branch="automation/roadmap-reconcile-pr-${SOURCE_PR}"
+          git config user.name "songchart-roadmap-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -C "$branch"
+          git add governance/CAPABILITY_MAP.json docs/roadmap/VERTICAL_SLICES.md README.md
+          git commit -m "GOVERNANCE: reconcile roadmap after PR #${SOURCE_PR}"
+          git push --force-with-lease origin "HEAD:$branch"
+          existing="$(gh pr list --state open --head "$branch" --json number --jq '.[0].number // empty')"
+          body_file="$(mktemp)"
+          cat > "$body_file" <<EOF
+          Reconciles factual authority/evidence after merged PR #${SOURCE_PR}.
+
+          Owning Issue / slice / capability: #89 / FOUNDATION / project-os
+
+          This PR was generated only after the source PR metadata passed the fail-closed reconciliation contract. It introduces no new product scope, provider/technology activation or deployment decision.
+
+          <!-- songchart-reconcile {"schema_version":1,"skip":true,"reconcile":[]} -->
+          EOF
+          if [[ -z "$existing" ]]; then
+            url="$(gh pr create --base main --head "$branch" --title "GOVERNANCE: reconcile roadmap after PR #${SOURCE_PR}" --body-file "$body_file")"
+            pr_number="${url##*/}"
+          else
+            pr_number="$existing"
+            gh pr edit "$pr_number" --title "GOVERNANCE: reconcile roadmap after PR #${SOURCE_PR}" --body-file "$body_file"
+          fi
+          reconcile_sha="$(git rev-parse HEAD)"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo "pr_number=$pr_number" >> "$GITHUB_OUTPUT"
+          echo "reconcile_sha=$reconcile_sha" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch protected reconciliation checks
+        if: steps.pr.outputs.pr_number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.pr.outputs.branch }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run project-governance.yml --ref "$BRANCH"
+          gh workflow run project-os.yml --ref "$BRANCH"
+          gh workflow run roadmap-health.yml --ref "$BRANCH"
+
+      - name: Wait for protected contexts on exact reconciliation SHA
+        if: steps.pr.outputs.pr_number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.pr.outputs.reconcile_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(governance verify health)
+          for attempt in $(seq 1 40); do
+            checks="$(gh api -H 'Accept: application/vnd.github+json' "repos/$GITHUB_REPOSITORY/commits/$SHA/check-runs?per_page=100")"
+            pending=0
+            failed=0
+            for name in "${required[@]}"; do
+              conclusion="$(jq -r --arg name "$name" '[.check_runs[] | select(.name == $name)] | last | .conclusion // "missing"' <<< "$checks")"
+              case "$conclusion" in
+                success) ;;
+                failure|cancelled|timed_out|action_required|startup_failure|stale)
+                  echo "$name failed with conclusion=$conclusion" >&2
+                  failed=1
+                  ;;
+                *) pending=1 ;;
+              esac
+            done
+            [[ "$failed" == "0" ]] || exit 1
+            if [[ "$pending" == "0" ]]; then
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "Timed out waiting for governance/verify/health on $SHA" >&2
+          exit 1
+
+      - name: Enforce no human review intervention
+        if: steps.pr.outputs.pr_number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.pr.outputs.pr_number }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          review_count="$(gh api "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/reviews" --jq 'length')"
+          draft="$(gh pr view "$PR_NUMBER" --json isDraft --jq '.isDraft')"
+          mergeable="$(gh pr view "$PR_NUMBER" --json mergeable --jq '.mergeable')"
+          if [[ "$review_count" != "0" || "$draft" != "false" || "$mergeable" != "MERGEABLE" ]]; then
+            echo "Automatic merge stopped: review_count=$review_count draft=$draft mergeable=$mergeable" >&2
+            exit 1
+          fi
+
+      - name: Merge safe reconciliation PR
+        if: steps.pr.outputs.pr_number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.pr.outputs.pr_number }}
+          SHA: ${{ steps.pr.outputs.reconcile_sha }}
+          BRANCH: ${{ steps.pr.outputs.branch }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api --method PUT "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/merge" \
+            -f sha="$SHA" \
+            -f merge_method=merge \
+            --jq '.merged' | grep -qx true
+          gh workflow run project-projection-sync.yml --ref main || true
+          gh api --method DELETE "repos/$GITHUB_REPOSITORY/git/refs/heads/$BRANCH" || true
+
+      - name: Publish reconciliation summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Roadmap reconciliation"
+            echo
+            if [[ -f roadmap-reconcile.json ]]; then
+              echo '```json'
+              cat roadmap-reconcile.json
+              echo '```'
+            else
+              echo "No reconciliation patch was prepared."
+            fi
+            echo
+            echo "Authority is never written directly to protected main; reconciliation uses a bounded PR and protected checks."
+          } >> "$GITHUB_STEP_SUMMARY"
