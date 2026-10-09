@@ -126,7 +126,7 @@ def main() -> int:
 
     reconcile = contents.get("roadmap-reconcile.yml", "")
     for required in (
-        "types: [closed]",
+        "types: [closed, edited]",
         "workflow_dispatch:",
         "contents: write",
         "pull-requests: write",
