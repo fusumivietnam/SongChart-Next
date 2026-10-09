@@ -29,6 +29,9 @@ Search quality fixtures, derived index only when needed, official links checked 
 
 The VS-03a discovery sub-slice was implemented in [PR #81](https://github.com/fusumivietnam/SongChart-Next/pull/81): `/` and `/search` now search canonical PostgreSQL Artist, Release and Recording data with bounded deterministic exact/prefix/substring ranking, disambiguated mixed-entity results, canonical links, PostgreSQL/HTTP/type/browser evidence and retained non-production query-plan/latency evidence. The retained fixture evidence does not establish a relevance/latency failure, so the dedicated `search-index` capability remains unactivated. Official destination/link policy remains a separate VS-03 boundary because provider rights and security checks own that decision.
 
+<!-- reconciliation:pr-85 -->
+VS-03b1 journey continuity was implemented and exact-head verified in PR #85: canonical Artist pages now expose bounded deterministic Release relationships derived from structured credits, completing the Artist -> Release -> Recording navigation path without inferred/name-only joins.
+
 ## VS-04 — launch proof
 Accessible responsive SEO pages, privacy/support/correction minimum, dependency/secret scan, tested restore and rollback, production-equivalent migrations, health/incident runbooks and release approval. No declaration of launch without evidence.
 

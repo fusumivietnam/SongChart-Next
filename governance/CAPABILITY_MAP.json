@@ -106,24 +106,60 @@
         "canonical-music-core"
       ],
       "implementation": "resources/js/pages",
-      "scope": "VS-01a and VS-02 implement responsive public Artist, Release and Recording read pages with canonical SongChart ID+slug routes and stale-slug redirects. VS-03a adds the primary home/search discovery entry over canonical PostgreSQL Artist, Release and Recording data with deterministic exact/prefix/substring ranking, disambiguated mixed-entity results, bounded query behavior and canonical entity links. Dedicated search-index activation, official destination policy, editorial/legal surfaces and the broader MVP public journey remain incomplete.",
+      "scope": "VS-01a and VS-02 implement responsive public Artist, Release and Recording read pages with canonical SongChart ID+slug routes and stale-slug redirects. VS-03a adds the primary home/search discovery entry over canonical PostgreSQL Artist, Release and Recording data with deterministic exact/prefix/substring ranking, disambiguated mixed-entity results, bounded query behavior and canonical entity links. Dedicated search-index activation, official destination policy, editorial/legal surfaces and the broader MVP public journey remain incomplete. VS-03b1 adds bounded canonical Artist-to-Release relationship navigation derived from structured credits, preserving deterministic ordering/deduplication and browser-verified journey continuity.",
       "verification_evidence": {
         "type": "github-actions",
-        "pr": 81,
-        "head_sha": "4726f121956fc11e146073f8c3bb17232f97bfc3",
-        "merge_sha": "6203fd637d388021484462be293292b0b2b42d83",
+        "pr": 85,
+        "head_sha": "5552e1c4243792e09de0a56e8da3c18234115a33",
+        "merge_sha": "72c5267bc57ffc326e2efa7bf5c94b2b4742b55f",
         "workflows": [
-          "VS-03a discovery search verification #37817361759",
-          "Foundation application checks #37817361781",
-          "Foundation visual render verification #37817361649",
-          "VS-02 Release Recording verification #37817361659",
-          "VS-01a Artist verification #37817361579",
-          "Project governance #37817361739",
-          "Project OS contracts #37817361546",
-          "Roadmap health #37817361532"
+          "Foundation application checks #37895438314",
+          "Foundation visual render verification #37895438523",
+          "Project OS contracts #37895438361",
+          "Project governance #37895438294",
+          "Roadmap health #37895438333",
+          "VS-01a Artist verification #37895438349",
+          "VS-02 Release Recording verification #37895438351",
+          "VS-03 discovery journey verification #37895438359"
         ],
-        "verified_at": "2026-10-08"
-      }
+        "verified_at": "2026-10-09"
+      },
+      "verification_history": [
+        {
+          "type": "github-actions",
+          "pr": 81,
+          "head_sha": "4726f121956fc11e146073f8c3bb17232f97bfc3",
+          "merge_sha": "6203fd637d388021484462be293292b0b2b42d83",
+          "workflows": [
+            "VS-03a discovery search verification #37817361759",
+            "Foundation application checks #37817361781",
+            "Foundation visual render verification #37817361649",
+            "VS-02 Release Recording verification #37817361659",
+            "VS-01a Artist verification #37817361579",
+            "Project governance #37817361739",
+            "Project OS contracts #37817361546",
+            "Roadmap health #37817361532"
+          ],
+          "verified_at": "2026-10-08"
+        },
+        {
+          "type": "github-actions",
+          "pr": 85,
+          "head_sha": "5552e1c4243792e09de0a56e8da3c18234115a33",
+          "merge_sha": "72c5267bc57ffc326e2efa7bf5c94b2b4742b55f",
+          "workflows": [
+            "Foundation application checks #37895438314",
+            "Foundation visual render verification #37895438523",
+            "Project OS contracts #37895438361",
+            "Project governance #37895438294",
+            "Roadmap health #37895438333",
+            "VS-01a Artist verification #37895438349",
+            "VS-02 Release Recording verification #37895438351",
+            "VS-03 discovery journey verification #37895438359"
+          ],
+          "verified_at": "2026-10-09"
+        }
+      ]
     },
     {
       "id": "admin-review",
