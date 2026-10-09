@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Models\Artist;
 use App\Models\Release;
 use App\Music\Artists\ExternalArtistClaim;
 use App\Music\Artists\ImportArtist;
 use App\Music\Releases\ImportReleaseBundle;
 use App\Music\Releases\MusicBrainzReleaseBundleNormalizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -47,7 +49,7 @@ final class ArtistPageTest extends TestCase
     {
         $this->artisan('songchart:fixture:import-artist')->assertSuccessful();
         $release = $this->importReleaseFixture();
-        $artist = \App\Models\Artist::query()->where('name', 'Aster Echo')->firstOrFail();
+        $artist = Artist::query()->where('name', 'Aster Echo')->firstOrFail();
 
         $this->get(route('artists.show', [
             'artist' => $artist->id,
@@ -69,9 +71,9 @@ final class ArtistPageTest extends TestCase
     {
         $this->artisan('songchart:fixture:import-artist')->assertSuccessful();
         $release = $this->importReleaseFixture();
-        $artist = \App\Models\Artist::query()->where('name', 'Aster Echo')->firstOrFail();
+        $artist = Artist::query()->where('name', 'Aster Echo')->firstOrFail();
 
-        \Illuminate\Support\Facades\DB::table('entity_credits')->insert([
+        DB::table('entity_credits')->insert([
             'subject_type' => 'release',
             'subject_id' => $release->id,
             'artist_id' => $artist->id,
@@ -91,6 +93,47 @@ final class ArtistPageTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->where('artist.releases.0.id', $release->id)
                 ->has('artist.releases', 1));
+    }
+
+    public function test_release_relationships_are_newest_first_and_bounded_to_twenty(): void
+    {
+        $artist = app(ImportArtist::class)->handle($this->claim());
+
+        for ($offset = 0; $offset < 22; $offset++) {
+            $year = 2000 + $offset;
+            $release = Release::query()->create([
+                'title' => "Archive {$year}",
+                'slug' => "archive-{$year}",
+                'status' => 'official',
+                'country_code' => 'FI',
+                'release_year' => $year,
+                'date_precision' => 'year',
+            ]);
+
+            DB::table('entity_credits')->insert([
+                'subject_type' => 'release',
+                'subject_id' => $release->id,
+                'artist_id' => $artist->id,
+                'role' => 'primary',
+                'credited_as' => $artist->name,
+                'join_phrase' => '',
+                'position' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        $this->get(route('artists.show', [
+            'artist' => $artist->id,
+            'slug' => $artist->slug,
+        ]))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->has('artist.releases', 20)
+                ->where('artist.releases.0.releaseYear', 2021)
+                ->where('artist.releases.0.title', 'Archive 2021')
+                ->where('artist.releases.19.releaseYear', 2002)
+                ->where('artist.releases.19.title', 'Archive 2002'));
     }
 
     public function test_missing_or_stale_slug_redirects_to_canonical_artist_url(): void
