@@ -8,6 +8,16 @@ type Provenance = {
     source_name: string;
 };
 
+type RelatedRelease = {
+    id: string;
+    slug: string;
+    title: string;
+    status: string | null;
+    countryCode: string | null;
+    releaseYear: number | null;
+    path: string;
+};
+
 type Artist = {
     id: string;
     slug: string;
@@ -16,6 +26,7 @@ type Artist = {
     countryCode: string | null;
     disambiguation: string | null;
     provenance: Provenance[];
+    releases: RelatedRelease[];
 };
 
 type Props = {
@@ -29,6 +40,16 @@ function MetadataRow({ label, value }: { label: string; value: string }) {
             <dd className="min-w-0 break-words text-slate-900">{value}</dd>
         </div>
     );
+}
+
+function releaseDetail(release: RelatedRelease): string {
+    return [
+        release.releaseYear?.toString(),
+        release.status,
+        release.countryCode,
+    ]
+        .filter((value): value is string => Boolean(value))
+        .join(' · ');
 }
 
 export default function ArtistShow({ artist }: Props) {
@@ -78,6 +99,7 @@ export default function ArtistShow({ artist }: Props) {
                                 <input
                                     id="site-search"
                                     name="q"
+                                    maxLength={80}
                                     placeholder="Search artists, releases, recordings"
                                     className="h-10 w-full rounded-[0.625rem] border border-slate-300 bg-white pr-3 pl-9 text-sm outline-none placeholder:text-slate-500 focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
                                 />
@@ -143,14 +165,36 @@ export default function ArtistShow({ artist }: Props) {
                                 />
                             </dl>
 
-                            <section className="mt-6">
-                                <h2 className="text-lg font-semibold">
+                            <section className="mt-6" aria-labelledby="artist-releases-heading">
+                                <h2 id="artist-releases-heading" className="text-lg font-semibold">
                                     Releases and relationships
                                 </h2>
-                                <div className="mt-3 rounded-[0.625rem] border border-dashed border-slate-300 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-                                    No release relationships are available in the
-                                    fixture-first Artist slice.
-                                </div>
+
+                                {artist.releases.length === 0 ? (
+                                    <div className="mt-3 rounded-[0.625rem] border border-dashed border-slate-300 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                                        No canonical release credits are recorded for this artist yet.
+                                    </div>
+                                ) : (
+                                    <ul className="mt-3 divide-y divide-slate-200 border-y border-slate-300">
+                                        {artist.releases.map((release) => {
+                                            const detail = releaseDetail(release);
+
+                                            return (
+                                                <li key={release.id} className="py-4">
+                                                    <a
+                                                        href={release.path}
+                                                        className="rounded-sm font-semibold text-blue-800 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+                                                    >
+                                                        {release.title}
+                                                    </a>
+                                                    <p className="mt-1 text-sm leading-6 text-slate-600">
+                                                        {detail || 'Canonical release credit'}
+                                                    </p>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                )}
                             </section>
 
                             <section className="mt-6 border-t border-slate-200 pt-5 text-sm text-slate-600">
@@ -159,8 +203,8 @@ export default function ArtistShow({ artist }: Props) {
                                 </h2>
                                 <p className="mt-2 leading-6">
                                     SongChart identity is independent from provider
-                                    identity. The source identifier is retained as
-                                    provenance evidence and is never replaced by a
+                                    identity. Release relationships shown here come
+                                    from canonical structured credits, never from a
                                     name-only match.
                                 </p>
                                 <button

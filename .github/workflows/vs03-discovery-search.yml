@@ -1,15 +1,18 @@
-name: VS-03a discovery search verification
+name: VS-03 discovery journey verification
 
 on:
   pull_request:
     paths:
       - app/Http/Controllers/SearchController.php
       - app/Music/Discovery/**
+      - app/Music/Artists/ArtistReadView.php
       - app/Models/**
       - database/**
       - resources/js/pages/search/**
+      - resources/js/pages/artists/show.tsx
       - routes/web.php
       - tests/Feature/DiscoverySearchTest.php
+      - tests/Feature/ArtistPageTest.php
       - scripts/capture_vs03_search.mjs
       - scripts/vs03_search_benchmark.php
       - .github/workflows/vs03-discovery-search.yml
@@ -18,11 +21,14 @@ on:
     paths:
       - app/Http/Controllers/SearchController.php
       - app/Music/Discovery/**
+      - app/Music/Artists/ArtistReadView.php
       - app/Models/**
       - database/**
       - resources/js/pages/search/**
+      - resources/js/pages/artists/show.tsx
       - routes/web.php
       - tests/Feature/DiscoverySearchTest.php
+      - tests/Feature/ArtistPageTest.php
       - scripts/capture_vs03_search.mjs
       - scripts/vs03_search_benchmark.php
       - .github/workflows/vs03-discovery-search.yml
@@ -36,7 +42,7 @@ permissions:
   contents: read
 
 jobs:
-  verify-vs03a:
+  verify-vs03:
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     env:
@@ -83,7 +89,7 @@ jobs:
           docker compose exec -T app php artisan migrate --force
           docker compose exec -T app php artisan db:show --database=pgsql
 
-      - name: Run VS-03a PostgreSQL and HTTP contracts
+      - name: Run VS-03 PostgreSQL and HTTP contracts
         shell: bash
         run: |
           docker compose exec -T \
@@ -94,22 +100,50 @@ jobs:
             -e DB_DATABASE=songchart \
             -e DB_USERNAME=songchart \
             -e DB_PASSWORD=ci-ephemeral-only \
-            app php artisan test tests/Feature/DiscoverySearchTest.php
+            app php artisan test \
+              tests/Feature/DiscoverySearchTest.php \
+              tests/Feature/ArtistPageTest.php
 
-      - name: Verify VS-03a source types
-        run: docker compose exec -T app php -d memory_limit=512M vendor/bin/phpstan analyse app/Music/Discovery app/Http/Controllers/SearchController.php
+      - name: Verify VS-03 source types
+        run: docker compose exec -T app php -d memory_limit=512M vendor/bin/phpstan analyse app/Music/Discovery app/Music/Artists/ArtistReadView.php app/Http/Controllers/SearchController.php
 
       - name: Build production-style frontend assets
         run: docker compose exec -T app pnpm run build
 
-      - name: Prepare deterministic discovery fixtures
+      - name: Prepare deterministic discovery journey fixtures
+        id: fixture
         shell: bash
         run: |
           set -euo pipefail
           docker compose exec -T app php artisan migrate:fresh --force
           docker compose exec -T app php artisan songchart:fixture:import-artist
-          docker compose exec -T app php artisan songchart:fixture:import-release
-          curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-connrefused 'http://127.0.0.1:8000/search?q=Signals%20at%20Dawn' > /dev/null
+          release_output="$(docker compose exec -T app php artisan songchart:fixture:import-release)"
+          printf '%s\n' "$release_output"
+          release_path="$(printf '%s\n' "$release_output" | tail -n 1 | tr -d '\r')"
+          [[ "$release_path" == /releases/* ]]
+          artist_path="$(docker compose exec -T app php -r '
+            require "vendor/autoload.php";
+            $app = require "bootstrap/app.php";
+            $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+            $artist = App\Models\Artist::query()->where("name", "Aster Echo")->firstOrFail();
+            echo route("artists.show", ["artist" => $artist->id, "slug" => $artist->slug], false);
+          ' | tr -d '\r')"
+          recording_path="$(docker compose exec -T app php -r '
+            require "vendor/autoload.php";
+            $app = require "bootstrap/app.php";
+            $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+            $recording = App\Models\Recording::query()->where("title", "Signals at Dawn")->firstOrFail();
+            echo route("recordings.show", ["recording" => $recording->id, "slug" => $recording->slug], false);
+          ' | tr -d '\r')"
+          [[ "$artist_path" == /artists/* ]]
+          [[ "$recording_path" == /recordings/* ]]
+          echo "artist_path=$artist_path" >> "$GITHUB_OUTPUT"
+          echo "release_path=$release_path" >> "$GITHUB_OUTPUT"
+          echo "recording_path=$recording_path" >> "$GITHUB_OUTPUT"
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-connrefused 'http://127.0.0.1:8000/search?q=Aster%20Echo' > /dev/null
+          curl --fail --silent --show-error "http://127.0.0.1:8000${artist_path}" > /dev/null
+          curl --fail --silent --show-error "http://127.0.0.1:8000${release_path}" > /dev/null
+          curl --fail --silent --show-error "http://127.0.0.1:8000${recording_path}" > /dev/null
 
       - name: Generate bounded PostgreSQL search evidence
         shell: bash
@@ -126,18 +160,21 @@ jobs:
           command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
           (google-chrome --version || google-chrome-stable --version || chromium --version || chromium-browser --version)
 
-      - name: Render narrow and wide VS-03a evidence
+      - name: Render narrow and wide VS-03 discovery journey evidence
         env:
           VS03_BASE_URL: http://127.0.0.1:8000
+          VS03_ARTIST_PATH: ${{ steps.fixture.outputs.artist_path }}
+          VS03_RELEASE_PATH: ${{ steps.fixture.outputs.release_path }}
+          VS03_RECORDING_PATH: ${{ steps.fixture.outputs.recording_path }}
           VS03_EVIDENCE_DIR: artifacts/vs03-search
           VS03_EVIDENCE_SHA: ${{ env.EVIDENCE_SHA }}
         run: node scripts/capture_vs03_search.mjs
 
-      - name: Preserve VS-03a evidence
+      - name: Preserve VS-03 evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: vs03-search-${{ env.EVIDENCE_SHA }}
+          name: vs03-discovery-${{ env.EVIDENCE_SHA }}
           path: artifacts/vs03-search/
           if-no-files-found: warn
           retention-days: 30
@@ -145,19 +182,25 @@ jobs:
       - name: Publish evidence summary
         if: success()
         shell: bash
+        env:
+          ARTIST_PATH: ${{ steps.fixture.outputs.artist_path }}
+          RELEASE_PATH: ${{ steps.fixture.outputs.release_path }}
+          RECORDING_PATH: ${{ steps.fixture.outputs.recording_path }}
         run: |
           {
-            echo "### VS-03a PostgreSQL-first discovery evidence"
+            echo "### VS-03 PostgreSQL-first discovery journey evidence"
             echo
             echo "- Source revision: \`${EVIDENCE_SHA}\`"
-            echo "- PostgreSQL mixed-entity HTTP contracts: passed"
+            echo "- PostgreSQL mixed-entity search and Artist relationship contracts: passed"
             echo "- Exact/prefix/substring deterministic ranking: passed"
             echo "- Query length and mixed-script contracts: passed"
-            echo "- PHPStan discovery boundary: passed"
-            echo "- Browser renders: results + no-results at 390x844 and 1440x1024"
+            echo "- Artist -> Release relationship is derived from canonical structured credits"
+            echo "- Journey: \`${ARTIST_PATH}\` -> \`${RELEASE_PATH}\` -> \`${RECORDING_PATH}\`"
+            echo "- PHPStan discovery/Artist read boundary: passed"
+            echo "- Browser renders: search + Artist + Release + Recording + no-results at 390x844 and 1440x1024"
             echo "- Search evidence includes EXPLAIN ANALYZE plus bounded CI latency; it is not production-scale benchmark evidence"
-            echo "- Dedicated search-index activation remains outside VS-03a"
-            echo "- Evidence artifact: \`vs03-search-${EVIDENCE_SHA}\`"
+            echo "- Dedicated search-index, provider destinations and production deployment remain outside this workflow"
+            echo "- Evidence artifact: \`vs03-discovery-${EVIDENCE_SHA}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Show runtime logs on failure
