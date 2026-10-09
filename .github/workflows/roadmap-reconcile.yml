@@ -3,6 +3,8 @@ name: Roadmap reconciliation
 on:
   pull_request:
     types: [closed, edited]
+  issue_comment:
+    types: [created]
   workflow_dispatch:
     inputs:
       pr_number:
@@ -12,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  issues: read
   pull-requests: write
   actions: write
 
@@ -21,7 +24,10 @@ concurrency:
 
 jobs:
   reconcile:
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && github.event.comment.body == '/roadmap-reconcile')
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -41,6 +47,9 @@ jobs:
           set -euo pipefail
           if [[ "$GITHUB_EVENT_NAME" == "pull_request" ]]; then
             jq '{pull_request: .pull_request}' "$GITHUB_EVENT_PATH" > source-event.json
+          elif [[ "$GITHUB_EVENT_NAME" == "issue_comment" ]]; then
+            replay_pr="$(jq -r '.issue.number' "$GITHUB_EVENT_PATH")"
+            gh api "repos/$GITHUB_REPOSITORY/pulls/$replay_pr" | jq '{pull_request: .}' > source-event.json
           else
             gh api "repos/$GITHUB_REPOSITORY/pulls/$REPLAY_PR" | jq '{pull_request: .}' > source-event.json
           fi

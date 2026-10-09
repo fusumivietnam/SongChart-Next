@@ -127,8 +127,12 @@ def main() -> int:
     reconcile = contents.get("roadmap-reconcile.yml", "")
     for required in (
         "types: [closed, edited]",
+        "issue_comment:",
+        "types: [created]",
+        "github.event.comment.body == '/roadmap-reconcile'",
         "workflow_dispatch:",
         "contents: write",
+        "issues: read",
         "pull-requests: write",
         "actions: write",
         "cancel-in-progress: false",
