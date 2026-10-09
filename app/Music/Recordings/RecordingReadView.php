@@ -37,6 +37,14 @@ final class RecordingReadView
             ->orderBy('id')
             ->get(['provider','entity_type','external_id','source_name'])
             ->map(fn ($row) => (array) $row)->all();
+        $destinations = DB::table('destination_links')
+            ->where('subject_type', 'recording')
+            ->where('subject_id', $recording->id)
+            ->where('verification_state', 'verified')
+            ->orderBy('provider')
+            ->orderBy('destination_type')
+            ->get(['provider','destination_type','external_url','source_name','verified_at'])
+            ->map(fn ($row) => (array) $row)->all();
 
         return [
             'id' => $recording->id,
@@ -49,6 +57,7 @@ final class RecordingReadView
             'works' => $works,
             'releases' => $releases,
             'provenance' => $provenance,
+            'destinations' => $destinations,
         ];
     }
 }
