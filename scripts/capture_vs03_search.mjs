@@ -8,6 +8,7 @@ const evidenceSha = process.env.VS03_EVIDENCE_SHA ?? 'unknown';
 const artistPath = process.env.VS03_ARTIST_PATH;
 const releasePath = process.env.VS03_RELEASE_PATH;
 const recordingPath = process.env.VS03_RECORDING_PATH;
+const destinationUrl = 'https://listen.example.test/recordings/signals-at-dawn';
 
 for (const [name, path, prefix] of [
     ['VS03_ARTIST_PATH', artistPath, '/artists/'],
@@ -44,8 +45,8 @@ const surfaces = [
     {
         label: 'recording',
         path: recordingPath,
-        expected: ['SongChart Next', 'Signals at Dawn', 'Works', 'Appears on releases'],
-        expectedLinks: [releasePath],
+        expected: ['SongChart Next', 'Signals at Dawn', 'Works', 'Appears on releases', 'Listen or watch elsewhere', 'Fixture Audio', 'Open external destination'],
+        expectedLinks: [releasePath, destinationUrl],
     },
     {
         label: 'empty',
@@ -76,7 +77,7 @@ function pngDimensions(path) {
 mkdirSync(evidenceDir, { recursive: true });
 const chromePath = findChrome();
 const browserVersion = spawnSync(chromePath, ['--version'], { encoding: 'utf8' }).stdout.trim();
-const evidence = { schemaVersion: 2, sourceRevision: evidenceSha, browser: browserVersion, generatedAt: new Date().toISOString(), journey: [artistPath, releasePath, recordingPath], captures: [] };
+const evidence = { schemaVersion: 3, sourceRevision: evidenceSha, browser: browserVersion, generatedAt: new Date().toISOString(), journey: [artistPath, releasePath, recordingPath, destinationUrl], captures: [] };
 
 for (const surface of surfaces) {
     const url = new URL(surface.path, baseUrl).toString();
@@ -93,7 +94,11 @@ for (const surface of surfaces) {
             if (!dom.includes(text)) throw new Error(`${surface.label} did not hydrate expected text: ${text}`);
         }
         for (const path of surface.expectedLinks) {
-            if (!dom.includes(`href="${path}"`)) throw new Error(`${surface.label} is missing canonical journey link: ${path}`);
+            if (!dom.includes(`href="${path}"`)) throw new Error(`${surface.label} is missing journey link: ${path}`);
+        }
+        if (surface.label === 'recording') {
+            if (!dom.includes('target="_blank"')) throw new Error('Recording destination is missing explicit external target treatment.');
+            if (!dom.includes('rel="noopener noreferrer"')) throw new Error('Recording destination is missing opener isolation.');
         }
         if (!dom.includes('role="search"')) throw new Error(`${surface.label} is missing the search landmark.`);
         if (!dom.includes('Skip to content')) throw new Error(`${surface.label} is missing the skip link.`);
