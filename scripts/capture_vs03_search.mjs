@@ -8,12 +8,14 @@ const evidenceSha = process.env.VS03_EVIDENCE_SHA ?? 'unknown';
 const artistPath = process.env.VS03_ARTIST_PATH;
 const releasePath = process.env.VS03_RELEASE_PATH;
 const recordingPath = process.env.VS03_RECORDING_PATH;
+const emptyRecordingPath = process.env.VS03_EMPTY_RECORDING_PATH;
 const destinationUrl = 'https://listen.example.test/recordings/signals-at-dawn';
 
 for (const [name, path, prefix] of [
     ['VS03_ARTIST_PATH', artistPath, '/artists/'],
     ['VS03_RELEASE_PATH', releasePath, '/releases/'],
     ['VS03_RECORDING_PATH', recordingPath, '/recordings/'],
+    ['VS03_EMPTY_RECORDING_PATH', emptyRecordingPath, '/recordings/'],
 ]) {
     if (!path?.startsWith(prefix)) throw new Error(`${name} must be a canonical ${prefix} path.`);
 }
@@ -49,6 +51,12 @@ const surfaces = [
         expectedLinks: [releasePath, destinationUrl],
     },
     {
+        label: 'recording-empty-destination',
+        path: emptyRecordingPath,
+        expected: ['SongChart Next', 'Northern Static', 'Listen or watch elsewhere', 'No verified external destination is recorded for this Recording', 'SongChart does not fabricate or infer provider links'],
+        expectedLinks: [releasePath],
+    },
+    {
         label: 'empty',
         path: '/search?q=definitely-not-canonical',
         expected: ['SongChart Next', 'Music knowledge results', 'No results', 'Unknown data is not replaced with guessed matches'],
@@ -77,7 +85,7 @@ function pngDimensions(path) {
 mkdirSync(evidenceDir, { recursive: true });
 const chromePath = findChrome();
 const browserVersion = spawnSync(chromePath, ['--version'], { encoding: 'utf8' }).stdout.trim();
-const evidence = { schemaVersion: 3, sourceRevision: evidenceSha, browser: browserVersion, generatedAt: new Date().toISOString(), journey: [artistPath, releasePath, recordingPath, destinationUrl], captures: [] };
+const evidence = { schemaVersion: 4, sourceRevision: evidenceSha, browser: browserVersion, generatedAt: new Date().toISOString(), journey: [artistPath, releasePath, recordingPath, destinationUrl], captures: [] };
 
 for (const surface of surfaces) {
     const url = new URL(surface.path, baseUrl).toString();
