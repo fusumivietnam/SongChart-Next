@@ -6,13 +6,17 @@ on:
       - app/Http/Controllers/SearchController.php
       - app/Music/Discovery/**
       - app/Music/Artists/ArtistReadView.php
+      - app/Music/Recordings/RecordingReadView.php
+      - app/Music/Destinations/**
       - app/Models/**
       - database/**
       - resources/js/pages/search/**
       - resources/js/pages/artists/show.tsx
+      - resources/js/pages/recordings/show.tsx
       - routes/web.php
       - tests/Feature/DiscoverySearchTest.php
       - tests/Feature/ArtistPageTest.php
+      - tests/Feature/DestinationLinkTest.php
       - scripts/capture_vs03_search.mjs
       - scripts/vs03_search_benchmark.php
       - .github/workflows/vs03-discovery-search.yml
@@ -22,13 +26,17 @@ on:
       - app/Http/Controllers/SearchController.php
       - app/Music/Discovery/**
       - app/Music/Artists/ArtistReadView.php
+      - app/Music/Recordings/RecordingReadView.php
+      - app/Music/Destinations/**
       - app/Models/**
       - database/**
       - resources/js/pages/search/**
       - resources/js/pages/artists/show.tsx
+      - resources/js/pages/recordings/show.tsx
       - routes/web.php
       - tests/Feature/DiscoverySearchTest.php
       - tests/Feature/ArtistPageTest.php
+      - tests/Feature/DestinationLinkTest.php
       - scripts/capture_vs03_search.mjs
       - scripts/vs03_search_benchmark.php
       - .github/workflows/vs03-discovery-search.yml
@@ -102,10 +110,11 @@ jobs:
             -e DB_PASSWORD=ci-ephemeral-only \
             app php artisan test \
               tests/Feature/DiscoverySearchTest.php \
-              tests/Feature/ArtistPageTest.php
+              tests/Feature/ArtistPageTest.php \
+              tests/Feature/DestinationLinkTest.php
 
       - name: Verify VS-03 source types
-        run: docker compose exec -T app php -d memory_limit=512M vendor/bin/phpstan analyse app/Music/Discovery app/Music/Artists/ArtistReadView.php app/Http/Controllers/SearchController.php
+        run: docker compose exec -T app php -d memory_limit=512M vendor/bin/phpstan analyse app/Music/Discovery app/Music/Artists/ArtistReadView.php app/Music/Recordings/RecordingReadView.php app/Music/Destinations app/Http/Controllers/SearchController.php
 
       - name: Build production-style frontend assets
         run: docker compose exec -T app pnpm run build
@@ -133,6 +142,18 @@ jobs:
             $app = require "bootstrap/app.php";
             $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
             $recording = App\Models\Recording::query()->where("title", "Signals at Dawn")->firstOrFail();
+            app(App\Music\Destinations\StoreDestinationLink::class)->handle(
+              "recording",
+              $recording->id,
+              "Fixture Audio",
+              "listen",
+              "https://listen.example.test/recordings/signals-at-dawn",
+              "vs-03c deterministic fixture",
+              "fixture:signals-at-dawn",
+              ["fixture" => true],
+              "verified",
+              new DateTimeImmutable("2026-10-09T12:00:00+00:00")
+            );
             echo route("recordings.show", ["recording" => $recording->id, "slug" => $recording->slug], false);
           ' | tr -d '\r')"
           [[ "$artist_path" == /artists/* ]]
@@ -188,18 +209,18 @@ jobs:
           RECORDING_PATH: ${{ steps.fixture.outputs.recording_path }}
         run: |
           {
-            echo "### VS-03 PostgreSQL-first discovery journey evidence"
+            echo "### VS-03 PostgreSQL-first discovery and destination journey evidence"
             echo
             echo "- Source revision: \`${EVIDENCE_SHA}\`"
-            echo "- PostgreSQL mixed-entity search and Artist relationship contracts: passed"
+            echo "- PostgreSQL mixed-entity search, Artist relationship and destination contracts: passed"
             echo "- Exact/prefix/substring deterministic ranking: passed"
-            echo "- Query length and mixed-script contracts: passed"
+            echo "- Destination URL validation, duplicate prevention and verified-only public projection: passed"
             echo "- Artist -> Release relationship is derived from canonical structured credits"
-            echo "- Journey: \`${ARTIST_PATH}\` -> \`${RELEASE_PATH}\` -> \`${RECORDING_PATH}\`"
-            echo "- PHPStan discovery/Artist read boundary: passed"
-            echo "- Browser renders: search + Artist + Release + Recording + no-results at 390x844 and 1440x1024"
+            echo "- Journey: \`${ARTIST_PATH}\` -> \`${RELEASE_PATH}\` -> \`${RECORDING_PATH}\` -> deterministic external destination fixture"
+            echo "- PHPStan discovery/Artist/Recording/Destination boundaries: passed"
+            echo "- Browser renders: search + Artist + Release + Recording destination chooser + no-results at 390x844 and 1440x1024"
             echo "- Search evidence includes EXPLAIN ANALYZE plus bounded CI latency; it is not production-scale benchmark evidence"
-            echo "- Dedicated search-index, provider destinations and production deployment remain outside this workflow"
+            echo "- Live provider traffic, provider-production approval, dedicated search-index and production deployment remain outside this workflow"
             echo "- Evidence artifact: \`vs03-discovery-${EVIDENCE_SHA}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
