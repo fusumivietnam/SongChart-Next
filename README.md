@@ -13,7 +13,6 @@ Repository lifecycle authority remains `governance/CAPABILITY_MAP.json`; planned
 
 Latest reconciled product evidence: PR #85 — VS-03b1 canonical Artist-to-Release journey continuity is merged and exact-head verified.
 <!-- roadmap-reconcile:end -->
-<!-- reconcile-ci-touch -->
 
 - The repository contains the approved Foundation runtime/design baseline and implemented canonical Artist, Release, Recording, Work/credits relationships, PostgreSQL-first mixed-entity discovery, Artist-to-Release journey continuity and deterministic fixture-only provider-destination rendering.
 - Live provider production access, public API, dedicated search-index, recommendation/ranking, production deployment target and deployment remain separately gated and unactivated unless their owning authorities say otherwise.
