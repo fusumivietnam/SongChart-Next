@@ -11,7 +11,7 @@ SongChart Next is a new, independent music knowledge and discovery project. **Th
 <!-- roadmap-reconcile:start -->
 Repository lifecycle authority remains `governance/CAPABILITY_MAP.json`; planned scope remains `docs/roadmap/VERTICAL_SLICES.md`; live execution remains GitHub Issues/PRs.
 
-Latest reconciled product evidence: PR #85 — VS-03b1 canonical Artist-to-Release journey continuity is merged and exact-head verified.
+Latest reconciled product evidence: PR #88 — VS-03c structured provider-destination persistence and verified-only external chooser are merged and exact-head verified; live provider production access remains unactivated.
 <!-- roadmap-reconcile:end -->
 
 - The repository contains the approved Foundation runtime/design baseline and implemented canonical Artist, Release, Recording, Work/credits relationships, PostgreSQL-first mixed-entity discovery, Artist-to-Release journey continuity and deterministic fixture-only provider-destination rendering.
