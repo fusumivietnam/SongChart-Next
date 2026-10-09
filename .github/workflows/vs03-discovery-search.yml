@@ -156,15 +156,25 @@ jobs:
             );
             echo route("recordings.show", ["recording" => $recording->id, "slug" => $recording->slug], false);
           ' | tr -d '\r')"
+          empty_recording_path="$(docker compose exec -T app php -r '
+            require "vendor/autoload.php";
+            $app = require "bootstrap/app.php";
+            $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+            $recording = App\Models\Recording::query()->where("title", "Northern Static")->firstOrFail();
+            echo route("recordings.show", ["recording" => $recording->id, "slug" => $recording->slug], false);
+          ' | tr -d '\r')"
           [[ "$artist_path" == /artists/* ]]
           [[ "$recording_path" == /recordings/* ]]
+          [[ "$empty_recording_path" == /recordings/* ]]
           echo "artist_path=$artist_path" >> "$GITHUB_OUTPUT"
           echo "release_path=$release_path" >> "$GITHUB_OUTPUT"
           echo "recording_path=$recording_path" >> "$GITHUB_OUTPUT"
+          echo "empty_recording_path=$empty_recording_path" >> "$GITHUB_OUTPUT"
           curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-connrefused 'http://127.0.0.1:8000/search?q=Aster%20Echo' > /dev/null
           curl --fail --silent --show-error "http://127.0.0.1:8000${artist_path}" > /dev/null
           curl --fail --silent --show-error "http://127.0.0.1:8000${release_path}" > /dev/null
           curl --fail --silent --show-error "http://127.0.0.1:8000${recording_path}" > /dev/null
+          curl --fail --silent --show-error "http://127.0.0.1:8000${empty_recording_path}" > /dev/null
 
       - name: Generate bounded PostgreSQL search evidence
         shell: bash
@@ -187,6 +197,7 @@ jobs:
           VS03_ARTIST_PATH: ${{ steps.fixture.outputs.artist_path }}
           VS03_RELEASE_PATH: ${{ steps.fixture.outputs.release_path }}
           VS03_RECORDING_PATH: ${{ steps.fixture.outputs.recording_path }}
+          VS03_EMPTY_RECORDING_PATH: ${{ steps.fixture.outputs.empty_recording_path }}
           VS03_EVIDENCE_DIR: artifacts/vs03-search
           VS03_EVIDENCE_SHA: ${{ env.EVIDENCE_SHA }}
         run: node scripts/capture_vs03_search.mjs
@@ -207,6 +218,7 @@ jobs:
           ARTIST_PATH: ${{ steps.fixture.outputs.artist_path }}
           RELEASE_PATH: ${{ steps.fixture.outputs.release_path }}
           RECORDING_PATH: ${{ steps.fixture.outputs.recording_path }}
+          EMPTY_RECORDING_PATH: ${{ steps.fixture.outputs.empty_recording_path }}
         run: |
           {
             echo "### VS-03 PostgreSQL-first discovery and destination journey evidence"
@@ -217,8 +229,9 @@ jobs:
             echo "- Destination URL validation, duplicate prevention and verified-only public projection: passed"
             echo "- Artist -> Release relationship is derived from canonical structured credits"
             echo "- Journey: \`${ARTIST_PATH}\` -> \`${RELEASE_PATH}\` -> \`${RECORDING_PATH}\` -> deterministic external destination fixture"
+            echo "- Destination empty state: \`${EMPTY_RECORDING_PATH}\`"
             echo "- PHPStan discovery/Artist/Recording/Destination boundaries: passed"
-            echo "- Browser renders: search + Artist + Release + Recording destination chooser + no-results at 390x844 and 1440x1024"
+            echo "- Browser renders: search + Artist + Release + destination-present Recording + destination-empty Recording + no-results at 390x844 and 1440x1024"
             echo "- Search evidence includes EXPLAIN ANALYZE plus bounded CI latency; it is not production-scale benchmark evidence"
             echo "- Live provider traffic, provider-production approval, dedicated search-index and production deployment remain outside this workflow"
             echo "- Evidence artifact: \`vs03-discovery-${EVIDENCE_SHA}\`"
