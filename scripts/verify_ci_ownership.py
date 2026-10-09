@@ -68,11 +68,7 @@ def main() -> int:
         if "scripts/verify_project_os.py" in content
     )
     if verify_owners != ["project-os.yml"]:
-        fail(
-            errors,
-            "scripts/verify_project_os.py must be owned only by project-os.yml; "
-            f"found {verify_owners}",
-        )
+        fail(errors, "scripts/verify_project_os.py must be owned only by project-os.yml; " f"found {verify_owners}")
 
     for name, content in contents.items():
         runners = re.findall(r"^\s*runs-on:\s*(\S+)\s*$", content, flags=re.MULTILINE)
@@ -139,6 +135,8 @@ def main() -> int:
         "ref: main",
         "scripts/roadmap_reconcile.py",
         "merged_at=$merged_at",
+        "source-runs.json",
+        "jq --arg merged_at",
         ".created_at <= $merged_at",
         "project-governance.yml",
         "project-os.yml",
@@ -171,10 +169,7 @@ def main() -> int:
     if "cancel-in-progress: false" not in work:
         fail(errors, "work-management-sync.yml: mutating reconciliation must be serialized")
 
-    token_owners = sorted(
-        name for name, content in contents.items()
-        if "PROJECT_SYNC_TOKEN" in content
-    )
+    token_owners = sorted(name for name, content in contents.items() if "PROJECT_SYNC_TOKEN" in content)
     if token_owners != ["project-projection-sync.yml"]:
         fail(errors, f"PROJECT_SYNC_TOKEN must have one workflow owner; found {token_owners}")
 
