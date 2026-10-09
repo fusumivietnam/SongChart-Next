@@ -98,7 +98,7 @@ final class DestinationLinkTest extends TestCase
             $recording->id,
             'Fixture Unsafe',
             'listen',
-            'javascript:alert(1)',
+            'ftp://media.example.test/recordings/signals-at-dawn',
             'vs-03c deterministic fixture',
         );
     }
