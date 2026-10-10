@@ -32,6 +32,9 @@ The VS-03a discovery sub-slice was implemented in [PR #81](https://github.com/fu
 <!-- reconciliation:pr-85 -->
 VS-03b1 journey continuity was implemented and exact-head verified in PR #85: canonical Artist pages now expose bounded deterministic Release relationships derived from structured credits, completing the Artist -> Release -> Recording navigation path without inferred/name-only joins.
 
+<!-- reconciliation:pr-88 -->
+VS-03c provider destinations were implemented and exact-head verified in PR #88 under ADR-0014: structured destination links are persisted with provenance/verification semantics, public Recording pages expose verified-only external destinations and honest empty states, and browser evidence covers destination-present/destination-empty narrow/wide states. Live provider production traffic remains unactivated.
+
 ## VS-04 — launch proof
 Accessible responsive SEO pages, privacy/support/correction minimum, dependency/secret scan, tested restore and rollback, production-equivalent migrations, health/incident runbooks and release approval. No declaration of launch without evidence.
 
