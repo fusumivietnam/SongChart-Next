@@ -1,0 +1,24 @@
+{
+  "authority_questions": [
+    {"q": "What file owns capability lifecycle status?", "expect": ["governance/CAPABILITY_MAP.json"]},
+    {"q": "Where is vertical-slice scope and acceptance defined?", "expect": ["docs/roadmap/VERTICAL_SLICES.md"]},
+    {"q": "What decision defines the single VPS Docker production baseline?", "expect": ["docs/adr/ADR-0015-single-vps-docker-production-baseline.md"]},
+    {"q": "Where is production release readiness and the G5 stop boundary documented?", "expect": ["docs/operations/VS04_RELEASE_READINESS.md"]},
+    {"q": "Where is MusicBrainz provider usage policy defined?", "expect": ["docs/providers/MUSICBRAINZ.md"]},
+    {"q": "What registry owns documentation freshness relationships?", "expect": ["governance/DOCUMENTATION_REGISTRY.json"]},
+    {"q": "Where is search-index lifecycle state recorded?", "expect": ["governance/CAPABILITY_MAP.json"]},
+    {"q": "Where are technology lifecycle choices registered?", "expect": ["governance/TECHNOLOGY_REGISTRY.json"]},
+    {"q": "How is GitHub Actions workflow ownership governed?", "expect": ["docs/operations/CI_WORKFLOW_OWNERSHIP.md", "scripts/verify_ci_ownership.py"]},
+    {"q": "Where is the visual and UX design authority?", "expect": ["design/DESIGN_AUTHORITY.md"]}
+  ],
+  "impact_probes": [
+    {"q": "If production deployment lifecycle changes, which documentation should be reviewed?", "expect": ["docs/operations/VS04_RELEASE_READINESS.md", "docs/operations/VPS_PRODUCTION.md", "README.md"]},
+    {"q": "If MusicBrainz production posture changes, which policy documentation should be reviewed?", "expect": ["docs/providers/MUSICBRAINZ.md", "docs/providers/PROVIDER_POLICY.md"]},
+    {"q": "If documentation generation ownership changes, which project OS documentation should be reviewed?", "expect": ["docs/operations/DOCUMENTATION_GOVERNANCE.md", "governance/DOCUMENTATION_REGISTRY.json"]}
+  ],
+  "contradiction_probes": [
+    {"q": "deployment target selected versus deployment still unselected or blocked", "expect_any": ["docs/adr/ADR-0015-single-vps-docker-production-baseline.md", "docs/operations/VS04_RELEASE_READINESS.md", "README.md"]},
+    {"q": "capability lifecycle wording conflicts with current production-deploy status", "expect_any": ["governance/CAPABILITY_MAP.json", "docs/generated/CAPABILITY_STATUS.md", "docs/operations/VS04_RELEASE_READINESS.md"]},
+    {"q": "CI or governance test wording that can become stale after an authority decision", "expect_any": ["tests/governance", "scripts/verify_project_os.py", "scripts/docs_verify.py"]}
+  ]
+}
