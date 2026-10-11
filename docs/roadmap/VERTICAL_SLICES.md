@@ -47,5 +47,8 @@ VS-04a public launch-support surfaces were implemented and exact-head verified i
 <!-- reconciliation:pr-111 -->
 VS-04b G3 release-candidate evidence was implemented and exact-head verified in PR #111: a repository-owned high-confidence tracked-secret scan and runtime .env tracking guard now complement Foundation-owned locked dependency audits, license inventory, provenance, production-target validation and source/image SBOMs on the same exact SHA. This is release-candidate evidence only and does not activate production deployment.
 
+<!-- reconciliation:pr-113 -->
+VS-04c PostgreSQL recovery proof was implemented and exact-head verified in PR #113: deterministic canonical fixtures survive logical pg_dump/drop-create/pg_restore with byte-identical normalized identity/relationship/destination/migration snapshots, followed by a disposable one-step migration rollback and fully-up forward re-apply. Temporary dumps are not retained and no production recovery claim is made.
+
 ## Later / activated only
 Flutter, public SDK/MCP, Kestra, advanced analytics, chart ranking, recommendation, external plugin runtime, schema registry, distributed infrastructure and premium billing. Record trigger evidence before adoption.

@@ -236,24 +236,21 @@
         "canonical-music-core"
       ],
       "implementation": "database/migrations",
-      "scope": "VS-01a and VS-02 instantiate canonical Artist, Work, Recording, Release, Release Group, release structure, credits, relationships and external identity persistence on PostgreSQL 18.6 with idempotent deterministic fixture import and integrity constraints. Backup/restore and production persistence gates remain separate. VS-03c adds structured SongChart-owned destination-link persistence attached to canonical Release/Recording subjects; provider URLs remain navigation evidence rather than canonical identity.",
+      "scope": "VS-01a and VS-02 instantiate canonical Artist, Work, Recording, Release, Release Group, release structure, credits, relationships and external identity persistence on PostgreSQL 18.6 with idempotent deterministic fixture import and integrity constraints. Backup/restore and production persistence gates remain separate. VS-03c adds structured SongChart-owned destination-link persistence attached to canonical Release/Recording subjects; provider URLs remain navigation evidence rather than canonical identity. VS-04c adds exact-SHA disposable PostgreSQL logical backup/recreate/restore verification with deterministic canonical snapshot equality and a bounded one-step migration rollback/forward-reapply rehearsal; production persistence, PITR and managed backup remain deployment-gated.",
       "decision": "docs/adr/ADR-0013-vs-02-release-recording-credits-model.md",
       "verification_evidence": {
         "type": "github-actions",
-        "pr": 88,
-        "head_sha": "e626c4e503af75a8d6597330bfa20d5217b5a873",
-        "merge_sha": "f866e508664ff9a27d97758c2e1e6539d1dc7585",
+        "pr": 113,
+        "head_sha": "9ccc01723426f088b689ecacf991b1e183ec0c89",
+        "merge_sha": "cb0b02dd573bdea102dc788f413fe41e9438c84c",
         "workflows": [
-          "Foundation application checks #37957838132",
-          "Foundation visual render verification #37957838218",
-          "Project OS contracts #37957838298",
-          "Project governance #37957838185",
-          "Roadmap health #37957838125",
-          "VS-01a Artist verification #37957838221",
-          "VS-02 Release Recording verification #37957838211",
-          "VS-03 discovery journey verification #37957838187"
+          "Foundation application checks #38123751505",
+          "Project OS contracts #38123751484",
+          "Project governance #38123751498",
+          "Roadmap health #38123751482",
+          "VS-04 launch proof verification #38123751506"
         ],
-        "verified_at": "2026-10-09"
+        "verified_at": "2026-10-11"
       },
       "verification_history": [
         {
@@ -285,6 +282,20 @@
             "VS-03 discovery journey verification #37957838187"
           ],
           "verified_at": "2026-10-09"
+        },
+        {
+          "type": "github-actions",
+          "pr": 113,
+          "head_sha": "9ccc01723426f088b689ecacf991b1e183ec0c89",
+          "merge_sha": "cb0b02dd573bdea102dc788f413fe41e9438c84c",
+          "workflows": [
+            "Foundation application checks #38123751505",
+            "Project OS contracts #38123751484",
+            "Project governance #38123751498",
+            "Roadmap health #38123751482",
+            "VS-04 launch proof verification #38123751506"
+          ],
+          "verified_at": "2026-10-11"
         }
       ]
     },
