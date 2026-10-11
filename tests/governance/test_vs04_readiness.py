@@ -12,7 +12,7 @@ class Vs04ReadinessContractTest(unittest.TestCase):
             "HTTP 503",
             "no database hostname",
             "Stop and escalation conditions",
-            "Production launch/recovery claims additionally require G5 evidence after #69 is resolved",
+            "real G5 environment/deployment evidence recorded under #69",
         ):
             self.assertIn(phrase, text)
 
@@ -25,20 +25,21 @@ class Vs04ReadinessContractTest(unittest.TestCase):
             "Provider data and canonical identity",
             "Secrets",
             "Health information disclosure",
-            "Until #69 selects a target and G5 verifies it",
+            "Until #69 records real G5 environment/deployment evidence",
         ):
             self.assertIn(phrase, text)
 
-    def test_release_record_fails_closed_before_g5(self) -> None:
+    def test_release_record_fails_closed_before_real_g5(self) -> None:
         text = Path("docs/operations/VS04_RELEASE_READINESS.md").read_text()
         for phrase in (
             "launch is not declared",
             "G2 — public product/read journey",
             "G3 — security and release candidate",
             "G4 — operational and recovery readiness",
+            "G5a — deployable single-VPS package",
             "STOP before production deployment",
-            "must not close #69",
-            "must not promote `production-deploy` out of candidate",
+            "Issue #69 remains open",
+            "must not be described as `deployed`",
         ):
             self.assertIn(phrase, text)
 
