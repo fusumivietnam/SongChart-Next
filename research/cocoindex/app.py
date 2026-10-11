@@ -53,10 +53,18 @@ def _iter_chunks(text: str):
             break
 
 
+def _relative_repo_path(path: Path) -> str:
+    resolved = path.resolve()
+    try:
+        return resolved.relative_to(CORPUS).as_posix()
+    except ValueError as exc:
+        raise ValueError(f"indexed file escaped staged corpus: {resolved}") from exc
+
+
 @coco.fn(memo=True)
 async def process_file(file: FileLike, table: sqlite.TableTarget[RepoChunk]) -> None:
     text = await file.read_text()
-    relative_path = str(file.file_path.path)
+    relative_path = _relative_repo_path(Path(file.file_path.path))
     embedder = coco.use_context(EMBEDDER)
     for start, end, chunk_text in _iter_chunks(text):
         chunk_id = hashlib.sha256(f"{relative_path}:{start}:{end}".encode()).hexdigest()
