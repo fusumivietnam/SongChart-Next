@@ -37,7 +37,7 @@ Project governance protocols and evidence ownership: [Project Control](docs/oper
 Git owns code and authored decisions; PostgreSQL owns canonical product data where installed; GitHub Issues/Projects own execution work when configured. Generated docs and AI contexts are **read-only projections** of their declared sources. A proposal is not an installed dependency, an approved design, a completed feature or a production release.
 
 ## Current delivery frontier
-Use live roadmap Issues plus the Capability Map to select the next executable work. At this repository revision, VS-03 parent acceptance still requires explicit reconciliation of any remaining Home/discovery scope before VS-04 launch-proof work can be treated as the next completed slice. Production target selection remains a separate decision.
+VS-04 G2/G3/G4 launch-proof scope is exact-SHA verified and reconciled in repository authority. This does **not** declare a production launch. The next production-facing boundary is the separately gated deployment-target decision in #69; G5 work must not begin until a target is explicitly approved and production artifact/migration/health/smoke/rollback evidence can be recorded. Other candidate/watch capabilities remain inactive until their owning authority and activation triggers are satisfied.
 
 ## Verification
 Run `python3 scripts/verify_project_os.py` to validate project registry links and lifecycle claims (Python standard library only).
