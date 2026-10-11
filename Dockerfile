@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Development stays ergonomic; production is deliberately minimal and is not yet a deployable web stack.
+# Development stays ergonomic; production is split into app (PHP-FPM) and web (Nginx + public assets) images.
 FROM php:8.4-fpm-bookworm AS php-extension-builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev libicu-dev libonig-dev libzip-dev libsqlite3-dev \
@@ -84,3 +84,11 @@ RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framewor
 USER www-data
 EXPOSE 9000
 CMD ["php-fpm"]
+
+# Nginx stable 1.30.5 is the reviewed G5a HTTP baseline. The release pipeline must
+# record immutable image digests; the tag here is build provenance, not release identity.
+FROM nginx:1.30.5-alpine AS production-web
+COPY deploy/nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY public /var/www/html/public
+COPY --from=frontend-build /var/www/html/public/build /var/www/html/public/build
+EXPOSE 8080
