@@ -41,5 +41,8 @@ VS-03b2 Home discovery was implemented and exact-head verified in PR #101: `/` i
 ## VS-04 — launch proof
 Accessible responsive SEO pages, privacy/support/correction minimum, dependency/secret scan, tested restore and rollback, production-equivalent migrations, health/incident runbooks and release approval. No declaration of launch without evidence.
 
+<!-- reconciliation:pr-106 -->
+VS-04a public launch-support surfaces were implemented and exact-head verified in PR #106: About/Privacy/Terms/Disclaimer/Support/Corrections share one accessible responsive anatomy with canonical metadata, real footer links, deterministic robots/sitemap and safe external issue-tracker correction/support actions. This is launch-proof evidence only and does not activate deployment.
+
 ## Later / activated only
 Flutter, public SDK/MCP, Kestra, advanced analytics, chart ranking, recommendation, external plugin runtime, schema registry, distributed infrastructure and premium billing. Record trigger evidence before adoption.
