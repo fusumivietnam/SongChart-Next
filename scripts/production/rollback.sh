@@ -28,7 +28,7 @@ COMPOSE=(docker compose --env-file "$ENV_FILE" -f compose.production.yaml)
 "${COMPOSE[@]}" ps
 
 APP_URL=$(awk -F= '$1=="APP_URL" {print substr($0, index($0,"=")+1)}' "$ENV_FILE" | tail -n1)
-scripts/production/smoke.sh "$APP_URL"
+bash scripts/production/smoke.sh "$APP_URL"
 
 cat <<'EOF'
 Application/web image rollback completed.
