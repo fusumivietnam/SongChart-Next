@@ -9,7 +9,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `project-governance.yml` | governance regression suite, read-only status snapshot, CI ownership verifier | contents read |
 | `project-os.yml` | sole owner of `verify_project_os.py` and required `verify` context | contents read |
 | `roadmap-health.yml` | live Issue/PR roadmap reconciliation health, unreconciled-merge detection and required `health` context; runs on every main push | contents/issues/PR/actions read |
-| `roadmap-reconcile.yml` | serialized post-merge proposal writer; creates/updates a factual reconciliation PR, waits for normal PR-associated protected checks and safe-merges only after fail-closed gates | default `GITHUB_TOKEN` is repository/PR read-only; mutations use only `ROADMAP_RECONCILE_TOKEN`; Project PAT is forbidden |
+| `roadmap-reconcile.yml` | serialized post-merge proposal writer; creates/updates a factual reconciliation PR, waits for normal PR-associated protected checks and safe-merges only after fail-closed gates | default `GITHUB_TOKEN` is repository/PR read-only; checkout must not persist it into Git; mutations use only `ROADMAP_RECONCILE_TOKEN`; Project PAT is forbidden |
 | `project-projection-sync.yml` | serialized Project #2 field/item projection | read-only repository token + `PROJECT_SYNC_TOKEN` |
 | `work-management-sync.yml` | declared labels and explicitly managed milestones | contents read + issues write; no Project PAT |
 | `foundation-app.yml` | Docker app/PostgreSQL/tests/audit/SBOM/production-target evidence | contents read |
@@ -29,6 +29,8 @@ This contract defines who owns each CI concern and the controls that prevent wor
 
 A dedicated credential is required because GitHub intentionally suppresses workflow recursion caused by the default `GITHUB_TOKEN`; manually dispatched checks can be successful but still remain `expected` for branch protection because they are not normal pull-request checks. The dedicated credential makes generated PR creation and branch updates emit normal `pull_request` `opened/synchronize` events. Branch protection therefore remains authoritative rather than being bypassed or weakened.
 
+The trusted-main checkout must set `persist-credentials: false`. Otherwise `actions/checkout` installs an `http.extraheader` carrying the default `GITHUB_TOKEN`; Git then prefers that header over the dedicated-token remote URL and the generated branch push is incorrectly authenticated as `github-actions[bot]`.
+
 If `ROADMAP_RECONCILE_TOKEN` is absent, the writer must fail before repository mutation and report the missing credential. Manual/connected-app reconciliation remains valid but is not considered full autonomous operation.
 
 ## Invariants
@@ -39,7 +41,7 @@ If `ROADMAP_RECONCILE_TOKEN` is absent, the writer must fail before repository m
 4. Roadmap health runs on every main push so implementation-only merges cannot hide roadmap drift.
 5. Every job has a bounded timeout, uses `ubuntu-24.04`, and external Actions are pinned to full commit SHAs.
 6. `PROJECT_SYNC_TOKEN` is owned only by `project-projection-sync.yml`.
-7. `ROADMAP_RECONCILE_TOKEN` is owned only by `roadmap-reconcile.yml` and never substitutes for the Project token.
+7. `ROADMAP_RECONCILE_TOKEN` is owned only by `roadmap-reconcile.yml`; trusted checkout persists no default Git credential; this token never substitutes for the Project token.
 8. Work-management reconciliation is serialized and never receives either specialized mutation token unless its own contract explicitly changes later.
 9. `roadmap-reconcile.yml` never writes protected `main` directly; it only writes its generated branch and PR.
 10. Automatic reconciliation rejects new roadmap/product decisions, provider/technology activation, deployment effects, lifecycle demotion, candidate/watch promotion and unknown capabilities.
