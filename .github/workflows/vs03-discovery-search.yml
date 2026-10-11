@@ -3,6 +3,7 @@ name: VS-03 discovery journey verification
 on:
   pull_request:
     paths:
+      - app/Http/Controllers/HomeController.php
       - app/Http/Controllers/SearchController.php
       - app/Music/Discovery/**
       - app/Music/Artists/ArtistReadView.php
@@ -10,6 +11,7 @@ on:
       - app/Music/Destinations/**
       - app/Models/**
       - database/**
+      - resources/js/pages/home/**
       - resources/js/pages/search/**
       - resources/js/pages/artists/show.tsx
       - resources/js/pages/recordings/show.tsx
@@ -23,6 +25,7 @@ on:
   push:
     branches: [main]
     paths:
+      - app/Http/Controllers/HomeController.php
       - app/Http/Controllers/SearchController.php
       - app/Music/Discovery/**
       - app/Music/Artists/ArtistReadView.php
@@ -30,6 +33,7 @@ on:
       - app/Music/Destinations/**
       - app/Models/**
       - database/**
+      - resources/js/pages/home/**
       - resources/js/pages/search/**
       - resources/js/pages/artists/show.tsx
       - resources/js/pages/recordings/show.tsx
@@ -114,7 +118,7 @@ jobs:
               tests/Feature/DestinationLinkTest.php
 
       - name: Verify VS-03 source types
-        run: docker compose exec -T app php -d memory_limit=512M vendor/bin/phpstan analyse app/Music/Discovery app/Music/Artists/ArtistReadView.php app/Music/Recordings/RecordingReadView.php app/Music/Destinations app/Http/Controllers/SearchController.php
+        run: docker compose exec -T app php -d memory_limit=512M vendor/bin/phpstan analyse app/Music/Discovery app/Music/Artists/ArtistReadView.php app/Music/Recordings/RecordingReadView.php app/Music/Destinations app/Http/Controllers/HomeController.php app/Http/Controllers/SearchController.php
 
       - name: Build production-style frontend assets
         run: docker compose exec -T app pnpm run build
@@ -170,7 +174,8 @@ jobs:
           echo "release_path=$release_path" >> "$GITHUB_OUTPUT"
           echo "recording_path=$recording_path" >> "$GITHUB_OUTPUT"
           echo "empty_recording_path=$empty_recording_path" >> "$GITHUB_OUTPUT"
-          curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-connrefused 'http://127.0.0.1:8000/search?q=Aster%20Echo' > /dev/null
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-connrefused 'http://127.0.0.1:8000/' > /dev/null
+          curl --fail --silent --show-error 'http://127.0.0.1:8000/search?q=Aster%20Echo' > /dev/null
           curl --fail --silent --show-error "http://127.0.0.1:8000${artist_path}" > /dev/null
           curl --fail --silent --show-error "http://127.0.0.1:8000${release_path}" > /dev/null
           curl --fail --silent --show-error "http://127.0.0.1:8000${recording_path}" > /dev/null
@@ -224,14 +229,17 @@ jobs:
             echo "### VS-03 PostgreSQL-first discovery and destination journey evidence"
             echo
             echo "- Source revision: \`${EVIDENCE_SHA}\`"
+            echo "- Deterministic Home discovery projection over canonical Artist/Release/Recording data: passed"
             echo "- PostgreSQL mixed-entity search, Artist relationship and destination contracts: passed"
-            echo "- Exact/prefix/substring deterministic ranking: passed"
+            echo "- Exact/prefix/substring deterministic search ranking: passed"
             echo "- Destination URL validation, duplicate prevention and verified-only public projection: passed"
+            echo "- Home discovery semantics are bounded/alphabetical and explicitly non-recommendation/non-popularity"
             echo "- Artist -> Release relationship is derived from canonical structured credits"
-            echo "- Journey: \`${ARTIST_PATH}\` -> \`${RELEASE_PATH}\` -> \`${RECORDING_PATH}\` -> deterministic external destination fixture"
+            echo "- Journey: \`/\` -> \`/search?q=Aster%20Echo\` -> \`${ARTIST_PATH}\` -> \`${RELEASE_PATH}\` -> \`${RECORDING_PATH}\` -> deterministic external destination fixture"
             echo "- Destination empty state: \`${EMPTY_RECORDING_PATH}\`"
-            echo "- PHPStan discovery/Artist/Recording/Destination boundaries: passed"
-            echo "- Browser renders: search + Artist + Release + destination-present Recording + destination-empty Recording + no-results at 390x844 and 1440x1024"
+            echo "- PHPStan discovery/Home/Artist/Recording/Destination boundaries: passed"
+            echo "- Browser renders: Home + Search + Artist + Release + destination-present Recording + destination-empty Recording + no-results at 390x844 and 1440x1024"
+            echo "- Browser evidence checks search landmarks, skip links and canonical journey hrefs"
             echo "- Search evidence includes EXPLAIN ANALYZE plus bounded CI latency; it is not production-scale benchmark evidence"
             echo "- Live provider traffic, provider-production approval, dedicated search-index and production deployment remain outside this workflow"
             echo "- Evidence artifact: \`vs03-discovery-${EVIDENCE_SHA}\`"
