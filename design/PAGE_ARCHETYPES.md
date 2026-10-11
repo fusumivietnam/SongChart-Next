@@ -8,16 +8,16 @@ This inventory prevents every URL from becoming a bespoke design. Status applies
 | Entity detail | Artist | approved Foundation | Artist normal + long-name baselines approved |
 | Entity detail extension | Release, Recording, Credits | candidate | must reuse Artist hierarchy; Release contract exists but rendered approval belongs to VS-02 |
 | Search/results | result list, same-name disambiguation, empty, error | approved Foundation | loading/filter/pagination remain candidate extensions |
-| Discovery/list | Home, category, tag, browse/discovery lists | candidate | VS-03 scope; reuse shell + list/result primitives |
+| Discovery/list | Home, category, tag, browse/discovery lists | candidate | VS-03 Home implementation is verified; generalized category/tag anatomy remains candidate |
 | Editorial index | News/Updates, posts list | candidate | collection/list anatomy; not MVP-critical unless activated |
 | Editorial article | post/article detail | candidate | long-form reading width + metadata + related navigation |
-| Document/legal | About, Terms, Privacy, Disclaimer, Community/Contribution guide | candidate | one document anatomy, not separate bespoke layouts |
-| Form/action | Contact, support request, correction/report flow | candidate | correction is MVP-relevant; contact/support may be launch support surface |
+| Document/legal | About, Terms, Privacy, Disclaimer | approved VS-04a | one readable document anatomy under the approved shell; evidence/decision in Issue #105 and `design/decisions/VS04_SUPPORTING_SURFACES_APPROVAL.md` |
+| Form/action | Support and correction guidance | approved VS-04a bounded subset | current action is safe external issue-tracker navigation only; submission forms and authenticated review remain candidate/separately scoped |
 | Review/status | correction submitted/pending/rejected/accepted messaging | candidate | public submission never implies direct canonical write |
-| Utility/navigation | Sitemap/help | candidate | simple grouped navigation + search/help affordance |
+| Utility/navigation | fixed-route sitemap/help | approved VS-04a bounded subset | deterministic fixed public routes only; generalized browse sitemap remains candidate |
 | Utility/error | 404, 403, 500/service unavailable | candidate | reuse common error-state component; no playful treatment that obscures recovery |
 | Loading/skeleton | entity/search/list loading | candidate | no fabricated values; preserve final layout hierarchy |
-| Provider destination chooser | external permitted destinations | candidate | VS-03; explicit external destination and rights/provenance treatment |
+| Provider destination chooser | external permitted destinations | candidate | VS-03 implementation is verified; generalized provider-choice extensions remain candidate |
 | Auth/editorial | internal login/review/admin | separately scoped | upstream auth scaffold is not public product design authority |
 
 ## Minimum public page set before launch proof
@@ -31,19 +31,19 @@ The product charter and roadmap imply the following representative journeys must
 - Privacy/support/legal minimum needed for launch.
 - 404 and service failure/recovery.
 
-## Candidate supporting content pages
+## Supporting content routes
 
-To keep the public site coherent when these are activated, map them to the shared archetypes instead of inventing new visual systems:
+Activated VS-04a supporting routes reuse shared anatomy rather than bespoke visual systems:
 
 - `/about` -> Document/legal.
 - `/terms` -> Document/legal.
 - `/privacy` -> Document/legal.
 - `/disclaimer` -> Document/legal.
-- `/contact` or `/support` -> Form/action.
-- `/sitemap` -> Utility/navigation.
-- `/news` or `/posts` -> Editorial index.
-- `/news/{slug}` -> Editorial article.
-- `/category/{slug}` / `/tag/{slug}` -> Discovery/list or editorial index depending content ownership.
+- `/support` -> bounded Form/action guidance + external issue tracker.
+- `/corrections` -> bounded Form/action guidance + external issue tracker; never direct canonical write.
+- `/sitemap.xml` -> bounded Utility/navigation machine-readable fixed-route projection.
+
+Editorial/category/tag pages and transactional support/review flows remain candidate until separately activated.
 
 ## Approval rule
 

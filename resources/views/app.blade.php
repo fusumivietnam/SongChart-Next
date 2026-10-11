@@ -44,5 +44,24 @@
     </head>
     <body class="font-sans antialiased">
         <x-inertia::app />
+
+        @unless(request()->routeIs('dashboard') || request()->is('settings/*'))
+            <footer class="border-t border-slate-300 bg-white text-slate-700" aria-label="Site information">
+                <div class="mx-auto flex max-w-[72rem] flex-col gap-4 px-4 py-7 text-sm sm:px-6 md:flex-row md:items-center md:justify-between">
+                    <p class="font-medium text-slate-900">SongChart Next</p>
+                    <nav aria-label="Supporting information">
+                        <ul class="flex flex-wrap gap-x-4 gap-y-2">
+                            <li><a class="rounded-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" href="{{ route('about') }}">About</a></li>
+                            <li><a class="rounded-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" href="{{ route('privacy') }}">Privacy</a></li>
+                            <li><a class="rounded-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" href="{{ route('terms') }}">Terms</a></li>
+                            <li><a class="rounded-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" href="{{ route('disclaimer') }}">Disclaimer</a></li>
+                            <li><a class="rounded-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" href="{{ route('support') }}">Support</a></li>
+                            <li><a class="rounded-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" href="{{ route('corrections') }}">Corrections</a></li>
+                            <li><a class="rounded-sm hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" href="{{ route('sitemap') }}">Sitemap</a></li>
+                        </ul>
+                    </nav>
+                </div>
+            </footer>
+        @endunless
     </body>
 </html>

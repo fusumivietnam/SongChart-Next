@@ -12,14 +12,14 @@ EXPECTED = {
     "foundation-visual.yml", "project-governance.yml", "project-os.yml",
     "project-projection-sync.yml", "roadmap-health.yml", "roadmap-reconcile.yml",
     "vs01a-artist.yml", "vs01b-musicbrainz.yml", "vs02-release-recording.yml",
-    "vs03-discovery-search.yml", "work-management-sync.yml",
+    "vs03-discovery-search.yml", "vs04-launch-proof.yml", "work-management-sync.yml",
 }
 RETIRED = {"docker-scaffold.yml"}
 PR_MAIN_EVIDENCE = {
     "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
     "foundation-visual.yml", "project-governance.yml", "project-os.yml",
     "vs01a-artist.yml", "vs01b-musicbrainz.yml", "vs02-release-recording.yml",
-    "vs03-discovery-search.yml",
+    "vs03-discovery-search.yml", "vs04-launch-proof.yml",
 }
 
 
