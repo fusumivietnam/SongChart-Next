@@ -5,11 +5,13 @@ on:
     paths:
       - .env.example
       - .gitignore
+      - app/Http/Controllers/HealthController.php
       - app/Http/Controllers/SiteDocumentController.php
       - app/Http/Controllers/SeoController.php
       - resources/js/pages/site/**
       - resources/views/app.blade.php
       - routes/web.php
+      - tests/Feature/HealthEndpointTest.php
       - tests/Feature/PublicLaunchSurfacesTest.php
       - tests/governance/test_tracked_secret_scan.py
       - tests/governance/test_vs04_*.py
@@ -26,11 +28,13 @@ on:
     paths:
       - .env.example
       - .gitignore
+      - app/Http/Controllers/HealthController.php
       - app/Http/Controllers/SiteDocumentController.php
       - app/Http/Controllers/SeoController.php
       - resources/js/pages/site/**
       - resources/views/app.blade.php
       - routes/web.php
+      - tests/Feature/HealthEndpointTest.php
       - tests/Feature/PublicLaunchSurfacesTest.php
       - tests/governance/test_tracked_secret_scan.py
       - tests/governance/test_vs04_*.py
@@ -54,7 +58,7 @@ permissions:
 jobs:
   verify-vs04:
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 45
     env:
       EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       POSTGRES_PASSWORD: ci-ephemeral-only
@@ -78,13 +82,14 @@ jobs:
           grep -F 'Foundation application checks' docs/operations/VS04_RELEASE_CANDIDATE_EVIDENCE.md >/dev/null
           grep -F 'not that SongChart Next is launched or deployed' docs/operations/VS04_RELEASE_CANDIDATE_EVIDENCE.md >/dev/null
 
-      - name: Verify recovery runbook boundaries
+      - name: Verify recovery and readiness documentation contracts
         shell: bash
         run: |
           test -s scripts/vs04_recovery_snapshot.php
           grep -F 'disposable CI infrastructure' docs/operations/VS04_RECOVERY_ROLLBACK.md >/dev/null
           grep -F 'not verify production persistence' docs/operations/VS04_RECOVERY_ROLLBACK.md >/dev/null
           grep -F 'dump is temporary runner state only' docs/operations/VS04_RECOVERY_ROLLBACK.md >/dev/null
+          python3 -m unittest tests.governance.test_vs04_readiness -v
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v3.11.1
@@ -119,7 +124,7 @@ jobs:
           docker compose exec -T app php artisan key:generate --force
           docker compose exec -T app php artisan migrate --force
 
-      - name: Verify public launch HTTP contracts
+      - name: Verify public launch and health feature contracts
         shell: bash
         run: |
           docker compose exec -T \
@@ -130,10 +135,12 @@ jobs:
             -e DB_DATABASE=songchart \
             -e DB_USERNAME=songchart \
             -e DB_PASSWORD=ci-ephemeral-only \
-            app php artisan test tests/Feature/PublicLaunchSurfacesTest.php
+            app php artisan test \
+              tests/Feature/PublicLaunchSurfacesTest.php \
+              tests/Feature/HealthEndpointTest.php
 
-      - name: Verify launch surface source types
-        run: docker compose exec -T app php -d memory_limit=512M vendor/bin/phpstan analyse app/Http/Controllers/SiteDocumentController.php app/Http/Controllers/SeoController.php
+      - name: Verify launch and health source types
+        run: docker compose exec -T app php -d memory_limit=512M vendor/bin/phpstan analyse app/Http/Controllers/SiteDocumentController.php app/Http/Controllers/SeoController.php app/Http/Controllers/HealthController.php
 
       - name: Build production-style frontend assets
         run: docker compose exec -T app pnpm run build
@@ -147,6 +154,51 @@ jobs:
           curl --fail --silent --show-error http://127.0.0.1:8000/sitemap.xml | tee /tmp/sitemap.xml
           grep -F '<urlset' /tmp/sitemap.xml
           grep -F '/corrections</loc>' /tmp/sitemap.xml
+
+      - name: Verify application and database health behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf artifacts/vs04-health
+          mkdir -p artifacts/vs04-health
+
+          healthy_code="$(curl --silent --show-error --output artifacts/vs04-health/healthy.json --write-out '%{http_code}' --retry 5 --retry-delay 2 --retry-connrefused http://127.0.0.1:8000/health)"
+          test "$healthy_code" = 200
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          assert json.loads(Path('artifacts/vs04-health/healthy.json').read_text()) == {'status': 'ok'}
+          PY
+
+          docker compose stop db
+          unavailable_code="$(curl --silent --show-error --output artifacts/vs04-health/unavailable.json --write-out '%{http_code}' http://127.0.0.1:8000/health)"
+          test "$unavailable_code" = 503
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          body = Path('artifacts/vs04-health/unavailable.json').read_text()
+          assert json.loads(body) == {'status': 'unavailable'}
+          lowered = body.lower()
+          for forbidden in ('postgres', 'pgsql', 'sqlstate', 'exception', 'password', 'host', '5432', 'laravel', 'php'):
+              assert forbidden not in lowered
+          PY
+
+          docker compose up -d --no-build --wait db
+          recovered_code="$(curl --silent --show-error --output artifacts/vs04-health/recovered.json --write-out '%{http_code}' --retry 10 --retry-delay 2 --retry-connrefused http://127.0.0.1:8000/health)"
+          test "$recovered_code" = 200
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          assert json.loads(Path('artifacts/vs04-health/recovered.json').read_text()) == {'status': 'ok'}
+          PY
+          printf '%s\n' \
+            "source_sha=${EVIDENCE_SHA}" \
+            "healthy_http=200" \
+            "database_outage_http=503" \
+            "database_recovery_http=200" \
+            "generic_body_contract=passed" \
+            "production_evidence=false" \
+            > artifacts/vs04-health/result.txt
 
       - name: Confirm browser availability
         shell: bash
@@ -252,6 +304,15 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      - name: Preserve VS-04 health evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: vs04-health-${{ env.EVIDENCE_SHA }}
+          path: artifacts/vs04-health/
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Publish evidence summary
         if: success()
         shell: bash
@@ -263,16 +324,18 @@ jobs:
             echo "- High-confidence tracked-secret scan + fixture tests: passed; matched values are never emitted"
             echo "- Runtime .env tracked-file guard: passed"
             echo "- About/Privacy/Terms/Disclaimer/Support/Corrections HTTP contracts: passed"
+            echo "- DB-aware health contract: 200 healthy, 503 during actual disposable PostgreSQL outage, 200 after recovery; response body remained generic"
+            echo "- Incident/threat/release-readiness contract tests: passed"
             echo "- Deterministic robots.txt and fixed-route sitemap.xml: passed"
-            echo "- PHPStan supporting controllers and production-style frontend build: passed"
+            echo "- PHPStan supporting/health controllers and production-style frontend build: passed"
             echo "- Browser evidence: six supporting surfaces at 390x844 and 1440x1024"
             echo "- PostgreSQL logical backup + database recreation + restore: passed"
             echo "- Canonical Artist/Release/Recording/relationship/destination/migration snapshot equality: passed"
             echo "- One-step disposable migration rollback + forward re-apply to fully-up state: passed"
             echo "- Temporary database dump was deleted and is not retained as an artifact"
             echo "- Foundation application checks separately own locked audits, licenses, provenance, production-target validation and SBOMs and must pass on this same exact SHA"
-            echo "- This is G3/G4 launch-proof evidence for tested scope only; it is not production deployment, PITR, RPO/RTO or G5 evidence"
-            echo "- Evidence artifacts: \`vs04-launch-${EVIDENCE_SHA}\`, \`vs04-recovery-${EVIDENCE_SHA}\`"
+            echo "- G2/G3/G4 tested scope is ready; launch is NOT declared and production-deploy remains candidate until #69 + G5 evidence"
+            echo "- Evidence artifacts: \`vs04-launch-${EVIDENCE_SHA}\`, \`vs04-recovery-${EVIDENCE_SHA}\`, \`vs04-health-${EVIDENCE_SHA}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Show runtime logs on failure
