@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = ROOT / ".github" / "workflows"
 EXPECTED = {
     "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
-    "foundation-visual.yml", "project-governance.yml", "project-os.yml",
+    "foundation-visual.yml", "g5-vps-baseline.yml", "project-governance.yml", "project-os.yml",
     "project-projection-sync.yml", "roadmap-health.yml", "roadmap-reconcile.yml",
     "vs01a-artist.yml", "vs01b-musicbrainz.yml", "vs02-release-recording.yml",
     "vs03-discovery-search.yml", "vs04-launch-proof.yml", "work-management-sync.yml",
@@ -17,7 +17,7 @@ EXPECTED = {
 RETIRED = {"docker-scaffold.yml"}
 PR_MAIN_EVIDENCE = {
     "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
-    "foundation-visual.yml", "project-governance.yml", "project-os.yml",
+    "foundation-visual.yml", "g5-vps-baseline.yml", "project-governance.yml", "project-os.yml",
     "vs01a-artist.yml", "vs01b-musicbrainz.yml", "vs02-release-recording.yml",
     "vs03-discovery-search.yml", "vs04-launch-proof.yml",
 }
@@ -95,6 +95,13 @@ def main() -> int:
     for name, job in (("project-governance.yml", "governance:"), ("project-os.yml", "verify:"), ("roadmap-health.yml", "health:")):
         if job not in contents.get(name, ""):
             errors.append(f"{name}: required branch-protection job {job[:-1]} missing")
+
+    g5 = contents.get("g5-vps-baseline.yml", "")
+    for required in ("compose.production.yaml", "--target production", "--target production-web", "scripts/production/smoke.sh", "Verify private service exposure"):
+        if required not in g5:
+            errors.append(f"g5-vps-baseline.yml: missing production-package control: {required}")
+    if "secrets." in g5:
+        errors.append("g5-vps-baseline.yml: disposable baseline verification must not consume repository production secrets")
 
     if errors:
         print("CI ownership verification failed:")
