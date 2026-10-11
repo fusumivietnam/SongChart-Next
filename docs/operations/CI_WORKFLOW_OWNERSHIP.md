@@ -19,6 +19,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `vs02-release-recording.yml` | VS-02 Release/Recording/Credits canonical relationships, PostgreSQL integration, canonical redirects and narrow/wide browser evidence | contents read |
 | `vs03-discovery-search.yml` | VS-03 PostgreSQL-first discovery, journey continuity and deterministic provider-destination evidence | contents read |
 | `vs04-launch-proof.yml` | VS-04 launch-support and later release/recovery evidence; starts with public legal/support/correction/SEO surfaces and must not claim production deployment | contents read |
+| `g5-vps-baseline.yml` | single-VPS production-package verification: production app/web image builds, Compose topology, private service exposure and disposable health/smoke evidence; never performs a real VPS deployment | contents read |
 | `design-review-contract.yml` | one-command local Design Authority review contract | contents read |
 | `codespaces-contract.yml` | devcontainer/Codespaces developer-shell contract | contents read |
 
@@ -52,6 +53,7 @@ If `ROADMAP_RECONCILE_TOKEN` is absent, the writer must fail before repository m
 14. Generated reconciliation branches are deleted only after successful merge; Project #2 refresh happens afterward and remains derived-only.
 15. Live provider production access, public API/search-index activation and production deployment remain outside roadmap automation authority.
 16. `vs04-launch-proof.yml` owns launch-proof evidence only; passing it may support G3/G4 claims for tested scope but never supplies G5 production-deployment evidence by itself.
+17. `g5-vps-baseline.yml` may verify deployable production packaging in disposable CI, but it never proves a VPS exists, never receives production credentials and never promotes `production-deploy` to deployed.
 
 ## Automated drift check
 
