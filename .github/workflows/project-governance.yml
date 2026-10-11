@@ -22,6 +22,10 @@ jobs:
           ref: ${{ env.EVIDENCE_SHA }}
       - name: Run governance regression tests
         run: python3 -m unittest discover -s tests/governance -v
+      - name: Verify documentation registry and freshness
+        run: |
+          python3 scripts/docs_verify.py
+          python3 scripts/docs_generate.py --check
       - name: Verify CI workflow ownership
         run: python3 scripts/verify_ci_ownership.py
       - name: Generate read-only status snapshot
