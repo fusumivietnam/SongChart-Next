@@ -66,9 +66,9 @@ def main() -> int:
     for required in (
         "types: [closed, edited]", "issue_comment:", "github.event.comment.body == '/roadmap-reconcile'",
         "workflow_dispatch:", "contents: read", "pull-requests: read", "actions: write",
-        "secrets.ROADMAP_RECONCILE_TOKEN", "Do not reuse PROJECT_SYNC_TOKEN", "git push --force-with-lease",
-        "any(.pull_requests[]?; .number == $pr)", "source-runs.json", ".created_at <= $merged_at",
-        "project-projection-sync.yml",
+        "persist-credentials: false", "secrets.ROADMAP_RECONCILE_TOKEN", "Do not reuse PROJECT_SYNC_TOKEN",
+        "git push --force-with-lease", "any(.pull_requests[]?; .number == $pr)", "source-runs.json",
+        ".created_at <= $merged_at", "project-projection-sync.yml",
     ):
         if required not in reconcile:
             errors.append(f"roadmap-reconcile.yml: missing safe-writer control: {required}")
