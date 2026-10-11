@@ -6,7 +6,7 @@ labels: []
 assignees: []
 ---
 
-**Slice ID:** FOUNDATION / VS-01a / VS-01b / VS-02 / VS-03 / VS-04 / Later
+**Slice ID:** FOUNDATION / VS-01a / VS-01b / VS-02 / VS-03 / VS-04 / VS-05 / VS-06 / Later
 **Capability ID(s):**
 **Blocked by:** none / #issue(s)
 **Lifecycle claim:** none — Issue state does not change Capability Map
