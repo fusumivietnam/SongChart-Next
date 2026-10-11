@@ -41,13 +41,52 @@ final class DiscoverySearchTest extends TestCase
                 ->has('search.items', 0));
     }
 
-    public function test_home_is_the_same_primary_discovery_entry(): void
+    public function test_home_renders_honest_empty_discovery_without_canonical_data(): void
     {
         $this->get('/')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->component('search/index')
-                ->where('search.query', ''));
+                ->component('home/index')
+                ->has('discovery.artists', 0)
+                ->has('discovery.releases', 0)
+                ->has('discovery.recordings', 0));
+    }
+
+    public function test_home_artist_discovery_is_bounded_and_deterministic(): void
+    {
+        foreach (['Delta', 'Alpha', 'Charlie', 'Bravo'] as $name) {
+            Artist::query()->create([
+                'name' => $name,
+                'slug' => strtolower($name),
+                'type' => 'Group',
+            ]);
+        }
+
+        $this->get('/')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('home/index')
+                ->has('discovery.artists', 3)
+                ->where('discovery.artists.0.name', 'Alpha')
+                ->where('discovery.artists.1.name', 'Bravo')
+                ->where('discovery.artists.2.name', 'Charlie'));
+    }
+
+    public function test_fixture_home_exposes_canonical_artist_release_and_recording_links(): void
+    {
+        $this->importFixture();
+        $artist = Artist::query()->where('name', 'Aster Echo')->firstOrFail();
+        $release = Release::query()->where('title', 'Signals at Dawn')->firstOrFail();
+
+        $this->get('/')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('home/index')
+                ->where('discovery.artists.0.name', 'Aster Echo')
+                ->where('discovery.artists.0.path', route('artists.show', ['artist' => $artist->id, 'slug' => $artist->slug], false))
+                ->where('discovery.releases.0.name', 'Signals at Dawn')
+                ->where('discovery.releases.0.path', route('releases.show', ['release' => $release->id, 'slug' => $release->slug], false))
+                ->has('discovery.recordings', 2));
     }
 
     public function test_fixture_search_returns_disambiguated_release_and_recording_canonical_links(): void
