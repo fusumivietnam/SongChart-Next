@@ -1,0 +1,1 @@
+cocoindex[sqlite,sentence_transformers]==1.0.25
