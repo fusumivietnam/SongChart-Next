@@ -3,28 +3,44 @@ name: VS-04 launch proof verification
 on:
   pull_request:
     paths:
+      - .env.example
+      - .gitignore
       - app/Http/Controllers/SiteDocumentController.php
       - app/Http/Controllers/SeoController.php
       - resources/js/pages/site/**
       - resources/views/app.blade.php
       - routes/web.php
       - tests/Feature/PublicLaunchSurfacesTest.php
+      - tests/governance/test_tracked_secret_scan.py
+      - tests/governance/test_vs04_*.py
       - scripts/capture_vs04_launch.mjs
+      - scripts/scan_tracked_secrets.py
+      - scripts/vs04_*.py
       - design/**
       - docs/operations/**
+      - docs/security/VS04_*.md
+      - .github/workflows/foundation-app.yml
       - .github/workflows/vs04-launch-proof.yml
   push:
     branches: [main]
     paths:
+      - .env.example
+      - .gitignore
       - app/Http/Controllers/SiteDocumentController.php
       - app/Http/Controllers/SeoController.php
       - resources/js/pages/site/**
       - resources/views/app.blade.php
       - routes/web.php
       - tests/Feature/PublicLaunchSurfacesTest.php
+      - tests/governance/test_tracked_secret_scan.py
+      - tests/governance/test_vs04_*.py
       - scripts/capture_vs04_launch.mjs
+      - scripts/scan_tracked_secrets.py
+      - scripts/vs04_*.py
       - design/**
       - docs/operations/**
+      - docs/security/VS04_*.md
+      - .github/workflows/foundation-app.yml
       - .github/workflows/vs04-launch-proof.yml
   workflow_dispatch:
 
@@ -48,6 +64,19 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ env.EVIDENCE_SHA }}
+
+      - name: Verify tracked-secret guard contracts
+        shell: bash
+        run: |
+          python3 -m unittest tests.governance.test_tracked_secret_scan -v
+          python3 scripts/scan_tracked_secrets.py
+          tracked_env="$(git ls-files '.env' '.env.*' | grep -v '^.env.example$' || true)"
+          if [ -n "$tracked_env" ]; then
+            echo "Tracked runtime .env file detected; paths intentionally withheld from summary." >&2
+            exit 1
+          fi
+          grep -F 'Foundation application checks' docs/operations/VS04_RELEASE_CANDIDATE_EVIDENCE.md >/dev/null
+          grep -F 'not that SongChart Next is launched or deployed' docs/operations/VS04_RELEASE_CANDIDATE_EVIDENCE.md >/dev/null
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v3.11.1
@@ -138,17 +167,19 @@ jobs:
         shell: bash
         run: |
           {
-            echo "### VS-04a public launch-support evidence"
+            echo "### VS-04 launch-proof evidence"
             echo
             echo "- Source revision: \`${EVIDENCE_SHA}\`"
+            echo "- High-confidence tracked-secret scan + fixture tests: passed; matched values are never emitted"
+            echo "- Runtime .env tracked-file guard: passed"
             echo "- About/Privacy/Terms/Disclaimer/Support/Corrections HTTP contracts: passed"
             echo "- Correction path preserves review-before-canonical-change semantics"
             echo "- Deterministic robots.txt and fixed-route sitemap.xml: passed"
             echo "- PHPStan supporting controllers: passed"
             echo "- Production-style frontend build: passed"
             echo "- Browser evidence: six supporting surfaces at 390x844 and 1440x1024"
-            echo "- Browser contract checks skip link, search landmark, metadata, footer and safe external issue-tracker actions"
-            echo "- This is launch-proof evidence only; it is not production deployment or G5 evidence"
+            echo "- Foundation application checks separately own locked audits, licenses, provenance, production-target validation and SBOMs and must pass on this same exact SHA"
+            echo "- This is G3/G4 launch-proof evidence for tested scope only; it is not production deployment or G5 evidence"
             echo "- Evidence artifact: \`vs04-launch-${EVIDENCE_SHA}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
