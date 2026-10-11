@@ -38,7 +38,8 @@ function rows(string $table, array $columns, array $orderBy): array
 $snapshot = [
     'schema_version' => 1,
     'migrations' => rows('migrations', ['migration', 'batch'], ['migration']),
-    'artists' => rows('artists', ['id', 'name', 'slug', 'sort_name', 'disambiguation', 'country_code', 'artist_type'], ['id']),
+    'artists' => rows('artists', ['id', 'name', 'slug', 'type', 'country_code', 'disambiguation'], ['id']),
+    'external_identities' => rows('external_identities', ['artist_id', 'provider', 'entity_type', 'external_id', 'source_name', 'provenance'], ['artist_id', 'provider', 'entity_type', 'external_id']),
     'release_groups' => rows('release_groups', ['id', 'title', 'slug', 'primary_type', 'disambiguation'], ['id']),
     'releases' => rows('releases', ['id', 'release_group_id', 'title', 'slug', 'status', 'country_code', 'release_year', 'release_month', 'release_day', 'date_precision', 'barcode'], ['id']),
     'recordings' => rows('recordings', ['id', 'title', 'slug', 'length_ms', 'disambiguation'], ['id']),
