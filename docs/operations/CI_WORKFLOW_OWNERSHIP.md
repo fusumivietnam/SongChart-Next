@@ -12,6 +12,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `roadmap-reconcile.yml` | serialized post-merge proposal writer; creates/updates a factual reconciliation PR, waits for normal PR-associated protected checks and safe-merges only after fail-closed gates | default `GITHUB_TOKEN` is repository/PR read-only; checkout must not persist it into Git; mutations use only `ROADMAP_RECONCILE_TOKEN`; Project PAT is forbidden |
 | `project-projection-sync.yml` | serialized Project #2 field/item projection | read-only repository token + `PROJECT_SYNC_TOKEN` |
 | `work-management-sync.yml` | declared labels and explicitly managed milestones | contents read + issues write; no Project PAT |
+| `research-cocoindex.yml` | bounded local-only CocoIndex repository-context benchmark; preserves derived timing/retrieval evidence and never makes lifecycle decisions | contents read; no repository secrets |
 | `foundation-app.yml` | Docker app/PostgreSQL/tests/audit/SBOM/production-target evidence | contents read |
 | `foundation-visual.yml` | deterministic Foundation design render evidence | contents read |
 | `vs01a-artist.yml` | VS-01a canonical Artist PostgreSQL integration, canonical URL and narrow/wide browser evidence | contents read |
@@ -54,6 +55,7 @@ If `ROADMAP_RECONCILE_TOKEN` is absent, the writer must fail before repository m
 15. Live provider production access, public API/search-index activation and production deployment remain outside roadmap automation authority.
 16. `vs04-launch-proof.yml` owns launch-proof evidence only; passing it may support G3/G4 claims for tested scope but never supplies G5 production-deployment evidence by itself.
 17. `g5-vps-baseline.yml` may verify deployable production packaging in disposable CI, but it never proves a VPS exists, never receives production credentials and never promotes `production-deploy` to deployed.
+18. `research-cocoindex.yml` may prove a disposable local research pipeline runs and retain benchmark evidence, but semantic retrieval quality is never a merge-blocking decision and the workflow cannot promote technology/capability lifecycle or consume secrets.
 
 ## Automated drift check
 

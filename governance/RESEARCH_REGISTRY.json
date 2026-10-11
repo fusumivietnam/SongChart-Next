@@ -15,6 +15,17 @@
       ],
       "decision_ref": "docs/providers/MUSICBRAINZ.md",
       "superseded_by": null
+    },
+    {
+      "id": "RES-0002",
+      "title": "CocoIndex derived repository context and documentation-impact evaluation",
+      "source": "docs/research/RES-0002-cocoindex-repository-context.md",
+      "status": "evaluated",
+      "capability_ids": [
+        "project-os"
+      ],
+      "decision_ref": null,
+      "superseded_by": null
     }
   ]
 }

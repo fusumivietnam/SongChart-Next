@@ -1,0 +1,84 @@
+name: Research CocoIndex spike
+on:
+  pull_request:
+    paths:
+      - 'research/cocoindex/**'
+      - 'docs/research/RES-0002-cocoindex-repository-context.md'
+      - 'governance/RESEARCH_REGISTRY.json'
+      - '.github/workflows/research-cocoindex.yml'
+      - 'scripts/verify_ci_ownership.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: research-cocoindex-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+jobs:
+  research-cocoindex:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Check out exact evidence revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.EVIDENCE_SHA }}
+      - name: Build disposable research image
+        run: docker build -f research/cocoindex/Dockerfile -t songchart-cocoindex-spike:${EVIDENCE_SHA} .
+      - name: Run incremental repository-context benchmark
+        run: |
+          mkdir -p artifacts/cocoindex-spike
+          docker run --rm \
+            -v "$PWD/artifacts/cocoindex-spike:/evidence" \
+            songchart-cocoindex-spike:${EVIDENCE_SHA} \
+            python research/cocoindex/benchmark.py --output /evidence/benchmark.json
+      - name: Verify evidence structure and safety boundary
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('artifacts/cocoindex-spike/benchmark.json').read_text())
+          assert report['tool']['version'] == '1.0.25'
+          assert report['tool']['upstream_tag_commit'] == '17c84f1a0f9bc5b0b4e1d8ebabb28bde79c4afa3'
+          assert report['boundaries']['derived_only'] is True
+          assert report['boundaries']['production_dependency'] is False
+          assert report['boundaries']['merge_blocking_semantic_judgement'] is False
+          assert report['corpus']['files'] > 0
+          assert report['corpus']['indexed_chunks'] > 0
+          print(json.dumps(report['timings_seconds'], indent=2))
+          print(json.dumps({k: report['quality'][k] for k in (
+              'authority_hit_rate_at_5',
+              'impact_mean_precision_at_5',
+              'impact_mean_recall_at_5',
+              'impact_false_positive_proxy',
+              'contradiction_retrieval_hit_rate_at_10',
+          )}, indent=2))
+          PY
+      - name: Publish research summary
+        run: |
+          python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          import os
+          from pathlib import Path
+          r = json.loads(Path('artifacts/cocoindex-spike/benchmark.json').read_text())
+          q = r['quality']
+          print('## CocoIndex repository-context spike')
+          print(f"- exact SHA: `{os.environ['EVIDENCE_SHA']}`")
+          print(f"- corpus: {r['corpus']['files']} files / {r['corpus']['indexed_chunks']} chunks")
+          print(f"- initial update: {r['timings_seconds']['initial']} s")
+          print(f"- incremental Markdown: {r['timings_seconds']['incremental_markdown']} s")
+          print(f"- incremental source: {r['timings_seconds']['incremental_source']} s")
+          print(f"- authority hit@5: {q['authority_hit_rate_at_5']:.3f}")
+          print(f"- impact recall@5: {q['impact_mean_recall_at_5']:.3f}")
+          print(f"- contradiction retrieval hit@10: {q['contradiction_retrieval_hit_rate_at_10']:.3f}")
+          print('- semantic quality is research evidence only; it does not block merge or change authority')
+          PY
+      - name: Preserve research evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cocoindex-spike-${{ env.EVIDENCE_SHA }}
+          path: artifacts/cocoindex-spike/benchmark.json
+          if-no-files-found: error
+          retention-days: 14
