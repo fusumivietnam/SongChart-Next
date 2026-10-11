@@ -22,4 +22,4 @@ if [[ -z "$APP_URL" ]]; then
   exit 3
 fi
 
-scripts/production/smoke.sh "$APP_URL"
+bash scripts/production/smoke.sh "$APP_URL"
