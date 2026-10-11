@@ -1,6 +1,6 @@
 # VS-04 public launch threat model
 
-Status: bounded pre-deployment threat model for the currently activated public SongChart surfaces. Deployment-specific controls remain unknown until #69 is resolved.
+Status: bounded pre-deployment threat model for the currently activated public SongChart surfaces. ADR-0015 selects the initial single-VPS Docker deployment package, but concrete environment controls remain unproven until #69 records real G5 deployment evidence.
 
 ## Assets and trust boundaries
 
@@ -14,7 +14,7 @@ Trust boundaries:
 4. SongChart public destination links → third-party websites after the user navigates away;
 5. public GitHub support/correction issues → human review → any later canonical mutation;
 6. CI/repository credentials → GitHub workflows and approved repository mutations;
-7. future deployment platform/network/database services — currently unselected and therefore not asserted as controlled.
+7. production VPS/network/database services — architecture selected, but concrete host/provider/account/network controls are not asserted until G5 environment evidence exists.
 
 ## Current threats and controls
 
@@ -31,20 +31,20 @@ Support/correction actions currently use the public repository issue tracker. Co
 Provider IDs, names and URLs are evidence, not canonical SongChart identity. Name-only joins and provider overwrite of canonical semantics are prohibited. Live/commercial provider access remains governed by provider-policy/rights gates.
 
 ### Secrets
-Runtime `.env` files must not be tracked. The repository-owned high-confidence scanner fails closed for common credential formats without printing matched values. Dependency/provenance/SBOM evidence is exact-SHA. Rotation/revocation remains the credential owner's action through the relevant provider/platform; no production secret store is assumed before deployment selection.
+Runtime `.env` files must not be tracked. The repository-owned high-confidence scanner fails closed for common credential formats without printing matched values. Dependency/provenance/SBOM evidence is exact-SHA. ADR-0015 requires production secrets outside Git; actual injection/rotation controls remain part of the concrete G5 environment evidence.
 
 ### Canonical database and destructive operations
-PostgreSQL is canonical. VS-04 recovery exercises dump/restore and one-step migration rollback only on disposable CI infrastructure. Production destructive migration, restore/PITR, retention and RPO/RTO remain release/platform-specific and cannot be inferred from CI rehearsal.
+PostgreSQL is canonical. VS-04 recovery exercises dump/restore and one-step migration rollback only on disposable CI infrastructure. The initial baseline places PostgreSQL 18.6 on the same VPS behind a private Docker network and requires off-host logical backup. Production destructive migration, restore/PITR, retention and RPO/RTO remain release/environment-specific and cannot be inferred from CI rehearsal.
 
 ### Health information disclosure
 `/health` exposes only generic `ok`/`unavailable` state and status code. Database host, credentials, SQL errors, entity data, dependency/framework versions and stack traces are not part of the contract.
 
 ## Deferred/deployment-specific risks
 
-Until #69 selects a target and G5 verifies it, the repository cannot claim controls for TLS/DNS, edge/proxy headers, production rate limits/WAF, runtime secret injection/rotation, managed PostgreSQL backup/PITR, network segmentation, immutable artifact promotion, platform IAM, production logging retention/redaction, alert delivery, deployment rollback, or production smoke behavior.
+Until #69 records real G5 environment/deployment evidence, the repository cannot claim production controls for DNS/TLS, host firewall/network exposure, production rate limits/WAF, runtime secret injection/rotation, off-host backup retention/restore in the selected environment, immutable artifact promotion, VPS IAM/access policy, production logging retention/redaction, alert delivery, deployment rollback or public production smoke behavior.
 
 Authenticated accounts/admin review, public API/SDK, search index, recommendation/ranking, provider production traffic and external workflow engines are also outside the current activated launch-proof surface.
 
 ## Review triggers
 
-Re-review this threat model before: selecting a deployment platform; enabling live provider network traffic; adding server-side destination fetching; enabling public writes/accounts/API; introducing a search index/recommendation system; changing canonical identity semantics; adding new secret-bearing services; or performing the first production deployment.
+Re-review this threat model before: provisioning/changing the production VPS or network path; enabling live provider network traffic; adding server-side destination fetching; enabling public writes/accounts/API; introducing a search index/recommendation system; changing canonical identity semantics; adding new secret-bearing services; migrating PostgreSQL to a managed service/cloud platform; or performing the first production deployment.

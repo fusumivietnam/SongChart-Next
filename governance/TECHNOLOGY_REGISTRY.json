@@ -124,7 +124,30 @@
       "source": "https://github.com/coollabsio/coolify",
       "status": "watch",
       "version_authority": "deployment manifest",
-      "license_review": "required"
+      "license_review": "required",
+      "scope": "Not selected for the initial SongChart deployment baseline. Retained only as a future watch candidate if operating needs justify an additional control plane."
+    },
+    {
+      "id": "docker-compose-production",
+      "capability": "production-deploy",
+      "source": "https://github.com/docker/compose",
+      "status": "implemented",
+      "version_authority": "Host Docker Engine/Compose versions plus compose.production.yaml; release app/web/database identities must be recorded as immutable image digests",
+      "license_review": "Docker Engine/Compose usage and license terms require operator review for the selected VPS environment",
+      "implementation": "compose.production.yaml",
+      "decision": "docs/adr/ADR-0015-single-vps-docker-production-baseline.md",
+      "scope": "Initial low-cost production packaging for one Ubuntu 24.04 LTS VPS. CI verifies topology and smoke only; no real VPS deployment is implied."
+    },
+    {
+      "id": "nginx-production-web",
+      "capability": "production-deploy",
+      "source": "https://nginx.org/",
+      "status": "implemented",
+      "version_authority": "Dockerfile production-web base tag for build provenance; immutable released web-image digest is required for G5 deployment identity",
+      "license_review": "nginx open-source 2-clause BSD license reviewed for baseline use; container-image provenance/digest must be recorded at release",
+      "implementation": "Dockerfile",
+      "decision": "docs/adr/ADR-0015-single-vps-docker-production-baseline.md",
+      "scope": "Nginx stable 1.30.5 baseline serves SongChart public assets and proxies PHP requests to the private app:9000 service. Only the web service publishes a host HTTP port."
     },
     {
       "id": "php-runtime",

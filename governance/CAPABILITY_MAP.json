@@ -373,13 +373,15 @@
     {
       "id": "production-deploy",
       "plane": "delivery",
-      "owner": "undecided",
-      "status": "candidate",
+      "owner": "songchart",
+      "status": "implemented",
       "depends_on": [
         "public-web",
         "canonical-database"
       ],
-      "implementation": null
+      "implementation": "compose.production.yaml",
+      "decision": "docs/adr/ADR-0015-single-vps-docker-production-baseline.md",
+      "scope": "The initial production deployment package is implemented and exact-head CI verified for a single Ubuntu 24.04 LTS VPS using Docker Compose, Nginx, PHP-FPM and PostgreSQL 18.6. This records deployable packaging only: no concrete VPS environment, immutable released image digest, production secret delivery, DNS/TLS, production database migration/backup, public production smoke or deployed revision evidence exists yet. Do not promote this capability to deployed until G5 production evidence is recorded."
     },
     {
       "id": "project-os",

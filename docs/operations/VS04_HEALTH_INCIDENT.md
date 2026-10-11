@@ -1,6 +1,6 @@
 # VS-04 health and incident response
 
-Status: repository-owned G4 operational runbook. It does not configure a production pager, monitoring vendor, deployment platform or production database.
+Status: repository-owned G4 operational runbook. ADR-0015 defines the initial single-VPS deployment package, but this runbook does not configure a production pager, monitoring vendor, concrete VPS environment or production database.
 
 ## Owners and entry criteria
 
@@ -29,16 +29,16 @@ Laravel's framework `/up` endpoint remains a process/framework liveness signal a
 
 ## Containment and recovery
 
-- Application-only failure: stop the release/change, restore the last known safe immutable artifact when a production deployment system is eventually activated, then re-run health/smoke checks.
+- Application-only failure: stop the release/change, restore the last known safe immutable app/web image references using the approved environment's rollback path, then re-run health/smoke checks.
 - Database connectivity failure: restore connectivity/service first; `/health` must return 200 before resuming writes or release activity.
-- Suspected canonical corruption/data loss: stop canonical writes, preserve available evidence, and follow `docs/operations/VS04_RECOVERY_ROLLBACK.md`. Production restore/PITR commands depend on the future deployment target and are not supplied by this pre-deployment runbook.
+- Suspected canonical corruption/data loss: stop canonical writes, preserve available evidence, and follow `docs/operations/VS04_RECOVERY_ROLLBACK.md`. Production restore/PITR commands remain environment/release-specific and require the recorded off-host backup plus an approved recovery plan.
 - Suspected credential exposure: do not echo or attach the credential. Stop the affected integration, rotate/revoke through the credential owner using the provider/platform control plane, and assess repository/history/log exposure separately.
 - Provider/external destination incident: disable or block the affected destination/evidence through the approved SongChart review path; do not fetch arbitrary destination URLs server-side.
 
 ## Stop and escalation conditions
 
-Escalate and stop automated recovery if the environment identity is uncertain; a destructive DB command would target non-disposable data without a release-specific approved plan; backups cannot be verified; canonical snapshots diverge; a migration is irreversible; credentials may be exposed; provider/legal policy is unclear; or production platform behavior differs from repository assumptions.
+Escalate and stop automated recovery if the environment identity is uncertain; a destructive DB command would target non-disposable data without a release-specific approved plan; backups cannot be verified; canonical snapshots diverge; a migration is irreversible; credentials may be exposed; provider/legal policy is unclear; or production environment behavior differs from repository assumptions.
 
 ## Exit criteria
 
-Do not close the incident until the triggering symptom is understood, `/health` and required smoke checks are green, canonical database state is verified for the incident scope, any compromised credential has been handled by its owner, and follow-up work/evidence is recorded in GitHub. Production launch/recovery claims additionally require G5 evidence after #69 is resolved.
+Do not close the incident until the triggering symptom is understood, `/health` and required smoke checks are green, canonical database state is verified for the incident scope, any compromised credential has been handled by its owner, and follow-up work/evidence is recorded in GitHub. Production launch/recovery claims additionally require real G5 environment/deployment evidence recorded under #69; the verified disposable package from PR #119 alone is insufficient.

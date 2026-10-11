@@ -11,11 +11,11 @@ SongChart Next is a new, independent music knowledge and discovery project. **Th
 <!-- roadmap-reconcile:start -->
 Repository lifecycle authority remains `governance/CAPABILITY_MAP.json`; planned scope remains `docs/roadmap/VERTICAL_SLICES.md`; live execution remains GitHub Issues/PRs.
 
-Latest reconciled product evidence: PR #115 — VS-04 G2/G3/G4 launch-proof scope is verified, including public support/SEO surfaces, secret/audit/SBOM evidence, PostgreSQL recovery/rollback rehearsal, DB-aware health outage/recovery and operational runbooks. Launch is not declared; production deployment remains candidate pending #69 and G5.
+Latest reconciled product evidence: PR #115 — VS-04 G2/G3/G4 launch-proof scope is verified, including public support/SEO surfaces, secret/audit/SBOM evidence, PostgreSQL recovery/rollback rehearsal, DB-aware health outage/recovery and operational runbooks. PR #119 adds the implemented and exact-head CI-verified single-VPS Docker deployment package under ADR-0015; no production VPS or deployed revision is claimed.
 <!-- roadmap-reconcile:end -->
 
 - The repository contains the approved Foundation runtime/design baseline and implemented canonical Artist, Release, Recording, Work/credits relationships, PostgreSQL-first mixed-entity discovery, Artist-to-Release journey continuity and deterministic fixture-only provider-destination rendering.
-- Live provider production access, public API, dedicated search-index, recommendation/ranking, production deployment target and deployment remain separately gated and unactivated unless their owning authorities say otherwise.
+- Live provider production access, public API, dedicated search-index and recommendation/ranking remain separately gated. The initial deployment packaging is implemented, but production environment provisioning and deployment evidence remain outstanding.
 - Do not copy old source, stage numbering, generated authority or UI by default.
 
 ## Project control (read-only status, no chat authority)
@@ -37,7 +37,7 @@ Project governance protocols and evidence ownership: [Project Control](docs/oper
 Git owns code and authored decisions; PostgreSQL owns canonical product data where installed; GitHub Issues/Projects own execution work when configured. Generated docs and AI contexts are **read-only projections** of their declared sources. A proposal is not an installed dependency, an approved design, a completed feature or a production release.
 
 ## Current delivery frontier
-VS-04 G2/G3/G4 launch-proof scope is exact-SHA verified and reconciled in repository authority. This does **not** declare a production launch. The next production-facing boundary is the separately gated deployment-target decision in #69; G5 work must not begin until a target is explicitly approved and production artifact/migration/health/smoke/rollback evidence can be recorded. Other candidate/watch capabilities remain inactive until their owning authority and activation triggers are satisfied.
+VS-04 G2/G3/G4 launch-proof scope is exact-SHA verified. ADR-0015 and PR #119 select and implement the initial low-cost deployment package: one Ubuntu 24.04 LTS VPS using Docker Compose, Nginx, PHP-FPM and PostgreSQL 18.6, without Coolify. This does **not** declare a production launch. The next boundary is real G5 environment execution: provision the VPS, record immutable app/web image digests, configure production secrets plus off-host backup, establish the intended DNS/TLS path, run production migrations, health/public smoke and rollback/recovery evidence, then record release approval. Issue #69 remains open until that production evidence exists.
 
 ## Verification
 Run `python3 scripts/verify_project_os.py` to validate project registry links and lifecycle claims (Python standard library only).
