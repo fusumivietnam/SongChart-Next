@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "authority": "governance/DOCUMENTATION_REGISTRY.json",
+  "rule": "Git and the declared source authorities own facts. Generated Markdown is a replaceable projection and must never become lifecycle authority.",
+  "projections": {
+    "capabilities": [
+      "public-web",
+      "canonical-database",
+      "production-deploy",
+      "admin-review",
+      "api-contracts",
+      "search-index",
+      "provider-adapters"
+    ],
+    "technologies": [
+      "docker-compose",
+      "postgresql",
+      "coolify"
+    ]
+  },
+  "documents": [
+    {
+      "path": "README.md",
+      "mode": "mixed",
+      "owner": "project-os",
+      "automation_owner": "roadmap-reconcile",
+      "sources": [
+        "governance/CAPABILITY_MAP.json",
+        "docs/roadmap/VERTICAL_SLICES.md"
+      ]
+    },
+    {
+      "path": "docs/roadmap/VERTICAL_SLICES.md",
+      "mode": "authored",
+      "owner": "roadmap-governance",
+      "sources": [
+        "governance/CAPABILITY_MAP.json",
+        "governance/ACTIVATION_TRIGGERS.json"
+      ]
+    },
+    {
+      "path": "docs/operations/VS04_RELEASE_READINESS.md",
+      "mode": "authored",
+      "owner": "production-deploy",
+      "sources": [
+        "governance/CAPABILITY_MAP.json",
+        "compose.production.yaml",
+        "docs/adr/ADR-0015-single-vps-docker-production-baseline.md"
+      ]
+    },
+    {
+      "path": "docs/security/VS04_THREAT_MODEL.md",
+      "mode": "authored",
+      "owner": "security-and-recovery",
+      "sources": [
+        "governance/CAPABILITY_MAP.json",
+        "compose.production.yaml"
+      ]
+    },
+    {
+      "path": "docs/operations/VPS_PRODUCTION.md",
+      "mode": "authored",
+      "owner": "production-deploy",
+      "sources": [
+        "compose.production.yaml",
+        "docs/adr/ADR-0015-single-vps-docker-production-baseline.md"
+      ]
+    },
+    {
+      "path": "docs/generated/CAPABILITY_STATUS.md",
+      "mode": "generated",
+      "owner": "project-os",
+      "generator": "capability_projection",
+      "sources": [
+        "governance/CAPABILITY_MAP.json"
+      ]
+    },
+    {
+      "path": "docs/generated/TECHNOLOGY_STATUS.md",
+      "mode": "generated",
+      "owner": "project-os",
+      "generator": "technology_projection",
+      "sources": [
+        "governance/TECHNOLOGY_REGISTRY.json"
+      ]
+    }
+  ]
+}
