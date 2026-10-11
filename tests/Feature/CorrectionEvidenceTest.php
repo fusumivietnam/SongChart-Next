@@ -102,8 +102,8 @@ final class CorrectionEvidenceTest extends TestCase
         new CorrectionEvidence(
             CorrectionSubjectType::Artist,
             (string) Str::ulid(),
-            'A correction claim with unsafe evidence.',
-            'javascript:alert(1)',
+            'A correction claim with unsupported evidence transport.',
+            'ftp://example.test/evidence',
         );
     }
 }
