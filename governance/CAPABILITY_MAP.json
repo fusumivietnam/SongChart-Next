@@ -106,22 +106,22 @@
         "canonical-music-core"
       ],
       "implementation": "resources/js/pages",
-      "scope": "VS-01a and VS-02 implement responsive public Artist, Release and Recording read pages with canonical SongChart ID+slug routes and stale-slug redirects. VS-03a adds the primary home/search discovery entry over canonical PostgreSQL Artist, Release and Recording data with deterministic exact/prefix/substring ranking, disambiguated mixed-entity results, bounded query behavior and canonical entity links. Dedicated search-index activation, official destination policy, editorial/legal surfaces and the broader MVP public journey remain incomplete. VS-03b1 adds bounded canonical Artist-to-Release relationship navigation derived from structured credits, preserving deterministic ordering/deduplication and browser-verified journey continuity. VS-03c adds a verified-only external destination chooser with explicit provider/type treatment, opener isolation, no-referrer navigation and an honest no-destination state using deterministic fixture evidence. VS-03b2 adds a dedicated SongChart Home discovery surface with first-class search entry and bounded deterministic canonical Artist/Release/Recording modules; ordering is alphabetical with stable identity tie-breakers and explicitly carries no recommendation/popularity/personalization semantics. VS-04a adds repository-owned About, Privacy, Terms, Disclaimer, Support and Corrections surfaces with a shared accessible document anatomy, real global footer links, fixed-route robots/sitemap and explicit review-before-canonical-change correction guidance.",
+      "scope": "VS-01a and VS-02 implement responsive public Artist, Release and Recording read pages with canonical SongChart ID+slug routes and stale-slug redirects. VS-03a adds the primary home/search discovery entry over canonical PostgreSQL Artist, Release and Recording data with deterministic exact/prefix/substring ranking, disambiguated mixed-entity results, bounded query behavior and canonical entity links. Dedicated search-index activation, official destination policy, editorial/legal surfaces and the broader MVP public journey remain incomplete. VS-03b1 adds bounded canonical Artist-to-Release relationship navigation derived from structured credits, preserving deterministic ordering/deduplication and browser-verified journey continuity. VS-03c adds a verified-only external destination chooser with explicit provider/type treatment, opener isolation, no-referrer navigation and an honest no-destination state using deterministic fixture evidence. VS-03b2 adds a dedicated SongChart Home discovery surface with first-class search entry and bounded deterministic canonical Artist/Release/Recording modules; ordering is alphabetical with stable identity tie-breakers and explicitly carries no recommendation/popularity/personalization semantics. VS-04a adds repository-owned About, Privacy, Terms, Disclaimer, Support and Corrections surfaces with a shared accessible document anatomy, real global footer links, fixed-route robots/sitemap and explicit review-before-canonical-change correction guidance. VS-04d adds a generic DB-aware /health readiness endpoint with exact-SHA actual PostgreSQL outage/recovery evidence and no diagnostic leakage.",
       "verification_evidence": {
         "type": "github-actions",
-        "pr": 106,
-        "head_sha": "0adbcf0b3a8a2e64cba640f51b8abf010c07f87a",
-        "merge_sha": "ab3ae9417bd044db1e324ef0a921db390ec2b117",
+        "pr": 115,
+        "head_sha": "339a3a0d5f5674c00255001555e6837ad04bcb01",
+        "merge_sha": "7750c4d4d36aa3f04dcbccc1b314cf193b8f2520",
         "workflows": [
-          "Foundation application checks #38122983935",
-          "Foundation visual render verification #38122983854",
-          "Project OS contracts #38122983908",
-          "Project governance #38122983872",
-          "Roadmap health #38122983841",
-          "VS-01a Artist verification #38122983958",
-          "VS-02 Release Recording verification #38122983838",
-          "VS-03 discovery journey verification #38122983818",
-          "VS-04 launch proof verification #38122983866"
+          "Foundation application checks #38124370628",
+          "Foundation visual render verification #38124370547",
+          "Project OS contracts #38124370539",
+          "Project governance #38124370487",
+          "Roadmap health #38124370478",
+          "VS-01a Artist verification #38124370526",
+          "VS-02 Release Recording verification #38124370570",
+          "VS-03 discovery journey verification #38124370548",
+          "VS-04 launch proof verification #38124370503"
         ],
         "verified_at": "2026-10-11"
       },
@@ -213,6 +213,24 @@
             "VS-04 launch proof verification #38122983866"
           ],
           "verified_at": "2026-10-11"
+        },
+        {
+          "type": "github-actions",
+          "pr": 115,
+          "head_sha": "339a3a0d5f5674c00255001555e6837ad04bcb01",
+          "merge_sha": "7750c4d4d36aa3f04dcbccc1b314cf193b8f2520",
+          "workflows": [
+            "Foundation application checks #38124370628",
+            "Foundation visual render verification #38124370547",
+            "Project OS contracts #38124370539",
+            "Project governance #38124370487",
+            "Roadmap health #38124370478",
+            "VS-01a Artist verification #38124370526",
+            "VS-02 Release Recording verification #38124370570",
+            "VS-03 discovery journey verification #38124370548",
+            "VS-04 launch proof verification #38124370503"
+          ],
+          "verified_at": "2026-10-11"
         }
       ]
     },
@@ -236,19 +254,23 @@
         "canonical-music-core"
       ],
       "implementation": "database/migrations",
-      "scope": "VS-01a and VS-02 instantiate canonical Artist, Work, Recording, Release, Release Group, release structure, credits, relationships and external identity persistence on PostgreSQL 18.6 with idempotent deterministic fixture import and integrity constraints. Backup/restore and production persistence gates remain separate. VS-03c adds structured SongChart-owned destination-link persistence attached to canonical Release/Recording subjects; provider URLs remain navigation evidence rather than canonical identity. VS-04c adds exact-SHA disposable PostgreSQL logical backup/recreate/restore verification with deterministic canonical snapshot equality and a bounded one-step migration rollback/forward-reapply rehearsal; production persistence, PITR and managed backup remain deployment-gated.",
+      "scope": "VS-01a and VS-02 instantiate canonical Artist, Work, Recording, Release, Release Group, release structure, credits, relationships and external identity persistence on PostgreSQL 18.6 with idempotent deterministic fixture import and integrity constraints. Backup/restore and production persistence gates remain separate. VS-03c adds structured SongChart-owned destination-link persistence attached to canonical Release/Recording subjects; provider URLs remain navigation evidence rather than canonical identity. VS-04c adds exact-SHA disposable PostgreSQL logical backup/recreate/restore verification with deterministic canonical snapshot equality and a bounded one-step migration rollback/forward-reapply rehearsal; production persistence, PITR and managed backup remain deployment-gated. VS-04d extends operational evidence with health failure/recovery behavior while preserving PostgreSQL canonical authority.",
       "decision": "docs/adr/ADR-0013-vs-02-release-recording-credits-model.md",
       "verification_evidence": {
         "type": "github-actions",
-        "pr": 113,
-        "head_sha": "9ccc01723426f088b689ecacf991b1e183ec0c89",
-        "merge_sha": "cb0b02dd573bdea102dc788f413fe41e9438c84c",
+        "pr": 115,
+        "head_sha": "339a3a0d5f5674c00255001555e6837ad04bcb01",
+        "merge_sha": "7750c4d4d36aa3f04dcbccc1b314cf193b8f2520",
         "workflows": [
-          "Foundation application checks #38123751505",
-          "Project OS contracts #38123751484",
-          "Project governance #38123751498",
-          "Roadmap health #38123751482",
-          "VS-04 launch proof verification #38123751506"
+          "Foundation application checks #38124370628",
+          "Foundation visual render verification #38124370547",
+          "Project OS contracts #38124370539",
+          "Project governance #38124370487",
+          "Roadmap health #38124370478",
+          "VS-01a Artist verification #38124370526",
+          "VS-02 Release Recording verification #38124370570",
+          "VS-03 discovery journey verification #38124370548",
+          "VS-04 launch proof verification #38124370503"
         ],
         "verified_at": "2026-10-11"
       },
@@ -294,6 +316,24 @@
             "Project governance #38123751498",
             "Roadmap health #38123751482",
             "VS-04 launch proof verification #38123751506"
+          ],
+          "verified_at": "2026-10-11"
+        },
+        {
+          "type": "github-actions",
+          "pr": 115,
+          "head_sha": "339a3a0d5f5674c00255001555e6837ad04bcb01",
+          "merge_sha": "7750c4d4d36aa3f04dcbccc1b314cf193b8f2520",
+          "workflows": [
+            "Foundation application checks #38124370628",
+            "Foundation visual render verification #38124370547",
+            "Project OS contracts #38124370539",
+            "Project governance #38124370487",
+            "Roadmap health #38124370478",
+            "VS-01a Artist verification #38124370526",
+            "VS-02 Release Recording verification #38124370570",
+            "VS-03 discovery journey verification #38124370548",
+            "VS-04 launch proof verification #38124370503"
           ],
           "verified_at": "2026-10-11"
         }
@@ -347,7 +387,8 @@
       "owner": "songchart",
       "status": "implemented",
       "depends_on": [],
-      "implementation": "governance/"
+      "implementation": "governance/",
+      "scope": "VS-04d adds repository-owned incident response, threat-model and release-readiness contracts that synthesize G2/G3/G4 without becoming a second lifecycle authority."
     },
     {
       "id": "local-docker-development",

@@ -11,7 +11,7 @@ SongChart Next is a new, independent music knowledge and discovery project. **Th
 <!-- roadmap-reconcile:start -->
 Repository lifecycle authority remains `governance/CAPABILITY_MAP.json`; planned scope remains `docs/roadmap/VERTICAL_SLICES.md`; live execution remains GitHub Issues/PRs.
 
-Latest reconciled product evidence: PR #113 — VS-04 launch proof includes disposable PostgreSQL logical backup/restore plus bounded migration rollback/forward-reapply evidence; production persistence/PITR and deployment remain separate G5 gates.
+Latest reconciled product evidence: PR #115 — VS-04 G2/G3/G4 launch-proof scope is verified, including public support/SEO surfaces, secret/audit/SBOM evidence, PostgreSQL recovery/rollback rehearsal, DB-aware health outage/recovery and operational runbooks. Launch is not declared; production deployment remains candidate pending #69 and G5.
 <!-- roadmap-reconcile:end -->
 
 - The repository contains the approved Foundation runtime/design baseline and implemented canonical Artist, Release, Recording, Work/credits relationships, PostgreSQL-first mixed-entity discovery, Artist-to-Release journey continuity and deterministic fixture-only provider-destination rendering.
