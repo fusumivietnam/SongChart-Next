@@ -1,0 +1,161 @@
+name: VS-04 launch proof verification
+
+on:
+  pull_request:
+    paths:
+      - app/Http/Controllers/SiteDocumentController.php
+      - app/Http/Controllers/SeoController.php
+      - resources/js/pages/site/**
+      - resources/views/app.blade.php
+      - routes/web.php
+      - tests/Feature/PublicLaunchSurfacesTest.php
+      - scripts/capture_vs04_launch.mjs
+      - design/**
+      - docs/operations/**
+      - .github/workflows/vs04-launch-proof.yml
+  push:
+    branches: [main]
+    paths:
+      - app/Http/Controllers/SiteDocumentController.php
+      - app/Http/Controllers/SeoController.php
+      - resources/js/pages/site/**
+      - resources/views/app.blade.php
+      - routes/web.php
+      - tests/Feature/PublicLaunchSurfacesTest.php
+      - scripts/capture_vs04_launch.mjs
+      - design/**
+      - docs/operations/**
+      - .github/workflows/vs04-launch-proof.yml
+  workflow_dispatch:
+
+concurrency:
+  group: vs04-launch-proof-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify-vs04:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      POSTGRES_PASSWORD: ci-ephemeral-only
+
+    steps:
+      - name: Check out exact evidence revision
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ env.EVIDENCE_SHA }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v3.11.1
+
+      - name: Build cached development image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v6.18.0
+        with:
+          context: .
+          target: development
+          load: true
+          tags: songchart-next:development
+          cache-from: |
+            type=gha,scope=vs04-buildkit
+            type=gha,scope=foundation-buildkit
+          cache-to: type=gha,scope=vs04-buildkit,mode=max
+
+      - name: Prepare disposable Compose environment
+        shell: bash
+        run: |
+          cp .env.example .env
+          sed -i 's/REPLACE_WITH_UNIQUE_LOCAL_PASSWORD/ci-ephemeral-only/g' .env
+          docker compose config --quiet
+
+      - name: Boot PostgreSQL and application
+        shell: bash
+        run: |
+          if ! docker compose up -d --no-build --wait db app; then
+            docker compose ps -a
+            docker compose logs --no-color --tail=160 app db
+            exit 1
+          fi
+          docker compose exec -T app php artisan key:generate --force
+          docker compose exec -T app php artisan migrate --force
+
+      - name: Verify public launch HTTP contracts
+        shell: bash
+        run: |
+          docker compose exec -T \
+            -e APP_ENV=testing \
+            -e DB_CONNECTION=pgsql \
+            -e DB_HOST=db \
+            -e DB_PORT=5432 \
+            -e DB_DATABASE=songchart \
+            -e DB_USERNAME=songchart \
+            -e DB_PASSWORD=ci-ephemeral-only \
+            app php artisan test tests/Feature/PublicLaunchSurfacesTest.php
+
+      - name: Verify launch surface source types
+        run: docker compose exec -T app php -d memory_limit=512M vendor/bin/phpstan analyse app/Http/Controllers/SiteDocumentController.php app/Http/Controllers/SeoController.php
+
+      - name: Build production-style frontend assets
+        run: docker compose exec -T app pnpm run build
+
+      - name: Verify robots and sitemap over HTTP
+        shell: bash
+        run: |
+          curl --fail --silent --show-error --retry 5 --retry-delay 2 --retry-connrefused http://127.0.0.1:8000/robots.txt | tee /tmp/robots.txt
+          grep -F 'User-agent: *' /tmp/robots.txt
+          grep -F '/sitemap.xml' /tmp/robots.txt
+          curl --fail --silent --show-error http://127.0.0.1:8000/sitemap.xml | tee /tmp/sitemap.xml
+          grep -F '<urlset' /tmp/sitemap.xml
+          grep -F '/corrections</loc>' /tmp/sitemap.xml
+
+      - name: Confirm browser availability
+        shell: bash
+        run: |
+          command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser
+          (google-chrome --version || google-chrome-stable --version || chromium --version || chromium-browser --version)
+
+      - name: Render narrow and wide launch-support evidence
+        env:
+          VS04_BASE_URL: http://127.0.0.1:8000
+          VS04_EVIDENCE_DIR: artifacts/vs04-launch
+          VS04_EVIDENCE_SHA: ${{ env.EVIDENCE_SHA }}
+        run: node scripts/capture_vs04_launch.mjs
+
+      - name: Preserve VS-04 evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: vs04-launch-${{ env.EVIDENCE_SHA }}
+          path: artifacts/vs04-launch/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Publish evidence summary
+        if: success()
+        shell: bash
+        run: |
+          {
+            echo "### VS-04a public launch-support evidence"
+            echo
+            echo "- Source revision: \`${EVIDENCE_SHA}\`"
+            echo "- About/Privacy/Terms/Disclaimer/Support/Corrections HTTP contracts: passed"
+            echo "- Correction path preserves review-before-canonical-change semantics"
+            echo "- Deterministic robots.txt and fixed-route sitemap.xml: passed"
+            echo "- PHPStan supporting controllers: passed"
+            echo "- Production-style frontend build: passed"
+            echo "- Browser evidence: six supporting surfaces at 390x844 and 1440x1024"
+            echo "- Browser contract checks skip link, search landmark, metadata, footer and safe external issue-tracker actions"
+            echo "- This is launch-proof evidence only; it is not production deployment or G5 evidence"
+            echo "- Evidence artifact: \`vs04-launch-${EVIDENCE_SHA}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Show runtime logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail=200 app db || true
+
+      - name: Cleanup disposable runtime
+        if: always()
+        run: docker compose down --volumes --remove-orphans
