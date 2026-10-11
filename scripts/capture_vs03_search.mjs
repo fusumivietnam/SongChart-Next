@@ -27,6 +27,12 @@ const viewports = [
 
 const surfaces = [
     {
+        label: 'home',
+        path: '/',
+        expected: ['SongChart Next', 'Music knowledge, from canonical data', 'Explore canonical data', 'Aster Echo', 'Signals at Dawn', 'These are not recommendations or popularity charts'],
+        expectedLinks: [artistPath, releasePath, recordingPath],
+    },
+    {
         label: 'results',
         path: '/search?q=Aster%20Echo',
         expected: ['SongChart Next', 'Music knowledge results', 'Aster Echo', 'Artist'],
@@ -85,7 +91,7 @@ function pngDimensions(path) {
 mkdirSync(evidenceDir, { recursive: true });
 const chromePath = findChrome();
 const browserVersion = spawnSync(chromePath, ['--version'], { encoding: 'utf8' }).stdout.trim();
-const evidence = { schemaVersion: 4, sourceRevision: evidenceSha, browser: browserVersion, generatedAt: new Date().toISOString(), journey: [artistPath, releasePath, recordingPath, destinationUrl], captures: [] };
+const evidence = { schemaVersion: 5, sourceRevision: evidenceSha, browser: browserVersion, generatedAt: new Date().toISOString(), journey: ['/', '/search?q=Aster%20Echo', artistPath, releasePath, recordingPath, destinationUrl], captures: [] };
 
 for (const surface of surfaces) {
     const url = new URL(surface.path, baseUrl).toString();
