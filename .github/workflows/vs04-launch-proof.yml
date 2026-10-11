@@ -15,7 +15,7 @@ on:
       - tests/governance/test_vs04_*.py
       - scripts/capture_vs04_launch.mjs
       - scripts/scan_tracked_secrets.py
-      - scripts/vs04_*.py
+      - scripts/vs04_*
       - design/**
       - docs/operations/**
       - docs/security/VS04_*.md
@@ -36,7 +36,7 @@ on:
       - tests/governance/test_vs04_*.py
       - scripts/capture_vs04_launch.mjs
       - scripts/scan_tracked_secrets.py
-      - scripts/vs04_*.py
+      - scripts/vs04_*
       - design/**
       - docs/operations/**
       - docs/security/VS04_*.md
@@ -54,7 +54,7 @@ permissions:
 jobs:
   verify-vs04:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 40
     env:
       EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       POSTGRES_PASSWORD: ci-ephemeral-only
@@ -77,6 +77,14 @@ jobs:
           fi
           grep -F 'Foundation application checks' docs/operations/VS04_RELEASE_CANDIDATE_EVIDENCE.md >/dev/null
           grep -F 'not that SongChart Next is launched or deployed' docs/operations/VS04_RELEASE_CANDIDATE_EVIDENCE.md >/dev/null
+
+      - name: Verify recovery runbook boundaries
+        shell: bash
+        run: |
+          test -s scripts/vs04_recovery_snapshot.php
+          grep -F 'disposable CI infrastructure' docs/operations/VS04_RECOVERY_ROLLBACK.md >/dev/null
+          grep -F 'not verify production persistence' docs/operations/VS04_RECOVERY_ROLLBACK.md >/dev/null
+          grep -F 'dump is temporary runner state only' docs/operations/VS04_RECOVERY_ROLLBACK.md >/dev/null
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v3.11.1
@@ -153,12 +161,94 @@ jobs:
           VS04_EVIDENCE_SHA: ${{ env.EVIDENCE_SHA }}
         run: node scripts/capture_vs04_launch.mjs
 
-      - name: Preserve VS-04 evidence
+      - name: Rehearse PostgreSQL backup and restore
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f /tmp/vs04-recovery.dump
+          rm -rf artifacts/vs04-recovery
+          mkdir -p artifacts/vs04-recovery
+
+          docker compose exec -T app php artisan migrate:fresh --force
+          docker compose exec -T app php artisan songchart:fixture:import-artist >/dev/null
+          docker compose exec -T app php artisan songchart:fixture:import-release >/dev/null
+          docker compose exec -T app php -r '
+            require "vendor/autoload.php";
+            $app = require "bootstrap/app.php";
+            $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+            $recording = App\Models\Recording::query()->where("title", "Signals at Dawn")->firstOrFail();
+            app(App\Music\Destinations\StoreDestinationLink::class)->handle(
+              "recording",
+              $recording->id,
+              "Fixture Audio",
+              "listen",
+              "https://listen.example.test/recordings/signals-at-dawn",
+              "vs-04c deterministic recovery fixture",
+              "fixture:vs04-recovery",
+              ["fixture" => true, "purpose" => "recovery"],
+              "verified",
+              new DateTimeImmutable("2026-10-11T08:00:00+00:00")
+            );
+          '
+
+          docker compose exec -T app php scripts/vs04_recovery_snapshot.php > artifacts/vs04-recovery/pre-restore.json
+          python3 -m json.tool artifacts/vs04-recovery/pre-restore.json >/dev/null
+          grep -q '"destination_links"' artifacts/vs04-recovery/pre-restore.json
+
+          docker compose exec -T db pg_dump -U songchart -d songchart -Fc > /tmp/vs04-recovery.dump
+          test -s /tmp/vs04-recovery.dump
+
+          docker compose stop app
+          docker compose exec -T db psql -U songchart -d postgres -v ON_ERROR_STOP=1 -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = 'songchart' AND pid <> pg_backend_pid();" >/dev/null
+          docker compose exec -T db dropdb -U songchart --if-exists songchart
+          docker compose exec -T db createdb -U songchart songchart
+          docker compose exec -T db pg_restore -U songchart -d songchart --no-owner --no-privileges < /tmp/vs04-recovery.dump
+
+          docker compose up -d --no-build --wait app
+          docker compose exec -T app php scripts/vs04_recovery_snapshot.php > artifacts/vs04-recovery/post-restore.json
+          python3 -m json.tool artifacts/vs04-recovery/post-restore.json >/dev/null
+          cmp artifacts/vs04-recovery/pre-restore.json artifacts/vs04-recovery/post-restore.json
+
+          docker compose exec -T app php artisan migrate:status --no-ansi > artifacts/vs04-recovery/migrate-status-restored.txt
+          ! grep -E '^\s*Pending\s' artifacts/vs04-recovery/migrate-status-restored.txt
+          sha256sum artifacts/vs04-recovery/pre-restore.json | awk '{print $1}' > artifacts/vs04-recovery/snapshot.sha256
+
+      - name: Rehearse one-step migration rollback and forward apply
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s /tmp/vs04-recovery.dump
+          docker compose exec -T app php artisan migrate:rollback --step=1 --force --no-ansi > artifacts/vs04-recovery/rollback.txt
+          grep -F '2026_10_09_000000_create_destination_links_table' artifacts/vs04-recovery/rollback.txt >/dev/null
+          docker compose exec -T app php artisan migrate --force --no-ansi > artifacts/vs04-recovery/reapply.txt
+          docker compose exec -T app php artisan migrate:status --no-ansi > artifacts/vs04-recovery/migrate-status-final.txt
+          ! grep -E '^\s*Pending\s' artifacts/vs04-recovery/migrate-status-final.txt
+          test "$(docker compose exec -T db psql -U songchart -d songchart -Atc "SELECT to_regclass('public.destination_links') IS NOT NULL" | tr -d '\r')" = t
+          printf '%s\n' \
+            "source_sha=${EVIDENCE_SHA}" \
+            "backup_restore=passed" \
+            "canonical_snapshot_match=passed" \
+            "rollback_step=1" \
+            "forward_reapply=passed" \
+            "production_evidence=false" \
+            > artifacts/vs04-recovery/result.txt
+          rm -f /tmp/vs04-recovery.dump
+
+      - name: Preserve VS-04 launch evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: vs04-launch-${{ env.EVIDENCE_SHA }}
           path: artifacts/vs04-launch/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Preserve VS-04 recovery evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: vs04-recovery-${{ env.EVIDENCE_SHA }}
+          path: artifacts/vs04-recovery/
           if-no-files-found: warn
           retention-days: 30
 
@@ -173,14 +263,16 @@ jobs:
             echo "- High-confidence tracked-secret scan + fixture tests: passed; matched values are never emitted"
             echo "- Runtime .env tracked-file guard: passed"
             echo "- About/Privacy/Terms/Disclaimer/Support/Corrections HTTP contracts: passed"
-            echo "- Correction path preserves review-before-canonical-change semantics"
             echo "- Deterministic robots.txt and fixed-route sitemap.xml: passed"
-            echo "- PHPStan supporting controllers: passed"
-            echo "- Production-style frontend build: passed"
+            echo "- PHPStan supporting controllers and production-style frontend build: passed"
             echo "- Browser evidence: six supporting surfaces at 390x844 and 1440x1024"
+            echo "- PostgreSQL logical backup + database recreation + restore: passed"
+            echo "- Canonical Artist/Release/Recording/relationship/destination/migration snapshot equality: passed"
+            echo "- One-step disposable migration rollback + forward re-apply to fully-up state: passed"
+            echo "- Temporary database dump was deleted and is not retained as an artifact"
             echo "- Foundation application checks separately own locked audits, licenses, provenance, production-target validation and SBOMs and must pass on this same exact SHA"
-            echo "- This is G3/G4 launch-proof evidence for tested scope only; it is not production deployment or G5 evidence"
-            echo "- Evidence artifact: \`vs04-launch-${EVIDENCE_SHA}\`"
+            echo "- This is G3/G4 launch-proof evidence for tested scope only; it is not production deployment, PITR, RPO/RTO or G5 evidence"
+            echo "- Evidence artifacts: \`vs04-launch-${EVIDENCE_SHA}\`, \`vs04-recovery-${EVIDENCE_SHA}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Show runtime logs on failure
@@ -189,4 +281,6 @@ jobs:
 
       - name: Cleanup disposable runtime
         if: always()
-        run: docker compose down --volumes --remove-orphans
+        run: |
+          rm -f /tmp/vs04-recovery.dump
+          docker compose down --volumes --remove-orphans
