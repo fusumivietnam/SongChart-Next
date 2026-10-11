@@ -50,5 +50,8 @@ VS-04b G3 release-candidate evidence was implemented and exact-head verified in 
 <!-- reconciliation:pr-113 -->
 VS-04c PostgreSQL recovery proof was implemented and exact-head verified in PR #113: deterministic canonical fixtures survive logical pg_dump/drop-create/pg_restore with byte-identical normalized identity/relationship/destination/migration snapshots, followed by a disposable one-step migration rollback and fully-up forward re-apply. Temporary dumps are not retained and no production recovery claim is made.
 
+<!-- reconciliation:pr-115 -->
+VS-04d operational readiness was implemented and exact-head verified in PR #115: /health proves 200 only with canonical DB connectivity, actual disposable PostgreSQL outage returns generic 503 and recovers to 200, and repository-owned incident/threat/release-readiness contracts explicitly stop before production. G2/G3/G4 tested scope is complete; G5 remains blocked by #69 and a future deployment-target decision/evidence package.
+
 ## Later / activated only
 Flutter, public SDK/MCP, Kestra, advanced analytics, chart ranking, recommendation, external plugin runtime, schema registry, distributed infrastructure and premium billing. Record trigger evidence before adoption.
