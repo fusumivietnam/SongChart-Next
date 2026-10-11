@@ -10,7 +10,7 @@ WORKFLOWS = ROOT / ".github" / "workflows"
 EXPECTED = {
     "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
     "foundation-visual.yml", "g5-vps-baseline.yml", "project-governance.yml", "project-os.yml",
-    "project-projection-sync.yml", "roadmap-health.yml", "roadmap-reconcile.yml",
+    "project-projection-sync.yml", "research-cocoindex.yml", "roadmap-health.yml", "roadmap-reconcile.yml",
     "vs01a-artist.yml", "vs01b-musicbrainz.yml", "vs02-release-recording.yml",
     "vs03-discovery-search.yml", "vs04-launch-proof.yml", "work-management-sync.yml",
 }
@@ -102,6 +102,13 @@ def main() -> int:
             errors.append(f"g5-vps-baseline.yml: missing production-package control: {required}")
     if "secrets." in g5:
         errors.append("g5-vps-baseline.yml: disposable baseline verification must not consume repository production secrets")
+
+    research = contents.get("research-cocoindex.yml", "")
+    for required in ("workflow_dispatch:", "research/cocoindex/Dockerfile", "research/cocoindex/benchmark.py", "merge_blocking_semantic_judgement", "actions/upload-artifact@"):
+        if required not in research:
+            errors.append(f"research-cocoindex.yml: missing research boundary/control: {required}")
+    if "secrets." in research:
+        errors.append("research-cocoindex.yml: local research spike must not consume repository secrets")
 
     if errors:
         print("CI ownership verification failed:")
