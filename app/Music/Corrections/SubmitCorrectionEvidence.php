@@ -21,7 +21,6 @@ final class SubmitCorrectionEvidence
             'subject_id' => $evidence->subjectId,
             'claim' => $evidence->claim,
             'evidence_url' => $evidence->evidenceUrl,
-            'status' => 'pending',
         ]));
     }
 }
