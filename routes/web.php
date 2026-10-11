@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArtistController;
+use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RecordingController;
 use App\Http\Controllers\ReleaseController;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
 Route::get('search', SearchController::class)->name('search');
+Route::get('health', HealthController::class)->name('health');
 
 Route::get('about', [SiteDocumentController::class, 'about'])->name('about');
 Route::get('privacy', [SiteDocumentController::class, 'privacy'])->name('privacy');
