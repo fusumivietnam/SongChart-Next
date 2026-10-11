@@ -1,0 +1,106 @@
+name: G5 VPS baseline verification
+
+on:
+  pull_request:
+    paths:
+      - Dockerfile
+      - compose.production.yaml
+      - deploy/**
+      - scripts/production/**
+      - docs/adr/ADR-0015-single-vps-docker-production-baseline.md
+      - docs/operations/VPS_PRODUCTION.md
+      - tests/governance/test_g5_vps_baseline.py
+      - .github/workflows/g5-vps-baseline.yml
+  push:
+    branches: [main]
+    paths:
+      - Dockerfile
+      - compose.production.yaml
+      - deploy/**
+      - scripts/production/**
+      - docs/adr/ADR-0015-single-vps-docker-production-baseline.md
+      - docs/operations/VPS_PRODUCTION.md
+      - tests/governance/test_g5_vps_baseline.py
+      - .github/workflows/g5-vps-baseline.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify-g5-vps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact evidence revision
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
+
+      - name: Verify repository contracts
+        run: python3 -m pytest -q tests/governance/test_g5_vps_baseline.py
+
+      - name: Validate shell syntax
+        run: |
+          bash -n scripts/production/deploy.sh
+          bash -n scripts/production/smoke.sh
+          bash -n scripts/production/backup.sh
+          bash -n scripts/production/rollback.sh
+
+      - name: Build production app image
+        run: docker build --target production --tag songchart-next-app:g5-test .
+
+      - name: Build production web image
+        run: docker build --target production-web --tag songchart-next-web:g5-test .
+
+      - name: Prepare disposable production environment
+        run: |
+          cat > /tmp/songchart-production.env <<EOF
+          APP_IMAGE=songchart-next-app:g5-test
+          WEB_IMAGE=songchart-next-web:g5-test
+          APP_URL=http://127.0.0.1:18080
+          APP_KEY=base64:$(openssl rand -base64 32 | tr -d '\n')
+          POSTGRES_DB=songchart
+          POSTGRES_USER=songchart
+          POSTGRES_PASSWORD=$(openssl rand -hex 32)
+          HTTP_BIND_ADDRESS=127.0.0.1
+          HTTP_PORT=18080
+          BACKUP_DIR=/tmp/songchart-backup
+          EOF
+          chmod 600 /tmp/songchart-production.env
+          docker compose --env-file /tmp/songchart-production.env -f compose.production.yaml config >/tmp/production-compose.rendered.yaml
+          ! grep -q '5173' /tmp/production-compose.rendered.yaml
+          ! grep -q '/var/www/html:' /tmp/production-compose.rendered.yaml
+
+      - name: Boot production topology
+        run: |
+          docker compose --env-file /tmp/songchart-production.env -f compose.production.yaml up -d db
+          docker compose --env-file /tmp/songchart-production.env -f compose.production.yaml run --rm app php artisan migrate --force
+          docker compose --env-file /tmp/songchart-production.env -f compose.production.yaml up -d app web
+
+      - name: Verify production health and smoke
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:18080/health | grep -q '"status":"ok"'; then
+              break
+            fi
+            if [[ "$attempt" == 30 ]]; then
+              docker compose --env-file /tmp/songchart-production.env -f compose.production.yaml ps
+              docker compose --env-file /tmp/songchart-production.env -f compose.production.yaml logs
+              exit 1
+            fi
+            sleep 2
+          done
+          bash scripts/production/smoke.sh http://127.0.0.1:18080
+
+      - name: Verify private service exposure
+        run: |
+          app_ports=$(docker inspect songchart-next-production-app-1 --format '{{json .NetworkSettings.Ports}}')
+          db_ports=$(docker inspect songchart-next-production-db-1 --format '{{json .NetworkSettings.Ports}}')
+          web_ports=$(docker inspect songchart-next-production-web-1 --format '{{json .NetworkSettings.Ports}}')
+          [[ "$app_ports" == *'9000/tcp' ]] && [[ "$app_ports" != *'HostPort'* ]]
+          [[ "$db_ports" == *'5432/tcp' ]] && [[ "$db_ports" != *'HostPort'* ]]
+          [[ "$web_ports" == *'HostPort'* ]]
+
+      - name: Cleanup disposable production topology
+        if: always()
+        run: |
+          docker compose --env-file /tmp/songchart-production.env -f compose.production.yaml down -v --remove-orphans || true
+          rm -f /tmp/songchart-production.env /tmp/production-compose.rendered.yaml
