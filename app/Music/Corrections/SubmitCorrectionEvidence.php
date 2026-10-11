@@ -16,11 +16,15 @@ final class SubmitCorrectionEvidence
             throw new InvalidArgumentException('Correction subject does not exist in the SongChart canonical database.');
         }
 
-        return DB::transaction(static fn (): CorrectionSubmission => CorrectionSubmission::query()->create([
-            'subject_type' => $evidence->subjectType,
-            'subject_id' => $evidence->subjectId,
-            'claim' => $evidence->claim,
-            'evidence_url' => $evidence->evidenceUrl,
-        ]));
+        return DB::transaction(static function () use ($evidence): CorrectionSubmission {
+            $submission = CorrectionSubmission::query()->create([
+                'subject_type' => $evidence->subjectType,
+                'subject_id' => $evidence->subjectId,
+                'claim' => $evidence->claim,
+                'evidence_url' => $evidence->evidenceUrl,
+            ]);
+
+            return $submission->refresh();
+        });
     }
 }
