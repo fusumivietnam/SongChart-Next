@@ -60,6 +60,9 @@ The approved MVP permits public correction input to feed an authenticated intern
 
 Acceptance intent: correction evidence is isolated from canonical mutation; malformed/abusive input fails safely; representative conflicting claims demonstrate whether the moderation trigger is real; any later approve/reject operation must route through SongChart application/domain validation, retain decision history and prove unauthorized users cannot mutate canonical state.
 
+<!-- reconciliation:pr-131 -->
+VS-05a correction evidence persistence was implemented and exact-head verified: typed Artist/Release/Recording canonical subjects, bounded claim/supporting-URL validation and isolated pending correction submissions are stored without a public intake route, reviewer mutation path or canonical-table write. `admin-review` remains candidate and separately activation-gated.
+
 ## VS-06 — provider metadata breadth
 Extend the already implemented provider-adapter boundary beyond the Artist-only live path toward the canonical Release, Recording, Release Group, Work and structured relationship model that VS-02 already owns. Start fixture/fake-first: typed provider claims, stable provider identifiers, normalization, idempotency, provenance/evidence retention and explicit admission into existing SongChart use cases. Do not create provider-shaped canonical tables or resolve identity by names alone.
 
