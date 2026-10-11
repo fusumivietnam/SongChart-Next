@@ -35,6 +35,9 @@ VS-03b1 journey continuity was implemented and exact-head verified in PR #85: ca
 <!-- reconciliation:pr-88 -->
 VS-03c provider destinations were implemented and exact-head verified in PR #88 under ADR-0014: structured destination links are persisted with provenance/verification semantics, public Recording pages expose verified-only external destinations and honest empty states, and browser evidence covers destination-present/destination-empty narrow/wide states. Live provider production traffic remains unactivated.
 
+<!-- reconciliation:pr-101 -->
+VS-03b2 Home discovery was implemented and exact-head verified in PR #101: `/` is a distinct SongChart-owned surface with first-class search, bounded deterministic canonical Artist/Release/Recording modules, honest empty behavior, and narrow/wide browser evidence for the complete Home -> Search -> Artist -> Release -> Recording journey. No recommendation/search-index/provider-production capability is activated.
+
 ## VS-04 — launch proof
 Accessible responsive SEO pages, privacy/support/correction minimum, dependency/secret scan, tested restore and rollback, production-equivalent migrations, health/incident runbooks and release approval. No declaration of launch without evidence.
 

@@ -106,23 +106,25 @@
         "canonical-music-core"
       ],
       "implementation": "resources/js/pages",
-      "scope": "VS-01a and VS-02 implement responsive public Artist, Release and Recording read pages with canonical SongChart ID+slug routes and stale-slug redirects. VS-03a adds the primary home/search discovery entry over canonical PostgreSQL Artist, Release and Recording data with deterministic exact/prefix/substring ranking, disambiguated mixed-entity results, bounded query behavior and canonical entity links. Dedicated search-index activation, official destination policy, editorial/legal surfaces and the broader MVP public journey remain incomplete. VS-03b1 adds bounded canonical Artist-to-Release relationship navigation derived from structured credits, preserving deterministic ordering/deduplication and browser-verified journey continuity. VS-03c adds a verified-only external destination chooser with explicit provider/type treatment, opener isolation, no-referrer navigation and an honest no-destination state using deterministic fixture evidence.",
+      "scope": "VS-01a and VS-02 implement responsive public Artist, Release and Recording read pages with canonical SongChart ID+slug routes and stale-slug redirects. VS-03a adds the primary home/search discovery entry over canonical PostgreSQL Artist, Release and Recording data with deterministic exact/prefix/substring ranking, disambiguated mixed-entity results, bounded query behavior and canonical entity links. Dedicated search-index activation, official destination policy, editorial/legal surfaces and the broader MVP public journey remain incomplete. VS-03b1 adds bounded canonical Artist-to-Release relationship navigation derived from structured credits, preserving deterministic ordering/deduplication and browser-verified journey continuity. VS-03c adds a verified-only external destination chooser with explicit provider/type treatment, opener isolation, no-referrer navigation and an honest no-destination state using deterministic fixture evidence. VS-03b2 adds a dedicated SongChart Home discovery surface with first-class search entry and bounded deterministic canonical Artist/Release/Recording modules; ordering is alphabetical with stable identity tie-breakers and explicitly carries no recommendation/popularity/personalization semantics.",
       "verification_evidence": {
         "type": "github-actions",
-        "pr": 88,
-        "head_sha": "e626c4e503af75a8d6597330bfa20d5217b5a873",
-        "merge_sha": "f866e508664ff9a27d97758c2e1e6539d1dc7585",
+        "pr": 101,
+        "head_sha": "f36205ecbf105a734c5263956f1aca3f5ee5f2a9",
+        "merge_sha": "a00efd307b41bdcff04b79de3c5a62a473b5f2bc",
         "workflows": [
-          "Foundation application checks #37957838132",
-          "Foundation visual render verification #37957838218",
-          "Project OS contracts #37957838298",
-          "Project governance #37957838185",
-          "Roadmap health #37957838125",
-          "VS-01a Artist verification #37957838221",
-          "VS-02 Release Recording verification #37957838211",
-          "VS-03 discovery journey verification #37957838187"
+          "Foundation application checks #38108770477",
+          "Foundation visual render verification #38108770449",
+          "Project OS contracts #38108759887",
+          "Project OS contracts #38108770452",
+          "Project governance #38108759885",
+          "Project governance #38108770428",
+          "Roadmap health #38108770464",
+          "VS-01a Artist verification #38108770456",
+          "VS-02 Release Recording verification #38108770451",
+          "VS-03 discovery journey verification #38108770462"
         ],
-        "verified_at": "2026-10-09"
+        "verified_at": "2026-10-11"
       },
       "verification_history": [
         {
@@ -175,6 +177,25 @@
             "VS-03 discovery journey verification #37957838187"
           ],
           "verified_at": "2026-10-09"
+        },
+        {
+          "type": "github-actions",
+          "pr": 101,
+          "head_sha": "f36205ecbf105a734c5263956f1aca3f5ee5f2a9",
+          "merge_sha": "a00efd307b41bdcff04b79de3c5a62a473b5f2bc",
+          "workflows": [
+            "Foundation application checks #38108770477",
+            "Foundation visual render verification #38108770449",
+            "Project OS contracts #38108759887",
+            "Project OS contracts #38108770452",
+            "Project governance #38108759885",
+            "Project governance #38108770428",
+            "Roadmap health #38108770464",
+            "VS-01a Artist verification #38108770456",
+            "VS-02 Release Recording verification #38108770451",
+            "VS-03 discovery journey verification #38108770462"
+          ],
+          "verified_at": "2026-10-11"
         }
       ]
     },
