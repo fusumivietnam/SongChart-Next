@@ -18,7 +18,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['subject_type', 'subject_id', 'claim', 'evidence_url', 'status'])]
+#[Fillable(['subject_type', 'subject_id', 'claim', 'evidence_url'])]
 final class CorrectionSubmission extends Model
 {
     use HasUlids;
