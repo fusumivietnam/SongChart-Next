@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 WORK = ROOT / ".cocoindex-spike"
 CORPUS = WORK / "corpus"
 DB = WORK / "index.sqlite"
+STATE_DB = WORK / "cocoindex-state"
 MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 ALLOWED = {".md", ".json", ".py", ".php", ".ts", ".tsx", ".yml", ".yaml"}
 SOURCES = [
@@ -47,6 +48,7 @@ def stage_corpus() -> int:
 
 def run_update() -> tuple[float, str]:
     env = os.environ.copy()
+    env["COCOINDEX_DB"] = str(STATE_DB)
     env["COCOINDEX_SPIKE_CORPUS"] = str(CORPUS)
     env["COCOINDEX_SPIKE_DB"] = str(DB)
     started = time.perf_counter()
