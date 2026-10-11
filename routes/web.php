@@ -5,10 +5,21 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RecordingController;
 use App\Http\Controllers\ReleaseController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SeoController;
+use App\Http\Controllers\SiteDocumentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
 Route::get('search', SearchController::class)->name('search');
+
+Route::get('about', [SiteDocumentController::class, 'about'])->name('about');
+Route::get('privacy', [SiteDocumentController::class, 'privacy'])->name('privacy');
+Route::get('terms', [SiteDocumentController::class, 'terms'])->name('terms');
+Route::get('disclaimer', [SiteDocumentController::class, 'disclaimer'])->name('disclaimer');
+Route::get('support', [SiteDocumentController::class, 'support'])->name('support');
+Route::get('corrections', [SiteDocumentController::class, 'corrections'])->name('corrections');
+Route::get('robots.txt', [SeoController::class, 'robots'])->name('robots');
+Route::get('sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 
 Route::get('artists/{artist}/{slug?}', ArtistController::class)
     ->whereUlid('artist')
