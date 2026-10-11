@@ -1,12 +1,13 @@
 <?php
 
 use App\Http\Controllers\ArtistController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RecordingController;
 use App\Http\Controllers\ReleaseController;
 use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', SearchController::class)->name('home');
+Route::get('/', HomeController::class)->name('home');
 Route::get('search', SearchController::class)->name('search');
 
 Route::get('artists/{artist}/{slug?}', ArtistController::class)
