@@ -21,8 +21,15 @@ on:
       - tests/Unit/**
       - tests/TestCase.php
       - tests/governance/test_foundation_provenance.py
+      - tests/governance/test_tracked_secret_scan.py
+      - tests/governance/test_vs04_*.py
       - scripts/foundation_provenance.py
+      - scripts/scan_tracked_secrets.py
+      - scripts/vs04_*.py
+      - docs/operations/VS04_*.md
+      - docs/security/VS04_*.md
       - .github/workflows/foundation-app.yml
+      - .github/workflows/vs04-launch-proof.yml
   push:
     branches: [main]
     paths:
@@ -45,8 +52,15 @@ on:
       - tests/Unit/**
       - tests/TestCase.php
       - tests/governance/test_foundation_provenance.py
+      - tests/governance/test_tracked_secret_scan.py
+      - tests/governance/test_vs04_*.py
       - scripts/foundation_provenance.py
+      - scripts/scan_tracked_secrets.py
+      - scripts/vs04_*.py
+      - docs/operations/VS04_*.md
+      - docs/security/VS04_*.md
       - .github/workflows/foundation-app.yml
+      - .github/workflows/vs04-launch-proof.yml
   workflow_dispatch:
 concurrency:
   group: foundation-app-${{ github.event.pull_request.number || github.sha }}
