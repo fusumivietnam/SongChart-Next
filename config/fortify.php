@@ -23,8 +23,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | Here you may specify which password broker Fortify can use when resetting
-    | passwords for your application. This must correspond to one of the password
-    | brokers configured in your "auth" configuration file.
+    | passwords for your application. This must correspond with one of the
+    | password brokers setup in your "auth" configuration file.
     |
     */
 
@@ -36,12 +36,12 @@ return [
     |--------------------------------------------------------------------------
     |
     | This value defines which model attribute should be considered as your
-    | application's "username" field. Typically, this might be the email address
-    | but you are free to change this value as needed.
+    | application's "username" field. Typically, this might be the email
+    | address of the users but you are free to change this value here as needed.
     |
-    | Out of the box, Fortify expects forgot password and reset password requests
-    | to have a field named 'email'. If the application uses another name for
-    | this field you may define it below as needed.
+    | Out of the box, Fortify expects forgot password and reset password
+    | requests to have a field named 'email'. If the application uses another
+    | name for the field you may define it below as needed.
     |
     */
 
@@ -68,8 +68,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | Here you may configure the path where users will get redirected during
-    | authentication or password reset when the operations are successful and the
-    | user is authenticated. You are free to change this value.
+    | authentication or password reset when the operations are successful and
+    | the user is authenticated. You are free to change this value.
     |
     */
 
@@ -80,9 +80,9 @@ return [
     | Fortify Routes Prefix / Subdomain
     |--------------------------------------------------------------------------
     |
-    | Here you may specify which prefix Fortify will assign to all routes that it
-    | registers. If necessary, you may change subdomain under which all of the
-    | Fortify routes will be available.
+    | Here you may specify which prefix Fortify will assign to all the routes
+    | that it registers with the application. If necessary, you may change
+    | subdomain under which all of the Fortify routes will be available.
     |
     */
 
@@ -96,8 +96,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | Here you may specify which middleware Fortify will assign to the routes
-    | that it registers. If necessary, you may change these middleware but the
-    | provided defaults are preferred.
+    | that it registers with the application. If necessary, you may change
+    | these middleware but typically this provided default is preferred.
     |
     */
 
@@ -109,8 +109,8 @@ return [
     |--------------------------------------------------------------------------
     |
     | By default, Fortify will throttle logins to five requests per minute for
-    | every email and IP address combination. You may specify custom limiters
-    | below when needed.
+    | every email and IP address combination. However, if you would like to
+    | specify a custom rate limiter to call then you may specify it here.
     |
     */
 
@@ -160,9 +160,9 @@ return [
     | Features
     |--------------------------------------------------------------------------
     |
-    | Public self-registration is intentionally disabled by the SongChart
-    | Product Charter. Authentication remains available only for workflows that
-    | genuinely require authorization, initially editorial/review operations.
+    | Some of the Fortify features are optional. You may disable the features
+    | by removing them from this array. You're free to only remove some of
+    | these features, or you can even remove all of these if you need to.
     |
     */
 
