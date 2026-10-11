@@ -11,7 +11,7 @@ SongChart Next is a new, independent music knowledge and discovery project. **Th
 <!-- roadmap-reconcile:start -->
 Repository lifecycle authority remains `governance/CAPABILITY_MAP.json`; planned scope remains `docs/roadmap/VERTICAL_SLICES.md`; live execution remains GitHub Issues/PRs.
 
-Latest reconciled product evidence: PR #101 — VS-03 Home discovery is complete through VS-03b2 with deterministic canonical Home modules and full Home-to-destination browser journey evidence; recommendation/search-index/provider production remain unactivated.
+Latest reconciled product evidence: PR #106 — VS-04 launch proof has begun with verified public legal/support/correction and fixed-route SEO surfaces; recovery/security/operational evidence and production deployment remain separate gates.
 <!-- roadmap-reconcile:end -->
 
 - The repository contains the approved Foundation runtime/design baseline and implemented canonical Artist, Release, Recording, Work/credits relationships, PostgreSQL-first mixed-entity discovery, Artist-to-Release journey continuity and deterministic fixture-only provider-destination rendering.
