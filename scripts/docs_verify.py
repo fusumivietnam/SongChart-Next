@@ -65,12 +65,15 @@ def verify(root: Path = ROOT) -> list[str]:
     projections = registry.get("projections", {})
     capability_ids = {item["id"] for item in _load(root, "governance/CAPABILITY_MAP.json")["capabilities"]}
     technology_ids = {item["id"] for item in _load(root, "governance/TECHNOLOGY_REGISTRY.json")["technologies"]}
+    projection_references_valid = True
     for capability_id in projections.get("capabilities", []):
         if capability_id not in capability_ids:
             errors.append(f"unknown projected capability: {capability_id}")
+            projection_references_valid = False
     for technology_id in projections.get("technologies", []):
         if technology_id not in technology_ids:
             errors.append(f"unknown projected technology: {technology_id}")
+            projection_references_valid = False
 
     generated_dir = root / "docs" / "generated"
     if generated_dir.exists():
@@ -79,10 +82,11 @@ def verify(root: Path = ROOT) -> list[str]:
             if relative not in generated_paths:
                 errors.append(f"unregistered generated document: {relative}")
 
-    for relative, expected in render_outputs(root).items():
-        path = root / relative
-        if not path.exists() or path.read_text(encoding="utf-8") != expected:
-            errors.append(f"stale generated document: {relative}")
+    if projection_references_valid:
+        for relative, expected in render_outputs(root).items():
+            path = root / relative
+            if not path.exists() or path.read_text(encoding="utf-8") != expected:
+                errors.append(f"stale generated document: {relative}")
 
     readme = next((item for item in documents if item.get("path") == "README.md"), None)
     if readme is None or readme.get("mode") != "mixed" or readme.get("automation_owner") != "roadmap-reconcile":
