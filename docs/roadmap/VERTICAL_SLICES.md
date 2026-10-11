@@ -44,5 +44,8 @@ Accessible responsive SEO pages, privacy/support/correction minimum, dependency/
 <!-- reconciliation:pr-106 -->
 VS-04a public launch-support surfaces were implemented and exact-head verified in PR #106: About/Privacy/Terms/Disclaimer/Support/Corrections share one accessible responsive anatomy with canonical metadata, real footer links, deterministic robots/sitemap and safe external issue-tracker correction/support actions. This is launch-proof evidence only and does not activate deployment.
 
+<!-- reconciliation:pr-111 -->
+VS-04b G3 release-candidate evidence was implemented and exact-head verified in PR #111: a repository-owned high-confidence tracked-secret scan and runtime .env tracking guard now complement Foundation-owned locked dependency audits, license inventory, provenance, production-target validation and source/image SBOMs on the same exact SHA. This is release-candidate evidence only and does not activate production deployment.
+
 ## Later / activated only
 Flutter, public SDK/MCP, Kestra, advanced analytics, chart ranking, recommendation, external plugin runtime, schema registry, distributed infrastructure and premium billing. Record trigger evidence before adoption.
