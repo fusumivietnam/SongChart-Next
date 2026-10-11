@@ -51,7 +51,21 @@ VS-04b G3 release-candidate evidence was implemented and exact-head verified in 
 VS-04c PostgreSQL recovery proof was implemented and exact-head verified in PR #113: deterministic canonical fixtures survive logical pg_dump/drop-create/pg_restore with byte-identical normalized identity/relationship/destination/migration snapshots, followed by a disposable one-step migration rollback and fully-up forward re-apply. Temporary dumps are not retained and no production recovery claim is made.
 
 <!-- reconciliation:pr-115 -->
-VS-04d operational readiness was implemented and exact-head verified in PR #115: /health proves 200 only with canonical DB connectivity, actual disposable PostgreSQL outage returns generic 503 and recovers to 200, and repository-owned incident/threat/release-readiness contracts explicitly stop before production. G2/G3/G4 tested scope is complete; G5 remains blocked by #69 and a future deployment-target decision/evidence package.
+VS-04d operational readiness was implemented and exact-head verified in PR #115: /health proves 200 only with canonical DB connectivity, actual disposable PostgreSQL outage returns generic 503 and recovers to 200, and repository-owned incident/threat/release-readiness contracts explicitly stop before production. G2/G3/G4 tested scope is complete; G5 remains blocked by #69 and real environment evidence.
+
+## VS-05 — correction evidence and editorial-review activation gate
+The approved MVP permits public correction input to feed an authenticated internal review decision, but correction input must never write canonical tables directly. This slice first establishes a bounded correction-evidence contract: subject identity, submitted claim, provenance/source references, submitter/contact handling where permitted, validation, abuse/rate-limit boundaries, retention/privacy rules and deterministic pending/resolved examples.
+
+`admin-review` remains `candidate` until its activation trigger is independently satisfied: real unresolved claims require moderation and a human-reviewed permission model plus authorization tests exist. Planned work may define the review use case, roles, audit/history requirements and acceptance fixtures before activation, but roadmap text, a correction submission or a green PR cannot promote the capability by itself. Public self-registration remains out of scope; reviewer identities are provisioned through an explicitly controlled internal path.
+
+Acceptance intent: correction evidence is isolated from canonical mutation; malformed/abusive input fails safely; representative conflicting claims demonstrate whether the moderation trigger is real; any later approve/reject operation must route through SongChart application/domain validation, retain decision history and prove unauthorized users cannot mutate canonical state.
+
+## VS-06 — provider metadata breadth
+Extend the already implemented provider-adapter boundary beyond the Artist-only live path toward the canonical Release, Recording, Release Group, Work and structured relationship model that VS-02 already owns. Start fixture/fake-first: typed provider claims, stable provider identifiers, normalization, idempotency, provenance/evidence retention and explicit admission into existing SongChart use cases. Do not create provider-shaped canonical tables or resolve identity by names alone.
+
+MusicBrainz development/testing/bounded non-commercial policy remains the governing provider posture. Automatic CI must use deterministic fixtures/fakes and must not emit live provider traffic. Live Release/Recording/Work probing, commercial/public provider use, Cover Art Archive or any additional provider requires its own policy/rights/activation evidence before use.
+
+Acceptance intent: deterministic fixtures cover representative Release/Recording/Work relationships and partial/missing data; repeated imports are idempotent; external identifiers remain evidence rather than SongChart identity; canonical constraints and existing public journeys remain stable; provider errors never corrupt canonical data; any new live path is separately gated.
 
 ## Later / activated only
-Flutter, public SDK/MCP, Kestra, advanced analytics, chart ranking, recommendation, external plugin runtime, schema registry, distributed infrastructure and premium billing. Record trigger evidence before adoption.
+Public API/SDK/MCP, dedicated search indexing, Flutter, Kestra, advanced analytics, chart ranking, recommendation, external plugin runtime, schema registry, distributed infrastructure and premium billing remain activation/product decisions rather than committed local MVP slices. Record trigger and decision evidence before adoption.
