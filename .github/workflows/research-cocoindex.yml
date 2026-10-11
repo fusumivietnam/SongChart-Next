@@ -59,11 +59,12 @@ jobs:
         run: |
           python3 - <<'PY' >> "$GITHUB_STEP_SUMMARY"
           import json
+          import os
           from pathlib import Path
           r = json.loads(Path('artifacts/cocoindex-spike/benchmark.json').read_text())
           q = r['quality']
           print('## CocoIndex repository-context spike')
-          print(f"- exact SHA: `{${{ toJSON(env.EVIDENCE_SHA) }}}`")
+          print(f"- exact SHA: `{os.environ['EVIDENCE_SHA']}`")
           print(f"- corpus: {r['corpus']['files']} files / {r['corpus']['indexed_chunks']} chunks")
           print(f"- initial update: {r['timings_seconds']['initial']} s")
           print(f"- incremental Markdown: {r['timings_seconds']['incremental_markdown']} s")
