@@ -73,5 +73,8 @@ Acceptance intent: deterministic fixtures cover representative Release/Recording
 <!-- reconciliation:pr-135 -->
 VS-06a implemented a deterministic fixture/fake MusicBrainz release-lookup adapter into the existing VS-02 ReleaseBundleClaim/import boundary, preserving release/release-group/recording identities, credits, media and ISRCs while explicitly not inventing Recording-to-Work relationships. No live provider or commercial/public activation is implied.
 
+<!-- reconciliation:pr-138 -->
+VS-06b implemented deterministic fixture/fake MusicBrainz Recording-to-Work performance relationship normalization and canonical admission by stable external identity, with fail-closed handling for relationship attributes the current schema cannot represent. No live provider or commercial/public activation is implied.
+
 ## Later / activated only
 Public API/SDK/MCP, dedicated search indexing, Flutter, Kestra, advanced analytics, chart ranking, recommendation, external plugin runtime, schema registry, distributed infrastructure and premium billing remain activation/product decisions rather than committed local MVP slices. Record trigger and decision evidence before adoption.
