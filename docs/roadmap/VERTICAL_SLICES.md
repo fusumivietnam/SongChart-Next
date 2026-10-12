@@ -70,5 +70,8 @@ MusicBrainz development/testing/bounded non-commercial policy remains the govern
 
 Acceptance intent: deterministic fixtures cover representative Release/Recording/Work relationships and partial/missing data; repeated imports are idempotent; external identifiers remain evidence rather than SongChart identity; canonical constraints and existing public journeys remain stable; provider errors never corrupt canonical data; any new live path is separately gated.
 
+<!-- reconciliation:pr-135 -->
+VS-06a implemented a deterministic fixture/fake MusicBrainz release-lookup adapter into the existing VS-02 ReleaseBundleClaim/import boundary, preserving release/release-group/recording identities, credits, media and ISRCs while explicitly not inventing Recording-to-Work relationships. No live provider or commercial/public activation is implied.
+
 ## Later / activated only
 Public API/SDK/MCP, dedicated search indexing, Flutter, Kestra, advanced analytics, chart ranking, recommendation, external plugin runtime, schema registry, distributed infrastructure and premium billing remain activation/product decisions rather than committed local MVP slices. Record trigger and decision evidence before adoption.
