@@ -1,0 +1,37 @@
+{
+  "id": "33333333-3333-4333-8333-333333333333",
+  "title": "Signals at Dawn",
+  "relations": [
+    {
+      "type-id": "936c7c95-3156-3889-a062-8a0cd57f8946",
+      "type": "main performer",
+      "direction": "backward",
+      "target-type": "artist",
+      "artist": {
+        "id": "8f3a5f22-4d6b-4d3f-9a62-4ca0f36a2a10",
+        "name": "Aster Echo"
+      },
+      "attributes": []
+    },
+    {
+      "type-id": "a3005666-a872-32c3-ad06-98af558e99b0",
+      "type": "performance",
+      "direction": "forward",
+      "target-type": "work",
+      "work": {
+        "id": "55555555-5555-4555-8555-555555555555",
+        "title": "Signals at Dawn",
+        "type": "Song",
+        "disambiguation": ""
+      },
+      "attributes": [],
+      "attribute-ids": {},
+      "attribute-values": {},
+      "begin": null,
+      "end": null,
+      "ended": false,
+      "source-credit": "",
+      "target-credit": ""
+    }
+  ]
+}
