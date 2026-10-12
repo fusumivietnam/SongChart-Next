@@ -23,7 +23,7 @@ final class AdmitRecordingWorks
                 throw new RuntimeException('Recording must be admitted before Recording-to-Work relationships.');
             }
 
-            $recording = Recording::query()->findOrFail($recordingIdentity->canonical_id);
+            $recording = Recording::query()->findOrFail((string) $recordingIdentity->canonical_id);
 
             foreach ($claim->works as $workData) {
                 $workIdentity = DB::table('music_external_identities')
@@ -53,7 +53,7 @@ final class AdmitRecordingWorks
                         'updated_at' => now(),
                     ]);
                 } else {
-                    $work = Work::query()->findOrFail($workIdentity->canonical_id);
+                    $work = Work::query()->findOrFail((string) $workIdentity->canonical_id);
                     $work->fill([
                         'title' => $workData['title'],
                         'slug' => Str::slug($workData['title']),
