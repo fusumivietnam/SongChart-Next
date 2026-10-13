@@ -24,9 +24,10 @@ Configure these for the **Preview** environment only:
 | `APP_ENV` | no | `preview` (also defaulted by `Dockerfile.vercel`). |
 | `APP_DEBUG` | no | `false`. |
 | `SESSION_DRIVER` | no | `file`; ephemeral preview state only. |
-| `CACHE_STORE` | no | `file`; ephemeral preview state only. |
+| `CACHE_STORE` | no | `file`; ephemeral preview cache only. |
 | `QUEUE_CONNECTION` | no | `sync`. |
 | `MUSICBRAINZ_LIVE_ENABLED` | no | `false`. |
+| `PREVIEW_SEED_FIXTURES` | no | `true` by default; set `false` only when an intentionally empty preview DB is required. |
 
 Do not paste `APP_KEY`, `DB_URL`, database passwords or access tokens into GitHub issues, pull requests, CI logs or chat.
 
@@ -36,8 +37,9 @@ Do not paste `APP_KEY`, `DB_URL`, database passwords or access tokens into GitHu
 2. Vercel detects `Dockerfile.vercel` and builds the OCI image.
 3. At runtime `deploy/vercel/start.sh` refuses to start without `APP_KEY` or `DB_URL`.
 4. Startup applies `php artisan migrate --force --no-interaction` to the isolated preview database.
-5. Laravel listens on `${PORT}` supplied by Vercel.
-6. `APP_URL` is derived from `VERCEL_URL` when available.
+5. Unless `PREVIEW_SEED_FIXTURES=false`, startup idempotently imports the repository-owned deterministic Artist and Release fixtures through `songchart:fixture:import-artist` and `songchart:fixture:import-release`. No live provider traffic is involved.
+6. Laravel listens on `${PORT}` supplied by Vercel.
+7. `APP_URL` is derived from `VERCEL_URL` when available.
 
 Never promote a preview deployment to production as evidence for SongChart G5. If a newly-created Vercel project incorrectly classifies its first branch build as production, cancel that deployment and keep only the branch preview deployment.
 
@@ -47,11 +49,11 @@ For the exact preview commit record:
 
 - Vercel build state is `READY` and source SHA matches the intended Git commit;
 - deployment target is preview/non-production;
-- runtime log shows migrations complete without error;
+- runtime log shows migrations and deterministic fixture imports complete without error;
 - `GET /health` returns 200;
 - `/` renders the Home surface;
-- `/search` renders the Search surface/expected empty state;
-- a representative canonical Artist/Release/Recording route is exercised when deterministic preview fixture data is present;
+- `/search` renders Search and returns the deterministic fixture entities for an applicable query;
+- representative canonical Artist/Release/Recording routes from the deterministic fixtures render successfully;
 - `MUSICBRAINZ_LIVE_ENABLED=false`;
 - no production alias or G5 lifecycle state is changed.
 
