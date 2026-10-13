@@ -18,4 +18,9 @@ fi
 php artisan migrate --force --no-interaction
 php artisan config:clear
 
+if [ "${PREVIEW_SEED_FIXTURES:-true}" = "true" ]; then
+  php artisan songchart:fixture:import-artist --no-interaction
+  php artisan songchart:fixture:import-release --no-interaction
+fi
+
 exec php artisan serve --host=0.0.0.0 --port="${PORT:-3000}"
