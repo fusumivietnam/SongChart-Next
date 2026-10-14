@@ -39,6 +39,15 @@ It must not:
 - ingest supplementary MusicBrainz data such as user annotations, tags/genres, ratings, edit history, derived statistics or other non-core data unless a separate rights review approves it;
 - redistribute audio/video.
 
+## Verified deterministic adapter breadth
+
+The live activation scope above remains Artist-only. Separately, fixture/fake provider contracts now cover more of the canonical model without granting any new live-network permission:
+
+- VS-06a / PR #135 exact-head verified a deterministic MusicBrainz release-lookup adapter that maps Release, Release Group, media/track structure, Recording identities, credits and ISRCs into the existing SongChart `ReleaseBundleClaim` and canonical admission path. It performs no live HTTP request and deliberately does not invent Recording-to-Work relationships from a release payload.
+- VS-06b / PR #138 exact-head verified deterministic MusicBrainz Recording-to-Work `performance` relationship normalization and admission by stable external identity, failing closed when relationship attributes cannot be represented by the current canonical schema. It performs no live HTTP request.
+
+These fixture/fake paths are verification evidence for the bounded normalization/admission implementation, not verification of live Release/Recording/Work fetching, hosted-service production use, commercial/public rights, Cover Art Archive, supplementary data or another provider. `provider-adapters` therefore remains `implemented` until the broader capability's required live/operational verification boundary is explicitly satisfied.
+
 ## Identification, rate limiting and failure behavior
 
 Every request must send a meaningful User-Agent containing the SongChart application name/version plus a maintainer contact URL or email.
