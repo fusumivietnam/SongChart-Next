@@ -19,7 +19,7 @@ on:
       - scripts/scan_tracked_secrets.py
       - scripts/vs04_*
       - design/**
-      - docs/operations/**
+      - docs/operations/VS04_*.md
       - docs/security/VS04_*.md
       - .github/workflows/foundation-app.yml
       - .github/workflows/vs04-launch-proof.yml
@@ -42,7 +42,7 @@ on:
       - scripts/scan_tracked_secrets.py
       - scripts/vs04_*
       - design/**
-      - docs/operations/**
+      - docs/operations/VS04_*.md
       - docs/security/VS04_*.md
       - .github/workflows/foundation-app.yml
       - .github/workflows/vs04-launch-proof.yml

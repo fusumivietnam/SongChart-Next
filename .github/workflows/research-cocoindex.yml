@@ -6,7 +6,6 @@ on:
       - 'docs/research/RES-0002-cocoindex-repository-context.md'
       - 'governance/RESEARCH_REGISTRY.json'
       - '.github/workflows/research-cocoindex.yml'
-      - 'scripts/verify_ci_ownership.py'
   workflow_dispatch:
 permissions:
   contents: read

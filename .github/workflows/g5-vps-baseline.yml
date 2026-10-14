@@ -11,8 +11,6 @@ on:
       - docs/operations/VPS_PRODUCTION.md
       - tests/governance/test_g5_vps_baseline.py
       - .github/workflows/g5-vps-baseline.yml
-      - docs/operations/CI_WORKFLOW_OWNERSHIP.md
-      - scripts/verify_ci_ownership.py
   push:
     branches: [main]
     paths:
@@ -24,8 +22,6 @@ on:
       - docs/operations/VPS_PRODUCTION.md
       - tests/governance/test_g5_vps_baseline.py
       - .github/workflows/g5-vps-baseline.yml
-      - docs/operations/CI_WORKFLOW_OWNERSHIP.md
-      - scripts/verify_ci_ownership.py
 
 permissions:
   contents: read
