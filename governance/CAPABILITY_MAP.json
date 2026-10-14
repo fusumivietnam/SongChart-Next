@@ -59,7 +59,7 @@
         "provider-policy"
       ],
       "implementation": "app/Music/Providers/MusicBrainz",
-      "scope": "VS-01b implements an opt-in MusicBrainz Artist HTTP adapter for development/testing/bounded non-commercial evaluation with typed outcomes, PostgreSQL deployment-wide request spacing, bounded 503 retry/backoff and retained evidence. Verification and any bounded live probe remain separate gates.",
+      "scope": "VS-01b implements an opt-in MusicBrainz Artist HTTP adapter for development/testing/bounded non-commercial evaluation with typed outcomes, PostgreSQL deployment-wide request spacing, bounded 503 retry/backoff and retained evidence. Verification and any bounded live probe remain separate gates. VS-06a (PR #135) and VS-06b (PR #138) exact-head verified deterministic fixture/fake MusicBrainz Release and Recording-to-Work normalization/admission against existing SongChart canonical boundaries. This bounded evidence does not verify live Release/Recording/Work fetching, commercial/public provider use, Cover Art Archive or production activation, so provider-adapters remains implemented.",
       "decision": "docs/providers/MUSICBRAINZ.md"
     },
     {
