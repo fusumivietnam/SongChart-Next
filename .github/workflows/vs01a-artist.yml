@@ -57,10 +57,7 @@ jobs:
           target: development
           load: true
           tags: songchart-next:development
-          cache-from: |
-            type=gha,scope=vs01a-buildkit
-            type=gha,scope=foundation-buildkit
-          cache-to: type=gha,scope=vs01a-buildkit,mode=max
+          cache-from: type=gha,scope=foundation-buildkit
 
       - name: Prepare disposable Compose environment
         shell: bash
@@ -147,7 +144,7 @@ jobs:
           name: vs01a-artist-${{ env.EVIDENCE_SHA }}
           path: artifacts/vs01a-artist/
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 14
 
       - name: Publish evidence summary
         if: success()
