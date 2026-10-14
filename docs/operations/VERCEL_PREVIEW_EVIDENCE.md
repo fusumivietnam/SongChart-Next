@@ -18,7 +18,7 @@ This record intentionally separates implementation, runtime verification, infras
 
 ## Verified runtime — 2026-10-15 (Asia/Bangkok)
 
-Exact source revision:
+Exact source revision used for runtime verification:
 
 - Git branch: `infra/vercel-free-preview`
 - Git SHA: `53153e9e205e179e20e3bef5d312b75534959186`
@@ -48,7 +48,7 @@ Representative canonical routes:
 - `/releases/01m4xhg22zj51ctppzfqxe07y1/signals-at-dawn`
 - `/recordings/01m4xhg3et77xdjfkhwxedg1qm/signals-at-dawn`
 
-Exact-head GitHub verification also completed successfully for:
+The exact runtime SHA also completed the following GitHub workflows successfully before evidence-only registry commits were added:
 
 - Project governance;
 - Project OS contracts;
@@ -58,14 +58,22 @@ Exact-head GitHub verification also completed successfully for:
 - G5 VPS baseline verification;
 - Foundation application checks.
 
+## Registered staging infrastructure
+
+After runtime verification, repository governance records:
+
+- technology `vercel-hobby-preview` as verified preview-only `public-web` infrastructure;
+- runtime instance `preview-vercel-public-web` as verified `staging`;
+- runtime instance `preview-neon-postgresql` as verified `staging`, using the existing `postgresql` technology entry.
+
+Both registrations reference this evidence record. The final evidence/registry revision must still pass exact-head repository governance before PR #141 is merge-ready; no additional Vercel runtime deployment is required for evidence-only commits.
+
 ## Known preview-only operational constraint
 
 A completely empty preview database can spend enough time on startup migrations and fixture imports to exceed the first request's container startup budget. After the isolated preview database is initialized, the idempotent startup path serves normally. This is a preview operational optimization item, not G5/production evidence; production remains governed by ADR-0015 and its explicit release/migration procedure.
 
-## Infrastructure registration boundary
+## Lifecycle boundary
 
-The verified Neon PostgreSQL staging instance can be registered against the existing `postgresql` technology entry. Vercel itself requires its own technology-registry entry before its runtime instance can be added to `INFRASTRUCTURE_REGISTRY.json`; it must not be mislabeled as Laravel/Inertia merely to satisfy schema linkage.
+Preview is **implemented and runtime-verified staging infrastructure**. It is not SongChart production deployment evidence.
 
-Runtime verification is therefore **verified preview evidence**, but issue #140 should remain open until the Vercel technology/runtime registration is committed and exact-head governance re-verifies that final evidence revision.
-
-This evidence does **not** imply `production-deploy=deployed`, does not satisfy G5 issues #69/#121, and does not authorize live provider traffic or production data.
+This evidence does **not** imply `production-deploy=deployed`, does not satisfy G5 issues #69/#121, and does not authorize live provider traffic, correction intake, public API activation, or production data.
