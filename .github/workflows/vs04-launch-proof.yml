@@ -101,10 +101,7 @@ jobs:
           target: development
           load: true
           tags: songchart-next:development
-          cache-from: |
-            type=gha,scope=vs04-buildkit
-            type=gha,scope=foundation-buildkit
-          cache-to: type=gha,scope=vs04-buildkit,mode=max
+          cache-from: type=gha,scope=foundation-buildkit
 
       - name: Prepare disposable Compose environment
         shell: bash
@@ -293,7 +290,7 @@ jobs:
           name: vs04-launch-${{ env.EVIDENCE_SHA }}
           path: artifacts/vs04-launch/
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 14
 
       - name: Preserve VS-04 recovery evidence
         if: always()
@@ -302,7 +299,7 @@ jobs:
           name: vs04-recovery-${{ env.EVIDENCE_SHA }}
           path: artifacts/vs04-recovery/
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 14
 
       - name: Preserve VS-04 health evidence
         if: always()
@@ -311,7 +308,7 @@ jobs:
           name: vs04-health-${{ env.EVIDENCE_SHA }}
           path: artifacts/vs04-health/
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 14
 
       - name: Publish evidence summary
         if: success()
