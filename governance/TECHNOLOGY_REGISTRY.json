@@ -249,6 +249,18 @@
       "scope": "CI-only BuildKit layer cache in one `foundation-buildkit` scope. Pull requests and secondary workflows read; the relevant main Foundation production build is the sole mode=max writer. Cache is never version or acceptance authority."
     },
     {
+      "id": "vercel-hobby-preview",
+      "capability": "public-web",
+      "source": "https://vercel.com/docs",
+      "status": "verified",
+      "version_authority": "Vercel Hobby service runtime plus exact SongChart Git SHA and preview container image digest recorded in preview evidence",
+      "license_review": "Vercel Hobby service terms apply; ADR-0016 authorizes zero-cost preview/test use only and forbids paid upgrade or production authority without a separate decision.",
+      "implementation": "Dockerfile.vercel",
+      "decision": "docs/adr/ADR-0016-zero-cost-preview-environment.md",
+      "verification_evidence": "docs/operations/VERCEL_PREVIEW_EVIDENCE.md",
+      "scope": "Internet-accessible preview-only custom container for public-web smoke and review. Exact-head deployment dpl_Bkv5EabKWnJdK2Tnf5ejZansMVre was READY and passed health/Home/Search/canonical journeys; no production/G5 authority."
+    },
+    {
       "id": "musicbrainz-web-service",
       "capability": "provider-adapters",
       "source": "https://musicbrainz.org/doc/MusicBrainz_API",
