@@ -62,10 +62,7 @@ jobs:
           target: development
           load: true
           tags: songchart-next:development
-          cache-from: |
-            type=gha,scope=vs01b-buildkit
-            type=gha,scope=foundation-buildkit
-          cache-to: type=gha,scope=vs01b-buildkit,mode=max
+          cache-from: type=gha,scope=foundation-buildkit
 
       - name: Prepare disposable Compose environment
         shell: bash
