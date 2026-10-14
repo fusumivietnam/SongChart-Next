@@ -20,7 +20,18 @@ Ports:
 - 8000 — SongChart app, private by default
 - 5173 — optional Vite development server, private/silent by default
 
-Minimum requested machine specification is 4 CPU, 8 GB RAM and 32 GB storage.
+Default requested machine specification is 2 CPU, 8 GB RAM and 32 GB storage. A larger machine is an explicit operator choice for a bounded task, not the repository default.
+
+## Quota discipline
+
+Codespaces is a convenience shell, not a persistent server or CI runner. To keep monthly core-hours and storage bounded:
+
+- prefer the repository default 2-core machine;
+- stop the Codespace when active development ends instead of leaving Docker services idle;
+- keep the account/repository idle timeout conservative;
+- delete abandoned or broken Codespaces after committed work is pushed;
+- prefer local Docker or GitHub Actions when Codespaces monthly use approaches the operational thresholds in `docs/operations/GITHUB_USAGE_GUARDRAILS.md`;
+- do not keep a larger machine running after the bounded task requiring it is complete.
 
 ## Troubleshooting a Codespace that stays "Stopping"
 
@@ -47,7 +58,7 @@ If the creation log only shows a successful `--expect-existing-container` / `doc
 After the dev-container configuration is merged, a repository administrator can enable a Codespaces prebuild for `main` under repository Settings → Codespaces. For this project, prefer:
 - branch: `main`;
 - configuration: `.devcontainer/devcontainer.json`;
-- trigger: on configuration change initially, or every push if faster fresh-environment startup is worth the additional Actions/storage consumption;
+- trigger: on configuration change initially; do not use every-push prebuilds without measured startup-time evidence that justifies their additional compute/storage consumption;
 - region(s): only the regions actually used by project developers.
 
 Prebuild configuration is GitHub repository state and is not duplicated as a second roadmap or product authority.

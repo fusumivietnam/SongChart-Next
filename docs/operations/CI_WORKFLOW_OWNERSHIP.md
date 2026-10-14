@@ -6,20 +6,20 @@ This contract defines who owns each CI concern and the controls that prevent wor
 
 | Workflow | Responsibility | Credential boundary |
 | --- | --- | --- |
-| `project-governance.yml` | governance regression suite, read-only status snapshot, CI ownership verifier | contents read |
+| `project-governance.yml` | governance regression suite, read-only status snapshot, CI ownership verifier and GitHub usage-policy verifier | contents read |
 | `project-os.yml` | sole owner of `verify_project_os.py` and required `verify` context | contents read |
 | `roadmap-health.yml` | live Issue/PR roadmap reconciliation health, unreconciled-merge detection and required `health` context; runs on every main push | contents/issues/PR/actions read |
 | `roadmap-reconcile.yml` | serialized post-merge proposal writer; creates/updates a factual reconciliation PR, waits for normal PR-associated protected checks and safe-merges only after fail-closed gates | default `GITHUB_TOKEN` is repository/PR read-only; checkout must not persist it into Git; mutations use only `ROADMAP_RECONCILE_TOKEN`; Project PAT is forbidden |
 | `project-projection-sync.yml` | serialized Project #2 field/item projection | read-only repository token + `PROJECT_SYNC_TOKEN` |
 | `work-management-sync.yml` | declared labels and explicitly managed milestones | contents read + issues write; no Project PAT |
 | `research-cocoindex.yml` | bounded local-only CocoIndex repository-context benchmark; preserves derived timing/retrieval evidence and never makes lifecycle decisions | contents read; no repository secrets |
-| `foundation-app.yml` | Docker app/PostgreSQL/tests/audit/SBOM/production-target evidence | contents read |
-| `foundation-visual.yml` | deterministic Foundation design render evidence | contents read |
-| `vs01a-artist.yml` | VS-01a canonical Artist PostgreSQL integration, canonical URL and narrow/wide browser evidence | contents read |
-| `vs01b-musicbrainz.yml` | VS-01b MusicBrainz adapter contracts and request-spacing evidence; never automatic live provider traffic | contents read |
-| `vs02-release-recording.yml` | VS-02 Release/Recording/Credits canonical relationships, PostgreSQL integration, canonical redirects and narrow/wide browser evidence | contents read |
-| `vs03-discovery-search.yml` | VS-03 PostgreSQL-first discovery, journey continuity and deterministic provider-destination evidence | contents read |
-| `vs04-launch-proof.yml` | VS-04 launch-support and later release/recovery evidence; starts with public legal/support/correction/SEO surfaces and must not claim production deployment | contents read |
+| `foundation-app.yml` | Docker app/PostgreSQL/tests/audit/SBOM/production-target evidence; sole writer of the shared `foundation-buildkit` cache | contents read |
+| `foundation-visual.yml` | deterministic Foundation design render evidence; reads shared BuildKit cache only | contents read |
+| `vs01a-artist.yml` | VS-01a canonical Artist PostgreSQL integration, canonical URL and narrow/wide browser evidence; reads shared BuildKit cache only | contents read |
+| `vs01b-musicbrainz.yml` | VS-01b MusicBrainz adapter contracts and request-spacing evidence; never automatic live provider traffic; reads shared BuildKit cache only | contents read |
+| `vs02-release-recording.yml` | VS-02 Release/Recording/Credits canonical relationships, PostgreSQL integration, canonical redirects and narrow/wide browser evidence; reads shared BuildKit cache only | contents read |
+| `vs03-discovery-search.yml` | VS-03 PostgreSQL-first discovery, journey continuity and deterministic provider-destination evidence; reads shared BuildKit cache only | contents read |
+| `vs04-launch-proof.yml` | VS-04 launch-support and later release/recovery evidence; starts with public legal/support/correction/SEO surfaces, reads shared BuildKit cache only, and must not claim production deployment | contents read |
 | `g5-vps-baseline.yml` | single-VPS production-package verification: production app/web image builds, Compose topology, private service exposure and disposable health/smoke evidence; never performs a real VPS deployment | contents read |
 | `design-review-contract.yml` | one-command local Design Authority review contract | contents read |
 | `codespaces-contract.yml` | devcontainer/Codespaces developer-shell contract | contents read |
@@ -56,7 +56,8 @@ If `ROADMAP_RECONCILE_TOKEN` is absent, the writer must fail before repository m
 16. `vs04-launch-proof.yml` owns launch-proof evidence only; passing it may support G3/G4 claims for tested scope but never supplies G5 production-deployment evidence by itself.
 17. `g5-vps-baseline.yml` may verify deployable production packaging in disposable CI, but it never proves a VPS exists, never receives production credentials and never promotes `production-deploy` to deployed.
 18. `research-cocoindex.yml` may prove a disposable local research pipeline runs and retain benchmark evidence, but semantic retrieval quality is never a merge-blocking decision and the workflow cannot promote technology/capability lifecycle or consume secrets.
+19. Repository workflow artifacts retain at most 14 days, heavy workflows cancel superseded runs, slice workflows do not create private BuildKit cache scopes, and the default Codespaces requirement remains the quota-conscious baseline defined by `docs/operations/GITHUB_USAGE_GUARDRAILS.md`.
 
 ## Automated drift check
 
-`scripts/verify_ci_ownership.py` validates this contract and is executed by `project-governance.yml`. Adding or retiring a workflow or changing a specialized credential boundary therefore requires updating this document and verifier in the same reviewed change.
+`scripts/verify_ci_ownership.py` validates workflow ownership and credential boundaries. `scripts/verify_github_usage_policy.py` validates artifact retention, heavy-workflow concurrency, BuildKit cache scope and Codespaces host requirements. Both are executed by `project-governance.yml`; changing these boundaries therefore requires updating the owning document/verifier in the same reviewed change.

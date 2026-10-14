@@ -169,7 +169,7 @@ jobs:
             echo "- Reverse-proxy HTTPS/host asset generation: verified"
             echo "- CI runtime: isolated cached BuildKit visual server"
             echo "- Evidence artifact: \`foundation-render-${EVIDENCE_SHA}\`"
-            echo "- Artifact retention: 30 days"
+            echo "- Artifact retention: 14 days"
             echo "- This verifies deterministic browser rendering only; human Design Authority approval is still required."
           } >> "$GITHUB_STEP_SUMMARY"
 
@@ -180,7 +180,7 @@ jobs:
           name: foundation-render-${{ env.EVIDENCE_SHA }}
           path: artifacts/foundation-baselines/
           if-no-files-found: warn
-          retention-days: 30
+          retention-days: 14
 
       - name: Show server logs on failure
         if: failure()
