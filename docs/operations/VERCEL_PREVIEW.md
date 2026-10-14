@@ -6,11 +6,23 @@ Authority: ADR-0016 and issue #140. This runbook is preview/test only. Productio
 
 - Vercel project: `songchart-next-preview` on the Hobby plan.
 - Git source: `fusumivietnam/SongChart-Next`.
-- Preview source branch: `infra/vercel-free-preview` while issue #140 is being implemented; normal future PR branches may create their own preview deployments after this baseline merges.
+- Preview source branch: `infra/vercel-free-preview` while issue #140 is being implemented.
 - Database: isolated Neon Free PostgreSQL 18 project `SongChart-Next-Preview`, database `songchart_next_preview`.
 - Application container: root `Dockerfile.vercel`.
 
 Provider-generated IDs and credentials are operational details, not application identity and must not be embedded in application code.
+
+## Zero-cost Git deployment guard
+
+While issue #140 is open, the Vercel project uses an Ignored Build Step as a temporary quota guard:
+
+- branches other than `infra/vercel-free-preview` are ignored;
+- commits on `infra/vercel-free-preview` are also ignored when the latest commit changes only non-runtime material such as documentation;
+- a build proceeds only when the intended preview branch changes application/build inputs such as `Dockerfile.vercel`, `deploy/vercel`, application/config/database/public/resources/routes files, or locked Composer/pnpm inputs.
+
+Vercel's Ignored Build Step contract is inverted from a normal CI success condition: exit code `0` skips the deployment and exit code `1` continues the build. The project setting is therefore operational configuration, not product/application authority.
+
+This guard exists to protect Hobby/free-tier build quota and, critically, to stop normal `main` merges from being treated as Vercel production deployments. It must be reviewed before enabling normal per-PR preview deployments after the baseline is verified. A Vercel deployment whose target is `production` is rejected as SongChart production evidence even if Vercel created it automatically; cancel it rather than allowing it to redefine ADR-0015 or G5.
 
 ## Required Vercel preview environment variables
 
@@ -33,7 +45,7 @@ Do not paste `APP_KEY`, `DB_URL`, database passwords or access tokens into GitHu
 
 ## Deployment contract
 
-1. Deploy a non-production branch/commit as a Vercel Preview deployment.
+1. Deploy the exact approved `infra/vercel-free-preview` commit as a Vercel Preview deployment.
 2. Vercel detects `Dockerfile.vercel` and builds the OCI image.
 3. At runtime `deploy/vercel/start.sh` refuses to start without `APP_KEY` or `DB_URL`.
 4. Startup applies `php artisan migrate --force --no-interaction` to the isolated preview database.
@@ -41,7 +53,28 @@ Do not paste `APP_KEY`, `DB_URL`, database passwords or access tokens into GitHu
 6. Laravel listens on `${PORT}` supplied by Vercel.
 7. `APP_URL` is derived from `VERCEL_URL` when available.
 
-Never promote a preview deployment to production as evidence for SongChart G5. If a newly-created Vercel project incorrectly classifies its first branch build as production, cancel that deployment and keep only the branch preview deployment.
+Never promote a preview deployment to production as evidence for SongChart G5. If Vercel classifies a Git deployment as production because of project Git defaults, cancel it and keep SongChart production lifecycle unchanged.
+
+## Preview versus production parity
+
+Preview is deliberately application-level evidence, not a production-equivalent topology.
+
+| Concern | Preview can verify | Production/G5 still owns |
+| --- | --- | --- |
+| Laravel routing and public UI | yes | public smoke on the deployed release revision |
+| PostgreSQL migrations | yes, against isolated Neon test PostgreSQL | controlled production migration and persistence evidence |
+| deterministic canonical Artist/Release/Recording journey | yes | representative journey on the real production environment |
+| application `/health` behavior | yes | health after real environment cutover |
+| Nginx behavior/configuration | no | ADR-0015 / G5 |
+| PHP-FPM topology | no; preview runs the Laravel HTTP server | ADR-0015 / G5 |
+| Docker Compose service isolation | no | ADR-0015 / G5 |
+| VPS firewall/network hardening | no | #121 / G5 |
+| off-host PostgreSQL backup | no | #69/#121 / G5 |
+| DNS/TLS/public hostname | no | #69/#121 / G5 |
+| immutable production app/web image digests | no | #69/#121 / G5 |
+| release-owner production approval | no | G5 |
+
+A green preview must never promote `production-deploy`, replace production-package evidence, or be described as a production deployment.
 
 ## Verification checklist
 
