@@ -3,5 +3,42 @@
   "project": "SongChart-Next",
   "authority": "governance/INFRASTRUCTURE_REGISTRY.json",
   "rule": "Register actual, approved environment-scoped runtime instances only; technology choices live in TECHNOLOGY_REGISTRY, actual versions in manifests, secrets outside Git. PR-only Docker scaffold is not a main runtime instance.",
-  "instances": []
+  "instances": [
+    {
+      "id": "preview-vercel-public-web",
+      "capability_id": "public-web",
+      "technology_id": "vercel-hobby-preview",
+      "environment": "staging",
+      "status": "verified",
+      "configuration_ref": "docs/operations/VERCEL_PREVIEW_ENVIRONMENT.md",
+      "runtime_owner": "SongChart preview operator",
+      "data_classification": "public application responses backed only by synthetic deterministic preview data",
+      "secrets_ref": "Vercel Preview control plane APP_KEY and DB_URL; values intentionally excluded from Git",
+      "backup_policy_ref": null,
+      "recovery_policy_ref": null,
+      "failure_mode": "Disposable zero-cost preview runtime may be rebuilt from the exact Git revision; it is not production or G5 evidence.",
+      "operational_evidence": [
+        "docs/operations/VERCEL_PREVIEW_EVIDENCE.md",
+        "Vercel deployment dpl_Bkv5EabKWnJdK2Tnf5ejZansMVre at Git SHA 53153e9e205e179e20e3bef5d312b75534959186"
+      ]
+    },
+    {
+      "id": "preview-neon-postgresql",
+      "capability_id": "canonical-database",
+      "technology_id": "postgresql",
+      "environment": "staging",
+      "status": "verified",
+      "configuration_ref": "docs/operations/VERCEL_PREVIEW_ENVIRONMENT.md",
+      "runtime_owner": "SongChart preview operator",
+      "data_classification": "synthetic deterministic preview data only; no production or sensitive data",
+      "secrets_ref": "Vercel Preview control plane DB_URL; value intentionally excluded from Git",
+      "backup_policy_ref": null,
+      "recovery_policy_ref": null,
+      "failure_mode": "Disposable isolated preview database may be rebuilt from migrations and deterministic repository fixtures; it has no production authority.",
+      "operational_evidence": [
+        "docs/operations/VERCEL_PREVIEW_EVIDENCE.md",
+        "Vercel deployment dpl_Bkv5EabKWnJdK2Tnf5ejZansMVre at Git SHA 53153e9e205e179e20e3bef5d312b75534959186"
+      ]
+    }
+  ]
 }

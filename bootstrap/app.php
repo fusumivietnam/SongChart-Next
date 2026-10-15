@@ -17,7 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
 
-        if (in_array((string) env('APP_ENV', 'production'), ['local', 'testing'], true)) {
+        if (in_array((string) env('APP_ENV', 'production'), ['local', 'testing', 'preview'], true)) {
             $middleware->trustProxies(
                 at: '*',
                 headers: Request::HEADER_X_FORWARDED_FOR
