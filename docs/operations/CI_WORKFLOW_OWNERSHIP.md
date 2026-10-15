@@ -9,7 +9,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `project-governance.yml` | governance regression suite, read-only status snapshot, CI ownership verifier and GitHub usage-policy verifier | contents read |
 | `project-os.yml` | sole owner of `verify_project_os.py` and required `verify` context | contents read |
 | `roadmap-health.yml` | live Issue/PR roadmap reconciliation health, unreconciled-merge detection and required `health` context; runs on every main push | contents/issues/PR/actions read |
-| `roadmap-reconcile.yml` | serialized post-merge proposal writer; creates/updates a factual reconciliation PR, waits for normal PR-associated protected checks and safe-merges only after fail-closed gates | default `GITHUB_TOKEN` is repository/PR read-only; checkout must not persist it into Git; mutations use only `ROADMAP_RECONCILE_TOKEN`; Project PAT is forbidden |
+| `roadmap-reconcile.yml` | serialized post-merge proposal writer; triggered only by a merged PR close or explicit workflow dispatch; creates/updates a factual reconciliation PR, waits for normal PR-associated protected checks and safe-merges only after fail-closed gates | default `GITHUB_TOKEN` is repository/PR read-only; checkout must not persist it into Git; mutations use only `ROADMAP_RECONCILE_TOKEN`; Project PAT is forbidden |
 | `project-projection-sync.yml` | serialized Project #2 field/item projection | read-only repository token + `PROJECT_SYNC_TOKEN` |
 | `work-management-sync.yml` | declared labels and explicitly managed milestones | contents read + issues write; no Project PAT |
 | `research-cocoindex.yml` | bounded local-only CocoIndex repository-context benchmark; preserves derived timing/retrieval evidence and never makes lifecycle decisions | contents read; no repository secrets |
@@ -25,6 +25,14 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `codespaces-contract.yml` | devcontainer/Codespaces developer-shell contract | contents read |
 
 `docker-scaffold.yml` is retired because Foundation application checks own Compose/PostgreSQL runtime evidence.
+
+## Low-amplification execution
+
+A bounded semantic work unit should produce one reviewed PR and, where practical, one visible implementation commit that already includes its source, tests, required documentation and governance changes. Intermediate file-by-file mutations may be prepared before a PR exists, but they must be collapsed before the review branch becomes CI evidence. Observation-only commits and evidence-only commits are not a substitute for exact-head checks.
+
+`scripts/classify_ci_change.py` is the repository-owned deterministic classifier for changed-path impact. Its categories are advisory groundwork for semantic fan-out; lifecycle authority stays in governance registries and workflow ownership stays in this document. A registry-only governance change must not be interpreted as an application/provider/production change merely because the registry mentions those technologies. Any workflow that later consumes classifier output must preserve exact-head evidence and the protected `governance`/`verify`/`health` contexts.
+
+Roadmap reconciliation deliberately does **not** subscribe to PR `edited` events or general issue comments. Those events previously produced workflow shells that immediately skipped and amplified Actions usage without adding evidence. Normal reconciliation occurs on merged PR close; explicit replay uses `workflow_dispatch` with a merged PR number.
 
 ## Reconciliation credential
 
@@ -47,17 +55,20 @@ If `ROADMAP_RECONCILE_TOKEN` is absent, the writer must fail before repository m
 7. `ROADMAP_RECONCILE_TOKEN` is owned only by `roadmap-reconcile.yml`; trusted checkout persists no default Git credential; this token never substitutes for the Project token.
 8. Work-management reconciliation is serialized and never receives either specialized mutation token unless its own contract explicitly changes later.
 9. `roadmap-reconcile.yml` never writes protected `main` directly; it only writes its generated branch and PR.
-10. Automatic reconciliation rejects new roadmap/product decisions, provider/technology activation, deployment effects, lifecycle demotion, candidate/watch promotion and unknown capabilities.
-11. Reconciliation evidence is limited to successful exact-head source-PR runs created no later than the source merge timestamp.
-12. Generated PR checks count only when the check-run is associated with that generated PR; workflow-dispatch-only checks are insufficient.
-13. Any human review submission, draft/unmergeable state, failed/missing protected context or changed head stops automatic merge.
-14. Generated reconciliation branches are deleted only after successful merge; Project #2 refresh happens afterward and remains derived-only.
-15. Live provider production access, public API/search-index activation and production deployment remain outside roadmap automation authority.
-16. `vs04-launch-proof.yml` owns launch-proof evidence only; passing it may support G3/G4 claims for tested scope but never supplies G5 production-deployment evidence by itself.
-17. `g5-vps-baseline.yml` may verify deployable production packaging in disposable CI, but it never proves a VPS exists, never receives production credentials and never promotes `production-deploy` to deployed.
-18. `research-cocoindex.yml` may prove a disposable local research pipeline runs and retain benchmark evidence, but semantic retrieval quality is never a merge-blocking decision and the workflow cannot promote technology/capability lifecycle or consume secrets.
-19. Repository workflow artifacts retain at most 14 days, heavy workflows cancel superseded runs, slice workflows do not create private BuildKit cache scopes, and the default Codespaces requirement remains the quota-conscious baseline defined by `docs/operations/GITHUB_USAGE_GUARDRAILS.md`.
+10. `roadmap-reconcile.yml` is triggered only by merged-PR close or explicit workflow dispatch; PR edits and arbitrary comments must not create reconciliation runs.
+11. Automatic reconciliation rejects new roadmap/product decisions, provider/technology activation, deployment effects, lifecycle demotion, candidate/watch promotion and unknown capabilities.
+12. Reconciliation evidence is limited to successful exact-head source-PR runs created no later than the source merge timestamp.
+13. Generated PR checks count only when the check-run is associated with that generated PR; workflow-dispatch-only checks are insufficient.
+14. Any human review submission, draft/unmergeable state, failed/missing protected context or changed head stops automatic merge.
+15. Generated reconciliation branches are deleted only after successful merge; Project #2 refresh happens afterward and remains derived-only.
+16. Generated reconciliation PR metadata must identify the actual source PR and must not hard-code an unrelated issue/slice/capability provenance string.
+17. Live provider production access, public API/search-index activation and production deployment remain outside roadmap automation authority.
+18. `vs04-launch-proof.yml` owns launch-proof evidence only; passing it may support G3/G4 claims for tested scope but never supplies G5 production-deployment evidence by itself.
+19. `g5-vps-baseline.yml` may verify deployable production packaging in disposable CI, but it never proves a VPS exists, never receives production credentials and never promotes `production-deploy` to deployed.
+20. `research-cocoindex.yml` may prove a disposable local research pipeline runs and retain benchmark evidence, but semantic retrieval quality is never a merge-blocking decision and the workflow cannot promote technology/capability lifecycle or consume secrets.
+21. Repository workflow artifacts retain at most 14 days, heavy workflows cancel superseded runs, slice workflows do not create private BuildKit cache scopes, and the default Codespaces requirement remains the quota-conscious baseline defined by `docs/operations/GITHUB_USAGE_GUARDRAILS.md`.
+22. `scripts/classify_ci_change.py` and its governance tests remain deterministic and advisory until a separately reviewed workflow change consumes its outputs for semantic fan-out.
 
 ## Automated drift check
 
-`scripts/verify_ci_ownership.py` validates workflow ownership and credential boundaries. `scripts/verify_github_usage_policy.py` validates artifact retention, heavy-workflow concurrency, BuildKit cache scope and Codespaces host requirements. Both are executed by `project-governance.yml`; changing these boundaries therefore requires updating the owning document/verifier in the same reviewed change.
+`scripts/verify_ci_ownership.py` validates workflow ownership, credential boundaries, reconciliation trigger minimization and classifier presence. `scripts/verify_github_usage_policy.py` validates artifact retention, heavy-workflow concurrency, BuildKit cache scope and Codespaces host requirements. Both are executed by `project-governance.yml`; changing these boundaries therefore requires updating the owning document/verifier in the same reviewed change.
