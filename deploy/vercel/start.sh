@@ -15,12 +15,40 @@ if [ -z "${DB_URL:-}" ]; then
   exit 1
 fi
 
-php artisan migrate --force --no-interaction
-php artisan config:clear
+export PORT="${PORT:-3000}"
+readiness_pid=""
 
-if [ "${PREVIEW_SEED_FIXTURES:-true}" = "true" ]; then
-  php artisan songchart:fixture:import-artist --no-interaction
-  php artisan songchart:fixture:import-release --no-interaction
-fi
+cleanup_readiness() {
+  if [ -n "${readiness_pid}" ]; then
+    kill "${readiness_pid}" 2>/dev/null || true
+    wait "${readiness_pid}" 2>/dev/null || true
+    readiness_pid=""
+  fi
+}
 
-exec php artisan serve --host=0.0.0.0 --port="${PORT:-3000}"
+trap cleanup_readiness EXIT INT TERM
+
+php -S "0.0.0.0:${PORT}" /usr/local/bin/songchart-preview-readiness.php >/dev/null 2>&1 &
+readiness_pid=$!
+
+php -r '
+$port = (int) getenv("PORT");
+$deadline = microtime(true) + 5.0;
+do {
+    $socket = @fsockopen("127.0.0.1", $port, $errno, $errstr, 0.1);
+    if ($socket !== false) {
+        fclose($socket);
+        exit(0);
+    }
+    usleep(50000);
+} while (microtime(true) < $deadline);
+fwrite(STDERR, "preview readiness gate failed to bind PORT\n");
+exit(1);
+'
+
+/usr/local/bin/songchart-preview-bootstrap
+
+cleanup_readiness
+trap - EXIT INT TERM
+
+exec php artisan serve --host=0.0.0.0 --port="${PORT}"

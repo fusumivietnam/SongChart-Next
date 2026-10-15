@@ -33,7 +33,10 @@ RUN mkdir -p bootstrap/cache storage/framework/cache storage/framework/sessions 
 FROM php-runtime AS preview
 COPY --from=build /var/www/html /var/www/html
 COPY deploy/vercel/start.sh /usr/local/bin/songchart-preview-start
-RUN chmod 0755 /usr/local/bin/songchart-preview-start \
+COPY deploy/vercel/bootstrap.sh /usr/local/bin/songchart-preview-bootstrap
+COPY deploy/vercel/readiness.php /usr/local/bin/songchart-preview-readiness.php
+RUN chmod 0755 /usr/local/bin/songchart-preview-start /usr/local/bin/songchart-preview-bootstrap \
+    && chmod 0644 /usr/local/bin/songchart-preview-readiness.php \
     && chown -R www-data:www-data storage bootstrap/cache
 USER www-data
 ENV APP_ENV=preview \
