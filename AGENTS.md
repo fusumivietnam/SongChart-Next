@@ -24,6 +24,7 @@ GitHub Codespaces, when used, is governed by [ADR-0006](docs/adr/ADR-0006-codesp
 - Separate **candidate / approved / implemented / verified / deployed**. Do not infer later states from earlier ones.
 - Propose a bounded change, identify the owning capability, blast radius, data/security/legal implications, contracts and acceptance tests before coding.
 - Use one small branch/PR per semantic change; no unrequested merge, production deploy, migration, data deletion, secret rotation, provider terms override or irreversible action.
+- For AI-authored multi-file work, prepare the bounded patch before opening the PR and keep the reviewed branch history atomic where practical: source, tests, required docs and governance for one semantic change belong in the same work unit. Do not push observation-only or evidence-only commits when the same information can remain in checks/PR metadata. Prefer one integration candidate plus at most one consolidated repair head unless a newly discovered independent failure requires another revision.
 - Prefer native framework features, then a maintained approved dependency, then minimum custom SongChart code. Do not build a general-purpose platform.
 - Domain truth belongs to SongChart Core + PostgreSQL; provider payloads are evidence, not identity. AI suggestions cannot mutate canonical data without deterministic safeguards and appropriate review.
 - A public REST/MCP/CLI/Filament surface routes through the same application use cases. Never bypass authorization or directly write canonical tables.

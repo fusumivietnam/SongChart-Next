@@ -35,6 +35,11 @@ def main() -> int:
     if owners != ["project-os.yml"]:
         errors.append(f"scripts/verify_project_os.py must be owned only by project-os.yml; found {owners}")
 
+    classifier = ROOT / "scripts" / "classify_ci_change.py"
+    classifier_test = ROOT / "tests" / "governance" / "test_ci_change_classifier.py"
+    if not classifier.is_file() or not classifier_test.is_file():
+        errors.append("deterministic CI impact classifier and governance test are required")
+
     for name, content in contents.items():
         runners = re.findall(r"^\s*runs-on:\s*(\S+)\s*$", content, flags=re.MULTILINE)
         if not runners or any(r != "ubuntu-24.04" for r in runners):
@@ -64,14 +69,16 @@ def main() -> int:
 
     reconcile = contents.get("roadmap-reconcile.yml", "")
     for required in (
-        "types: [closed, edited]", "issue_comment:", "github.event.comment.body == '/roadmap-reconcile'",
-        "workflow_dispatch:", "contents: read", "pull-requests: read", "actions: write",
+        "types: [closed]", "workflow_dispatch:", "contents: read", "pull-requests: read", "actions: write",
         "persist-credentials: false", "secrets.ROADMAP_RECONCILE_TOKEN", "Do not reuse PROJECT_SYNC_TOKEN",
         "git push --force-with-lease", "any(.pull_requests[]?; .number == $pr)", "source-runs.json",
-        ".created_at <= $merged_at", "project-projection-sync.yml",
+        ".created_at <= $merged_at", "project-projection-sync.yml", "Source PR: #${SOURCE_PR}",
     ):
         if required not in reconcile:
             errors.append(f"roadmap-reconcile.yml: missing safe-writer control: {required}")
+    for forbidden in ("types: [closed, edited]", "issue_comment:", "github.event.comment.body"):
+        if forbidden in reconcile:
+            errors.append(f"roadmap-reconcile.yml: no-op trigger amplification must remain removed: {forbidden}")
     if "contents: write" in reconcile or "pull-requests: write" in reconcile:
         errors.append("roadmap-reconcile.yml: default GITHUB_TOKEN must remain read-only for repository/PR mutation")
     if "PROJECT_SYNC_TOKEN" in reconcile and "Do not reuse PROJECT_SYNC_TOKEN" not in reconcile:
