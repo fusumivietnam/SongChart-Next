@@ -36,9 +36,6 @@ class RoadmapReconcileTests(unittest.TestCase):
         (root / "docs/roadmap/VERTICAL_SLICES.md").write_text(
             "# V\n\n## VS-03 — x\nOld\n\n## VS-04 — y\nLater\n", encoding="utf-8"
         )
-        (root / "README.md").write_text(
-            "# R\n\n## Current status\nOld\n\n## Next\nN\n", encoding="utf-8"
-        )
         self.root = root
         self.pr = {
             "number": 88,
@@ -61,10 +58,9 @@ class RoadmapReconcileTests(unittest.TestCase):
             "technology_activation": False,
             "provider_activation": False,
             "deployment_effect": "none",
-            "reconcile": ["capability-map", "vertical-slices", "readme"],
+            "reconcile": ["capability-map", "vertical-slices"],
             "capability_scope_append": {"public-web": "new evidence."},
             "vertical_slice_note": "PR #88 done.",
-            "readme_note": "VS-03c verified.",
         }
 
     def test_parse_metadata(self):
@@ -85,7 +81,6 @@ class RoadmapReconcileTests(unittest.TestCase):
         self.assertEqual(set(files), {
             "governance/CAPABILITY_MAP.json",
             "docs/roadmap/VERTICAL_SLICES.md",
-            "README.md",
         })
         data = json.loads((self.root / "governance/CAPABILITY_MAP.json").read_text())
         cap = data["capabilities"][0]
@@ -98,6 +93,11 @@ class RoadmapReconcileTests(unittest.TestCase):
         meta["lifecycle_effects"] = {"future": "implemented"}
         with self.assertRaisesRegex(ValueError, "cannot promote from candidate"):
             reconcile.apply(self.root, meta, self.pr, [])
+
+    def test_readme_is_not_a_reconciliation_target(self):
+        meta = self.metadata()
+        meta["reconcile"].append("readme")
+        self.assertIn("reconcile contains unsupported target", reconcile.validate_metadata(meta))
 
 
 if __name__ == "__main__":

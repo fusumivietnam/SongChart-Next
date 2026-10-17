@@ -20,7 +20,7 @@ class DocumentationFreshnessTests(unittest.TestCase):
         root = Path(tmp.name)
         for directory in ("governance", "docs/generated"):
             (root / directory).mkdir(parents=True, exist_ok=True)
-        (root / "README.md").write_text("fixture\n", encoding="utf-8")
+        (root / "README.md").write_text("# Fixture\n\n## Project state\nGenerated status only.\n", encoding="utf-8")
         (root / "docs/roadmap").mkdir(parents=True, exist_ok=True)
         (root / "docs/roadmap/VERTICAL_SLICES.md").write_text("fixture\n", encoding="utf-8")
         (root / "governance/ACTIVATION_TRIGGERS.json").write_text("{}\n", encoding="utf-8")
@@ -47,24 +47,20 @@ class DocumentationFreshnessTests(unittest.TestCase):
             "documents": [
                 {
                     "path": "README.md",
-                    "mode": "mixed",
+                    "mode": "authored",
                     "owner": "project-os",
-                    "automation_owner": "roadmap-reconcile",
                     "sources": ["governance/CAPABILITY_MAP.json", "docs/roadmap/VERTICAL_SLICES.md"],
                 },
                 {
-                    "path": "docs/generated/CAPABILITY_STATUS.md",
+                    "path": "docs/generated/PROJECT_STATUS.md",
                     "mode": "generated",
                     "owner": "project-os",
-                    "generator": "capability_projection",
-                    "sources": ["governance/CAPABILITY_MAP.json"],
-                },
-                {
-                    "path": "docs/generated/TECHNOLOGY_STATUS.md",
-                    "mode": "generated",
-                    "owner": "project-os",
-                    "generator": "technology_projection",
-                    "sources": ["governance/TECHNOLOGY_REGISTRY.json"],
+                    "generator": "project_status_projection",
+                    "sources": [
+                        "governance/CAPABILITY_MAP.json",
+                        "governance/TECHNOLOGY_REGISTRY.json",
+                        "docs/roadmap/VERTICAL_SLICES.md",
+                    ],
                 },
             ],
         }
@@ -80,9 +76,9 @@ class DocumentationFreshnessTests(unittest.TestCase):
 
     def test_stale_generated_projection_is_detected(self) -> None:
         root = self._fixture()
-        (root / "docs/generated/CAPABILITY_STATUS.md").write_text("stale\n", encoding="utf-8")
+        (root / "docs/generated/PROJECT_STATUS.md").write_text("stale\n", encoding="utf-8")
         self.assertIn(
-            "stale generated document: docs/generated/CAPABILITY_STATUS.md",
+            "stale generated document: docs/generated/PROJECT_STATUS.md",
             verify(root),
         )
 
@@ -93,6 +89,15 @@ class DocumentationFreshnessTests(unittest.TestCase):
         registry["projections"]["capabilities"].append("not-a-capability")
         path.write_text(json.dumps(registry), encoding="utf-8")
         self.assertIn("unknown projected capability: not-a-capability", verify(root))
+
+    def test_readme_mutable_status_markers_are_rejected(self) -> None:
+        root = self._fixture()
+        (root / "README.md").write_text(
+            "# Fixture\n\n## Current status\n<!-- roadmap-reconcile:start -->\nstale\n<!-- roadmap-reconcile:end -->\n",
+            encoding="utf-8",
+        )
+        errors = verify(root)
+        self.assertTrue(any("forbidden mutable status marker" in error for error in errors))
 
 
 if __name__ == "__main__":

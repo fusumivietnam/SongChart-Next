@@ -14,7 +14,7 @@ from pathlib import Path
 
 METADATA_RE = re.compile(r"<!--\s*songchart-reconcile\s*(\{.*?\})\s*-->", re.I | re.S)
 ALLOWED_TARGETS = {"implemented", "verified"}
-ALLOWED_RECONCILE = {"capability-map", "vertical-slices", "readme"}
+ALLOWED_RECONCILE = {"capability-map", "vertical-slices"}
 LIFECYCLE_ORDER = {"candidate": 0, "approved": 1, "implemented": 2, "verified": 3, "deployed": 4, "watch": -1}
 
 
@@ -162,36 +162,6 @@ def reconcile_vertical_slices(path, meta, pr):
     return True
 
 
-def reconcile_readme(path, meta, pr):
-    note = meta.get("readme_note")
-    if not note:
-        return False
-    text = path.read_text(encoding="utf-8")
-    start = "<!-- roadmap-reconcile:start -->"
-    end = "<!-- roadmap-reconcile:end -->"
-    block = (
-        f"{start}\n"
-        "Repository lifecycle authority remains `governance/CAPABILITY_MAP.json`; planned scope remains `docs/roadmap/VERTICAL_SLICES.md`; live execution remains GitHub Issues/PRs.\n\n"
-        f"Latest reconciled product evidence: PR #{int(pr['number'])} — {note.strip()}\n"
-        f"{end}"
-    )
-    if start in text and end in text:
-        before, rest = text.split(start, 1)
-        _, after = rest.split(end, 1)
-        updated = before + block + after
-    else:
-        heading = "## Current status"
-        pos = text.find(heading)
-        if pos < 0:
-            raise ValueError("README Current status heading not found")
-        line_end = text.find("\n", pos)
-        updated = text[: line_end + 1] + "\n" + block + "\n" + text[line_end + 1 :]
-    if updated == text:
-        return False
-    path.write_text(updated, encoding="utf-8")
-    return True
-
-
 def apply(root, meta, pr, workflows):
     errors = validate_metadata(meta)
     if errors:
@@ -208,10 +178,6 @@ def apply(root, meta, pr, workflows):
     if "vertical-slices" in targets:
         path = root / "docs/roadmap/VERTICAL_SLICES.md"
         if reconcile_vertical_slices(path, meta, pr):
-            changed.append(str(path.relative_to(root)))
-    if "readme" in targets:
-        path = root / "README.md"
-        if reconcile_readme(path, meta, pr):
             changed.append(str(path.relative_to(root)))
     return changed
 
