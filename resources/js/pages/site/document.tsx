@@ -1,5 +1,6 @@
-import { Head } from '@inertiajs/react';
+import { Head, useForm } from '@inertiajs/react';
 import { ExternalLink, Search } from 'lucide-react';
+import type { FormEvent } from 'react';
 
 type Section = {
     heading: string;
@@ -11,6 +12,18 @@ type DocumentAction = {
     url: string;
 };
 
+type CorrectionIntake = {
+    enabled: boolean;
+    status: 'accepted' | 'validation' | 'throttled' | 'unavailable' | null;
+    retryAfter: number | null;
+    message: string | null;
+    limits: {
+        claimCharacters: number;
+        evidenceUrlCharacters: number;
+        requestBytes: number;
+    };
+};
+
 type Props = {
     document: {
         slug: string;
@@ -20,9 +33,27 @@ type Props = {
         sections: Section[];
         action: DocumentAction | null;
     };
+    correctionIntake?: CorrectionIntake;
 };
 
-export default function SiteDocument({ document }: Props) {
+export default function SiteDocument({ document, correctionIntake }: Props) {
+    const form = useForm({
+        subject_type: 'artist',
+        subject_id: '',
+        claim: '',
+        evidence_url: '',
+    });
+
+    function submitCorrection(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault();
+        form.post('/corrections', {
+            preserveScroll: true,
+            onSuccess: () => form.reset('claim', 'evidence_url'),
+        });
+    }
+
+    const correctionStatus = correctionIntake?.status;
+
     return (
         <>
             <Head title={`${document.title} — SongChart Next`}>
@@ -92,6 +123,114 @@ export default function SiteDocument({ document }: Props) {
                                 </section>
                             ))}
                         </div>
+
+                        {correctionIntake?.enabled && (
+                            <section className="mt-10 border-t border-slate-300 pt-6" aria-labelledby="correction-form-title">
+                                <h2 id="correction-form-title" className="text-xl font-semibold tracking-tight">
+                                    Submit correction evidence
+                                </h2>
+                                <p className="mt-2 text-sm leading-6 text-slate-600">
+                                    No name, email address or public account is requested. Submitting evidence does not approve a canonical change.
+                                </p>
+
+                                {correctionStatus === 'accepted' && (
+                                    <div role="status" className="mt-5 rounded-[0.625rem] border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-950">
+                                        Correction evidence recorded for review. This does not mean the proposed canonical change was accepted.
+                                    </div>
+                                )}
+                                {correctionStatus === 'validation' && (
+                                    <div role="alert" className="mt-5 rounded-[0.625rem] border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+                                        {correctionIntake.message ?? 'Check the correction fields and try again.'}
+                                    </div>
+                                )}
+                                {correctionStatus === 'throttled' && (
+                                    <div role="alert" className="mt-5 rounded-[0.625rem] border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950">
+                                        Too many correction attempts. Try again later{correctionIntake.retryAfter ? ` (about ${correctionIntake.retryAfter} seconds)` : ''}.
+                                    </div>
+                                )}
+                                {correctionStatus === 'unavailable' && (
+                                    <div role="alert" className="mt-5 rounded-[0.625rem] border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-950">
+                                        Correction intake is temporarily unavailable. No canonical data was changed.
+                                    </div>
+                                )}
+
+                                <form onSubmit={submitCorrection} className="mt-6 space-y-5" noValidate>
+                                    <div>
+                                        <label htmlFor="subject-type" className="block text-sm font-medium text-slate-900">
+                                            Record type
+                                        </label>
+                                        <select
+                                            id="subject-type"
+                                            value={form.data.subject_type}
+                                            onChange={(event) => form.setData('subject_type', event.target.value)}
+                                            className="mt-2 h-10 w-full rounded-[0.625rem] border border-slate-300 bg-white px-3 text-sm outline-none focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
+                                        >
+                                            <option value="artist">Artist</option>
+                                            <option value="release">Release</option>
+                                            <option value="recording">Recording</option>
+                                        </select>
+                                        {form.errors.subject_type && <p className="mt-1 text-sm text-red-700">{form.errors.subject_type}</p>}
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="subject-id" className="block text-sm font-medium text-slate-900">
+                                            SongChart ID
+                                        </label>
+                                        <input
+                                            id="subject-id"
+                                            value={form.data.subject_id}
+                                            onChange={(event) => form.setData('subject_id', event.target.value)}
+                                            autoComplete="off"
+                                            required
+                                            className="mt-2 h-10 w-full rounded-[0.625rem] border border-slate-300 bg-white px-3 font-mono text-sm outline-none focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
+                                        />
+                                        {form.errors.subject_id && <p className="mt-1 text-sm text-red-700">{form.errors.subject_id}</p>}
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="claim" className="block text-sm font-medium text-slate-900">
+                                            Proposed correction
+                                        </label>
+                                        <textarea
+                                            id="claim"
+                                            value={form.data.claim}
+                                            onChange={(event) => form.setData('claim', event.target.value)}
+                                            maxLength={correctionIntake.limits.claimCharacters}
+                                            required
+                                            rows={7}
+                                            className="mt-2 w-full rounded-[0.625rem] border border-slate-300 bg-white px-3 py-2 text-sm leading-6 outline-none focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
+                                        />
+                                        <p className="mt-1 text-xs text-slate-500">Maximum {correctionIntake.limits.claimCharacters} characters.</p>
+                                        {form.errors.claim && <p className="mt-1 text-sm text-red-700">{form.errors.claim}</p>}
+                                    </div>
+
+                                    <div>
+                                        <label htmlFor="evidence-url" className="block text-sm font-medium text-slate-900">
+                                            Supporting public URL <span className="font-normal text-slate-500">(optional)</span>
+                                        </label>
+                                        <input
+                                            id="evidence-url"
+                                            type="url"
+                                            value={form.data.evidence_url}
+                                            onChange={(event) => form.setData('evidence_url', event.target.value)}
+                                            maxLength={correctionIntake.limits.evidenceUrlCharacters}
+                                            placeholder="https://example.org/source"
+                                            className="mt-2 h-10 w-full rounded-[0.625rem] border border-slate-300 bg-white px-3 text-sm outline-none focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
+                                        />
+                                        <p className="mt-1 text-xs text-slate-500">Stored as submitted; SongChart does not fetch this URL during intake.</p>
+                                        {form.errors.evidence_url && <p className="mt-1 text-sm text-red-700">{form.errors.evidence_url}</p>}
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={form.processing}
+                                        className="inline-flex min-h-10 items-center rounded-[0.625rem] bg-blue-700 px-4 py-2.5 text-sm font-medium text-white outline-none hover:bg-blue-800 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                        {form.processing ? 'Submitting…' : 'Submit for review'}
+                                    </button>
+                                </form>
+                            </section>
+                        )}
 
                         {document.action && (
                             <div className="mt-10 border-t border-slate-300 pt-6">
