@@ -21,9 +21,8 @@
   "documents": [
     {
       "path": "README.md",
-      "mode": "mixed",
+      "mode": "authored",
       "owner": "project-os",
-      "automation_owner": "roadmap-reconcile",
       "sources": [
         "governance/CAPABILITY_MAP.json",
         "docs/roadmap/VERTICAL_SLICES.md"
@@ -67,21 +66,14 @@
       ]
     },
     {
-      "path": "docs/generated/CAPABILITY_STATUS.md",
+      "path": "docs/generated/PROJECT_STATUS.md",
       "mode": "generated",
       "owner": "project-os",
-      "generator": "capability_projection",
+      "generator": "project_status_projection",
       "sources": [
-        "governance/CAPABILITY_MAP.json"
-      ]
-    },
-    {
-      "path": "docs/generated/TECHNOLOGY_STATUS.md",
-      "mode": "generated",
-      "owner": "project-os",
-      "generator": "technology_projection",
-      "sources": [
-        "governance/TECHNOLOGY_REGISTRY.json"
+        "governance/CAPABILITY_MAP.json",
+        "governance/TECHNOLOGY_REGISTRY.json",
+        "docs/roadmap/VERTICAL_SLICES.md"
       ]
     }
   ]

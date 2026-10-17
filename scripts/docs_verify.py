@@ -8,7 +8,13 @@ from pathlib import Path
 from docs_generate import GENERATORS, REGISTRY_PATH, render_outputs
 
 ROOT = Path(__file__).resolve().parents[1]
-ALLOWED_MODES = {"authored", "generated", "mixed"}
+ALLOWED_MODES = {"authored", "generated"}
+FORBIDDEN_README_STATUS = (
+    "roadmap-reconcile:start",
+    "roadmap-reconcile:end",
+    "## Current status",
+    "## Current delivery frontier",
+)
 
 
 def _load(root: Path, path: str) -> dict:
@@ -61,6 +67,8 @@ def verify(root: Path = ROOT) -> list[str]:
                 errors.append(f"{path}: unknown generator {generator!r}")
         elif "generator" in document:
             errors.append(f"{path}: only generated documents may declare generator")
+        if "automation_owner" in document:
+            errors.append(f"{path}: automation_owner is not allowed; authored authority or generated projection must be explicit")
 
     projections = registry.get("projections", {})
     capability_ids = {item["id"] for item in _load(root, "governance/CAPABILITY_MAP.json")["capabilities"]}
@@ -74,6 +82,9 @@ def verify(root: Path = ROOT) -> list[str]:
         if technology_id not in technology_ids:
             errors.append(f"unknown projected technology: {technology_id}")
             projection_references_valid = False
+
+    if generated_paths != {"docs/generated/PROJECT_STATUS.md"}:
+        errors.append("generated status must be exactly docs/generated/PROJECT_STATUS.md")
 
     generated_dir = root / "docs" / "generated"
     if generated_dir.exists():
@@ -89,8 +100,14 @@ def verify(root: Path = ROOT) -> list[str]:
                 errors.append(f"stale generated document: {relative}")
 
     readme = next((item for item in documents if item.get("path") == "README.md"), None)
-    if readme is None or readme.get("mode") != "mixed" or readme.get("automation_owner") != "roadmap-reconcile":
-        errors.append("README.md must remain mixed-mode and owned by roadmap-reconcile for automated status sections")
+    if readme is None or readme.get("mode") != "authored":
+        errors.append("README.md must be authored and must not carry automated status sections")
+    readme_path = root / "README.md"
+    if readme_path.exists():
+        readme_text = readme_path.read_text(encoding="utf-8")
+        for marker in FORBIDDEN_README_STATUS:
+            if marker in readme_text:
+                errors.append(f"README.md contains forbidden mutable status marker: {marker}")
 
     return errors
 
@@ -102,7 +119,7 @@ def main() -> int:
         for error in errors:
             print(f"- {error}")
         return 1
-    print("Documentation registry and generated projections are current.")
+    print("Documentation registry and generated projection are current.")
     return 0
 
 
