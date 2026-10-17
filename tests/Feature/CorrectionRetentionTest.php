@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\CorrectionSubmission;
 use App\Music\Corrections\PruneExpiredCorrectionEvidence;
+use Carbon\CarbonInterface;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -50,7 +51,7 @@ final class CorrectionRetentionTest extends TestCase
         $this->assertTrue($event->withoutOverlapping);
     }
 
-    private function submission(string $status, Carbon $createdAt): CorrectionSubmission
+    private function submission(string $status, CarbonInterface $createdAt): CorrectionSubmission
     {
         return CorrectionSubmission::query()->forceCreate([
             'subject_type' => 'artist',
