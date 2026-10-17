@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArtistController;
+use App\Http\Controllers\CorrectionController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\RecordingController;
@@ -19,7 +20,8 @@ Route::get('privacy', [SiteDocumentController::class, 'privacy'])->name('privacy
 Route::get('terms', [SiteDocumentController::class, 'terms'])->name('terms');
 Route::get('disclaimer', [SiteDocumentController::class, 'disclaimer'])->name('disclaimer');
 Route::get('support', [SiteDocumentController::class, 'support'])->name('support');
-Route::get('corrections', [SiteDocumentController::class, 'corrections'])->name('corrections');
+Route::get('corrections', [CorrectionController::class, 'show'])->name('corrections');
+Route::post('corrections', [CorrectionController::class, 'store'])->name('corrections.store');
 Route::get('robots.txt', [SeoController::class, 'robots'])->name('robots');
 Route::get('sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 

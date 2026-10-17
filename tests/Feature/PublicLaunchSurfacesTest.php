@@ -35,15 +35,15 @@ final class PublicLaunchSurfacesTest extends TestCase
         }
     }
 
-    public function test_correction_submission_is_review_only_and_uses_public_issue_tracker(): void
+    public function test_correction_submission_is_internal_review_only_and_never_direct_canonical_write(): void
     {
         $this->get('/corrections')
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->where('document.action.label', 'Propose a correction')
-                ->where('document.action.url', 'https://github.com/fusumivietnam/SongChart-Next/issues/new')
+                ->where('document.action', null)
+                ->where('correctionIntake.enabled', true)
                 ->where('document.sections.2.heading', 'Review before canonical change')
-                ->where('document.sections.2.paragraphs.0', 'A correction submission never writes canonical tables directly. Canonical changes require deterministic validation and the appropriate review decision.'));
+                ->where('document.sections.2.paragraphs.0', 'A correction submission never writes canonical tables directly. Submission only records pending evidence for later review and does not mean SongChart accepted the proposed canonical change.'));
     }
 
     public function test_support_warns_against_putting_secrets_in_public_issues(): void

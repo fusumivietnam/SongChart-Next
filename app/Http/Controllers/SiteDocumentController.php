@@ -37,7 +37,9 @@ final class SiteDocumentController
                 'Following an external provider destination leaves SongChart. The destination provider operates under its own privacy and service terms.',
             ]],
             ['heading' => 'Support and corrections', 'paragraphs' => [
-                'The initial public support and correction channel is the project issue tracker. Do not post passwords, access tokens, private account data or other sensitive personal information in a public issue.',
+                'The public correction form does not ask for a submitter name, email address, account or contact identity. It stores the selected canonical subject, correction claim and an optional public evidence URL.',
+                'Pending correction evidence is retained for at most 180 days. Resolved evidence and decision history are retained for at most 365 days after resolution. Anonymous abuse-control keys are derived for rate limiting and remain cache state rather than correction evidence.',
+                'Do not submit passwords, access tokens, private account data or other sensitive personal information through support or correction channels.',
             ]],
         ]);
     }
@@ -80,28 +82,12 @@ final class SiteDocumentController
         return $this->render('support', 'Support', 'Report a reproducible SongChart problem through the public project issue tracker.', [
             ['heading' => 'What to include', 'paragraphs' => [
                 'Include the SongChart URL, what you expected, what happened and enough non-sensitive detail to reproduce the problem.',
-                'For metadata corrections, use the correction guidance so identity and evidence remain explicit.',
+                'For metadata corrections, use the dedicated correction form so canonical identity and evidence remain explicit.',
             ]],
             ['heading' => 'Keep secrets out of public issues', 'paragraphs' => [
                 'Do not post passwords, tokens, private credentials or sensitive personal information. A public issue is not a confidential support channel.',
             ]],
         ], ['label' => 'Open the SongChart issue tracker', 'url' => self::ISSUE_TRACKER_URL]);
-    }
-
-    public function corrections(): Response
-    {
-        return $this->render('corrections', 'Corrections', 'Propose a metadata correction with canonical identity and supporting evidence.', [
-            ['heading' => 'Identify the canonical record', 'paragraphs' => [
-                'Include the SongChart Artist, Release or Recording URL and stable SongChart ID whenever possible. Do not rely on a display name alone to identify the record.',
-            ]],
-            ['heading' => 'Explain the proposed correction', 'paragraphs' => [
-                'Describe the field or relationship that appears wrong, the proposed value and the evidence or provenance that supports the change.',
-            ]],
-            ['heading' => 'Review before canonical change', 'paragraphs' => [
-                'A correction submission never writes canonical tables directly. Canonical changes require deterministic validation and the appropriate review decision.',
-                'Do not include passwords, tokens or sensitive personal information in the public issue tracker.',
-            ]],
-        ], ['label' => 'Propose a correction', 'url' => self::ISSUE_TRACKER_URL]);
     }
 
     /**
