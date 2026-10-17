@@ -1,6 +1,6 @@
 # Vercel preview runbook
 
-Authority: ADR-0016 and issues #140/#150/#161/#165. This runbook is preview/test only. Production remains ADR-0015 and issues #69/#121.
+Authority: ADR-0016 and issues #140/#150/#161/#165/#167. This runbook is the **current operating contract** for preview/test. Historical runtime proof lives in `VERCEL_PREVIEW_EVIDENCE.md`; current provider/control-plane state must be queried live. Production remains ADR-0015 and issues #69/#121.
 
 ## Resources
 
@@ -22,7 +22,7 @@ The Hobby quota guard skips branches that cannot provide useful application runt
 case "$VERCEL_GIT_COMMIT_REF" in main|governance/*|docs/*) exit 0;; *) exit 1;; esac
 ```
 
-As Vercel's Ignored Build Step, exit `0` skips `main`, `governance/*` and `docs/*`; other non-main branches remain eligible for Preview builds. This is a quota/control-plane optimization, not application authority. A governance/docs work unit that unexpectedly queues a deployment should be canceled instead of accepted as runtime evidence.
+As Vercel's Ignored Build Step, exit `0` skips `main`, `governance/*` and `docs/*`; other non-main branches remain eligible for Preview builds. `Project governance` enforces the matching branch-safety contract: a `docs/*` or `governance/*` PR may not carry runtime-impacting paths. If runtime work is needed, use a runtime-eligible branch rather than weakening the skip guard.
 
 Vercel Authentication/SSO remains enabled for preview deployments. Do not make the preview project public merely to simplify automation. For command-line smoke checks, create a temporary authenticated Vercel share URL and pass it to the repository verifier; never commit or print that URL.
 
@@ -55,48 +55,38 @@ Vercel container startup must bind `$PORT` quickly. SongChart therefore separate
 2. The startup process immediately launches a minimal PHP readiness gate on `${PORT}`.
 3. The gate returns HTTP `503`, `Retry-After: 2`, `Cache-Control: no-store`, and `{"status":"bootstrapping"}` for every request. Laravel is not exposed while schema work is incomplete.
 4. After the gate is confirmed bound, `deploy/vercel/bootstrap.sh` runs `php artisan migrate --force --no-interaction` against the direct Neon endpoint.
-5. Unless `PREVIEW_SEED_FIXTURES=false`, bootstrap idempotently imports the repository-owned Artist and Release fixtures. No live provider traffic is involved.
+5. Unless `PREVIEW_SEED_FIXTURES=false`, bootstrap idempotently imports repository-owned deterministic Artist/Release/Recording fixtures. No live provider traffic is involved.
 6. If bootstrap fails, startup fails closed: the readiness gate is terminated and the container exits non-zero.
 7. If bootstrap succeeds, startup terminates the readiness gate and hands the same `${PORT}` to `php artisan serve`.
 8. Normal Laravel `/health`, Home, Search and canonical routes are served only after the hand-off.
 
-This is intentionally a single-container supervised startup contract. It does not add a queue, workflow engine, second application service or production migration mechanism.
-
 ## Standard preview verification gate
 
-Use the same route set for every runtime smoke so a failure has one obvious owner:
+Use the same route set for every runtime smoke:
 
-- `/health` — must return HTTP 200 and exactly `{"status":"ok"}`;
+- `/health` — HTTP 200 and exactly `{"status":"ok"}`;
 - `/` — Home;
-- `/search?q=Signals` — deterministic fixture search;
+- `/search?q=Signals`;
 - `/artists/01m4xhg00fj3qgdbn34j43731a/aster-echo`;
 - `/releases/01m4xhg22zj51ctppzfqxe07y1/signals-at-dawn`;
 - `/recordings/01m4xhg3et77xdjfkhwxedg1qm/signals-at-dawn`;
 - `/corrections` — public correction intake surface.
 
-HTML routes must return 200 and keep `X-Robots-Tag: noindex`; production-like indexing of preview URLs is a failure. HTTPS must be preserved.
+HTML routes must return 200 and keep `X-Robots-Tag: noindex`; HTTPS must be preserved.
 
-For an SSO-protected Vercel deployment, obtain a temporary share URL through the authenticated Vercel control plane and run:
+For an SSO-protected deployment, obtain a temporary share URL through the authenticated Vercel control plane and run:
 
 ```sh
 python3 scripts/preview_smoke.py --share-url 'TEMPORARY_SHARE_URL'
 ```
 
-Do not save the share URL in shell history when that matters for the operator environment. The verifier authenticates once into an in-memory cookie jar, then checks only the deployment origin. It never prints response bodies, cookies or the supplied URL.
-
-For a locally authenticated/unprotected endpoint:
-
-```sh
-python3 scripts/preview_smoke.py --base-url 'https://preview.example'
-```
-
-The verifier retries only HTTP 503 bootstrap responses, honors a bounded `Retry-After` (maximum five seconds per retry), and fails on every other non-200 response. A cold instance may therefore report more than one attempt without being classified as a defect.
+The verifier retries only HTTP 503 bootstrap responses, honors a bounded `Retry-After` (maximum five seconds per retry), and fails on every other non-200 response.
 
 ### Fast failure classification
 
 ```text
 Vercel build not READY
-  -> build/container/dependency problem; inspect build events
+  -> build/container/dependency problem
 
 READY but /health never reaches 200
   -> bootstrap, migration, DB_URL/Neon connectivity or application startup problem
@@ -105,13 +95,26 @@ READY but /health never reaches 200
   -> application route/query/render regression
 
 all routes = 200 but runtime error/fatal logs exist
-  -> runtime defect requiring investigation before acceptance
+  -> runtime defect
 
 smoke passes + runtime logs clean
-  -> preview runtime verified for that exact deployment SHA
+  -> application runtime verified for that exact deployment SHA
 ```
 
-This gate is deliberately not a production release gate. It is a cheap way to answer "does the current web actually run, and where does it fail?" before VPS work begins.
+## Live control-plane acceptance
+
+Before recording **new** preview runtime evidence, query Vercel live rather than copying provider state from a Markdown evidence file. Confirm all of:
+
+1. deployment source SHA equals the intended exact Git revision;
+2. deployment target is preview/non-production;
+3. Vercel Authentication/SSO protection is enabled for preview access;
+4. the Ignored Build Step matches the approved `main|governance/*|docs/*` skip policy;
+5. Preview environment retains the approved non-production provider/data boundary, including `MUSICBRAINZ_LIVE_ENABLED=false`;
+6. runtime startup has no application error/fatal record for the verification window;
+7. `scripts/preview_smoke.py` passes the current standard route set;
+8. no production alias or G5 lifecycle state is changed.
+
+If a provider fact cannot be queried, record it as **unknown** and do not infer it from historical evidence. A historical deployment ID proves only its own recorded revision and time window.
 
 ## Preview versus production parity
 
@@ -121,35 +124,17 @@ Preview is application-level evidence, not a production-equivalent topology.
 | --- | --- | --- |
 | Laravel routing and public UI | yes | public smoke on the deployed release revision |
 | PostgreSQL migrations | yes, against isolated Neon test PostgreSQL | controlled production migration and persistence evidence |
-| deterministic canonical Artist/Release/Recording journey | yes | representative journey on the real production environment |
-| application `/health` behavior | yes | health after real environment cutover |
+| deterministic canonical journey | yes | representative journey on the real production environment |
+| application `/health` behavior | yes | health plus external production monitoring/alert routing |
 | correction intake route/render | yes | production privacy/runtime evidence on real environment |
-| Nginx behavior/configuration | no | ADR-0015 / G5 |
-| PHP-FPM topology | no; preview runs the Laravel HTTP server | ADR-0015 / G5 |
-| Docker Compose service isolation | no | ADR-0015 / G5 |
+| Nginx/PHP-FPM/Compose topology | no | ADR-0015 / G5 |
 | VPS firewall/network hardening | no | #121 / G5 |
 | off-host PostgreSQL backup | no | #69/#121 / G5 |
 | DNS/TLS/public hostname | no | #69/#121 / G5 |
-| immutable production app/web image digests | no | #69/#121 / G5 |
+| immutable production image digests | no | #69/#121 / G5 |
 | release-owner production approval | no | G5 |
 
 A green preview must never promote `production-deploy`, replace production-package evidence, or be described as a production deployment.
-
-## Verification checklist
-
-For the exact preview commit record:
-
-- Vercel build state is `READY` and source SHA matches the intended Git commit;
-- deployment target is preview/non-production;
-- runtime startup completes without application error/fatal records;
-- no startup `FUNCTION_INVOCATION_FAILED` is observed;
-- `scripts/preview_smoke.py` passes the standard route set;
-- generated asset/navigation URLs remain HTTPS behind Vercel's proxy;
-- preview responses retain `X-Robots-Tag: noindex`;
-- `MUSICBRAINZ_LIVE_ENABLED=false`;
-- no production alias or G5 lifecycle state is changed.
-
-The isolated preview database may already be initialized during normal verification. Do not destroy or recreate it merely to force a slow empty-database bootstrap unless a separate destructive test is explicitly approved.
 
 ## Failure and recovery
 
@@ -157,11 +142,10 @@ The preview environment is disposable:
 
 - failed application build: fix the bounded branch and redeploy exact SHA;
 - missing/invalid secret: correct only in Vercel Preview environment settings and redeploy;
-- pooled-connection migration failure: confirm `DB_URL` uses the direct Neon read-write hostname without `-pooler`, then redeploy the exact preview SHA;
 - bootstrap in progress: callers receive bounded `503` readiness responses and retry according to `Retry-After`;
-- bootstrap failure: container exits non-zero and must not expose Laravel; inspect runtime logs, correct the bounded defect, and redeploy;
+- bootstrap failure: container exits non-zero and must not expose Laravel;
 - preview DB corruption/schema experiment: recreate the isolated preview database only with explicit approval, then rerun migrations/fixtures;
-- free-tier suspension or quota exhaustion: allow the environment to sleep or recreate it; do not enable paid service without a new approval;
+- free-tier suspension or quota exhaustion: allow the environment to sleep or recreate it; do not enable paid service without approval;
 - platform incompatibility: retire the preview infrastructure entry and select another preview provider without modifying SongChart domain/application architecture.
 
-No backup of synthetic preview data is required. Repository migrations and deterministic fixture sources are the recovery authority for this disposable environment.
+No backup of synthetic preview data is required. Repository migrations and deterministic fixtures are the recovery authority for this disposable environment.

@@ -2,7 +2,7 @@
   "schema_version": 1,
   "project": "SongChart-Next",
   "authority": "governance/INFRASTRUCTURE_REGISTRY.json",
-  "rule": "Register actual, approved environment-scoped runtime instances only; technology choices live in TECHNOLOGY_REGISTRY, actual versions in manifests, secrets outside Git. PR-only Docker scaffold is not a main runtime instance.",
+  "rule": "Register actual, approved environment-scoped runtime instances only; technology choices live in TECHNOLOGY_REGISTRY, actual versions in manifests, secrets outside Git. PR-only Docker scaffold is not a main runtime instance. Current provider/control-plane state must be queried live; historical evidence proves only the exact recorded revision/environment.",
   "instances": [
     {
       "id": "preview-vercel-public-web",
@@ -18,8 +18,9 @@
       "recovery_policy_ref": null,
       "failure_mode": "Disposable zero-cost preview runtime may be rebuilt from the exact Git revision; it is not production or G5 evidence.",
       "operational_evidence": [
-        "docs/operations/VERCEL_PREVIEW_EVIDENCE.md",
-        "Vercel deployment dpl_Bkv5EabKWnJdK2Tnf5ejZansMVre at Git SHA 53153e9e205e179e20e3bef5d312b75534959186"
+        "docs/operations/VERCEL_PREVIEW.md (current operating contract; live provider state must be queried)",
+        "docs/operations/VERCEL_PREVIEW_EVIDENCE.md (historical baseline evidence)",
+        "Historical baseline: Vercel deployment dpl_Bkv5EabKWnJdK2Tnf5ejZansMVre at Git SHA 53153e9e205e179e20e3bef5d312b75534959186"
       ]
     },
     {
@@ -36,8 +37,9 @@
       "recovery_policy_ref": null,
       "failure_mode": "Disposable isolated preview database may be rebuilt from migrations and deterministic repository fixtures; it has no production authority.",
       "operational_evidence": [
-        "docs/operations/VERCEL_PREVIEW_EVIDENCE.md",
-        "Vercel deployment dpl_Bkv5EabKWnJdK2Tnf5ejZansMVre at Git SHA 53153e9e205e179e20e3bef5d312b75534959186"
+        "docs/operations/VERCEL_PREVIEW.md (current operating contract; live provider state must be queried)",
+        "docs/operations/VERCEL_PREVIEW_EVIDENCE.md (historical baseline evidence)",
+        "Historical baseline: Vercel deployment dpl_Bkv5EabKWnJdK2Tnf5ejZansMVre at Git SHA 53153e9e205e179e20e3bef5d312b75534959186"
       ]
     }
   ]

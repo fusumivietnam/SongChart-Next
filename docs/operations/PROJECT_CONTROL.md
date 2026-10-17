@@ -5,8 +5,8 @@
 ## Session read protocol
 1. Read current main HEAD, README and AGENTS; read Product Charter, Architecture and owning Design/contract docs.
 2. Validate CAPABILITY_MAP, TECHNOLOGY_REGISTRY, ACTIVATION_TRIGGERS, RESEARCH_REGISTRY and INFRASTRUCTURE_REGISTRY with `python3 scripts/verify_project_os.py`.
-3. Read Roadmap Governance and roadmap scope. Run `python3 scripts/project_status.py` for an offline **read-only** inventory. For proactive roadmap reconciliation, use the latest `Roadmap health` Action report or run `python3 scripts/roadmap_health.py --live-github` with read-only GitHub credentials; offline/live-query failures remain unknown.
-4. Query **live** GitHub Issues, PRs, branch HEADs, CI, manifests and tests; identify existing active capability/slice/branch. If API unavailable report unknown; never infer from snapshot or chat memory.
+3. Read Roadmap Governance and roadmap scope. `docs/generated/PROJECT_STATUS.md` is the **single committed status projection** and is replaceable generated output only. Run `python3 scripts/project_status.py` for an offline read-only diagnostic inventory; its stdout/JSON is not a second committed status file and must not be cached as execution truth. For proactive roadmap reconciliation, use the latest `Roadmap health` Action report or run `python3 scripts/roadmap_health.py --live-github` with read-only GitHub credentials; offline/live-query failures remain unknown.
+4. Query **live** GitHub Issues, PRs, branch HEADs, CI, manifests and tests; identify existing active capability/slice/branch. If API unavailable report unknown; never infer from a projection, historical evidence file or chat memory.
 5. Resume an owning Issue/PR rather than duplicate it. Distinguish proposed/approved/implemented/verified/deployed; use referenced G0–G5 acceptance evidence. Obtain review for decisions and provider/data-impact changes.
 6. Commit bounded changes to a branch, run validation/tests, open/update PR with exact SHA and evidence. Follow [CI Workflow Ownership](CI_WORKFLOW_OWNERSHIP.md) for required contexts, exact-SHA checkout, concurrency and credential boundaries. Do not merge/deploy/perform destructive changes without explicit review. Update owning authorities, not generated copies.
 
@@ -18,10 +18,11 @@ Follow [Roadmap Governance](../roadmap/ROADMAP_GOVERNANCE.md). `VERTICAL_SLICES.
 - Capability ID in CAPABILITY_MAP: canonical scope/status; technology ID in TECHNOLOGY_REGISTRY: approved/candidate/watch selection.
 - Runtime instance ID in INFRASTRUCTURE_REGISTRY: environment-specific configuration and operational owner, not technology version authority.
 - VERTICAL_SLICES defines slice scope; Issue/PR tracks work; ADR captures major architectural decisions; source and CI establish implementation/verification.
-- Local status report is regenerated per run. Never commit an auto-written CURRENT_STATUS file or manually maintain competing status flags.
+- `docs/generated/PROJECT_STATUS.md` is generated from declared repository authorities. `scripts/project_status.py` is a read-only diagnostic command. Neither owns live execution or deployment state.
+- Historical evidence records prove a specific revision/environment at a specific time. They must explicitly identify themselves as historical and must never be interpreted as current provider/control-plane state.
 
 ## PR review checklist
 Record: owning capability and issue, proposed vs approved boundary, affected source/contracts/registries, security/privacy/provider rights, dependency provenance, relevant acceptance gates, test command/results at SHA, outstanding unknown evidence and recovery implications. CI validates only registry consistency and its own regression tests; it cannot approve a business decision or prove production health.
 
 ## Change propagation
-Scope change -> Product Charter/ADR then relevant Capability Map and roadmap; technology adoption -> decision and Technology Registry then manifest; runtime creation -> Infra Registry and environment policy; research evaluation -> Research Registry with decision reference. Each PR checks inbound references and preserves historical decision links. A merge updates main authority only after review.
+Scope change -> Product Charter/ADR then relevant Capability Map and roadmap; technology adoption -> decision and Technology Registry then manifest; runtime creation -> Infra Registry and current environment policy; research evaluation -> Research Registry with decision reference. Operational evidence files record bounded historical proof, while current external-provider state is queried live. Each PR checks inbound references and preserves historical decision links. A merge updates main authority only after review.

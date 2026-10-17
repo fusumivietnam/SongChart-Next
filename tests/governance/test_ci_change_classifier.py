@@ -40,6 +40,31 @@ class CiChangeClassifierTests(unittest.TestCase):
         self.assertFalse(result["application"])
         self.assertFalse(result["production_package"])
 
+    def test_preview_runtime_paths_are_classified_separately(self):
+        result = MODULE.classify(["Dockerfile.vercel", "deploy/vercel/start.sh", "scripts/preview_smoke.py"])
+        self.assertTrue(result["preview_runtime"])
+
+    def test_governance_branch_rejects_runtime_change(self):
+        violations = MODULE.preview_skip_branch_violation(
+            "governance/runtime-mistake",
+            ["governance/CAPABILITY_MAP.json", "app/Http/Controllers/HomeController.php"],
+        )
+        self.assertIn("application", violations)
+
+    def test_docs_branch_allows_docs_only_change(self):
+        violations = MODULE.preview_skip_branch_violation(
+            "docs/preview-copy",
+            ["docs/operations/VERCEL_PREVIEW.md"],
+        )
+        self.assertEqual(set(), violations)
+
+    def test_regular_branch_is_not_blocked_by_preview_skip_assertion(self):
+        violations = MODULE.preview_skip_branch_violation(
+            "feature/runtime-change",
+            ["app/Http/Controllers/HomeController.php"],
+        )
+        self.assertEqual(set(), violations)
+
 
 if __name__ == "__main__":
     unittest.main()
