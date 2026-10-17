@@ -17,7 +17,18 @@ const surfaces = [
     { label: 'terms', path: '/terms', expected: ['Terms of use', 'Informational metadata', 'External services', 'Launch status'] },
     { label: 'disclaimer', path: '/disclaimer', expected: ['Disclaimer', 'Metadata can change', 'No media redistribution claim'] },
     { label: 'support', path: '/support', expected: ['Support', 'Keep secrets out of public issues', 'Open the SongChart issue tracker'] },
-    { label: 'corrections', path: '/corrections', expected: ['Corrections', 'Identify the canonical record', 'A correction submission never writes canonical tables directly', 'Propose a correction'] },
+    {
+        label: 'corrections',
+        path: '/corrections',
+        expected: [
+            'Corrections',
+            'Identify the canonical record',
+            'A correction submission never writes canonical tables directly',
+            'Submit correction evidence',
+            'Submit for review',
+            'Stored as submitted; SongChart does not fetch this URL during intake.',
+        ],
+    },
 ];
 
 function findChrome() {
@@ -64,10 +75,17 @@ for (const surface of surfaces) {
         if (!dom.includes('rel="canonical"')) throw new Error(`${surface.path} missing canonical metadata.`);
         if (dom.includes('/@vite/client') || dom.includes('127.0.0.1:5173')) throw new Error(`${surface.path} unexpectedly references Vite dev server.`);
 
-        if (surface.label === 'support' || surface.label === 'corrections') {
+        if (surface.label === 'support') {
             if (!dom.includes('https://github.com/fusumivietnam/SongChart-Next/issues/new')) throw new Error(`${surface.path} missing issue-tracker action.`);
             if (!dom.includes('rel="noopener noreferrer"')) throw new Error(`${surface.path} missing external-link opener isolation.`);
             if (!dom.includes('referrerpolicy="no-referrer"')) throw new Error(`${surface.path} missing no-referrer treatment.`);
+        }
+
+        if (surface.label === 'corrections') {
+            for (const text of ['id="subject-type"', 'id="subject-id"', 'id="claim"', 'id="evidence-url"']) {
+                if (!dom.includes(text)) throw new Error(`${surface.path} missing correction-intake form contract: ${text}`);
+            }
+            if (dom.includes('https://github.com/fusumivietnam/SongChart-Next/issues/new')) throw new Error(`${surface.path} unexpectedly exposes the old issue-tracker correction action.`);
         }
 
         const dimensions = pngDimensions(screenshotPath);
