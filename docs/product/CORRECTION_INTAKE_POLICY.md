@@ -77,6 +77,8 @@ A future legal, fraud or abuse requirement for longer retention requires a separ
 
 Retention enforcement may be implemented with the review workflow or an earlier bounded cleanup job, but public intake must not be described as production-ready until an enforceable cleanup path exists for the deployed environment.
 
+The bounded pre-review cleanup path deletes only `status=pending` evidence once its `created_at` reaches the 180-day cutoff, using the native Laravel scheduler and no external workflow engine. Non-pending evidence is deliberately outside that cleanup boundary. Because `admin-review` is not activated and the current schema has no authoritative resolution timestamp, a later separately approved review/decision-history slice must define the resolution timestamp and enforce the 365-day resolved-evidence rule before resolved records can exist in production.
+
 ## Public UX contract
 
 The correction experience must expose deterministic states:
@@ -100,7 +102,7 @@ Before the repository exposes the public POST route, `/privacy` and `/correction
 - supporting URLs are not fetched at intake;
 - submitting evidence never means SongChart accepted the correction or changed canonical data.
 
-The existing external GitHub issue-tracker correction path remains the public path until VS-05c is implemented and exact-head verified.
+The dedicated `/corrections` form is the public correction-intake path once VS-05c is implemented and exact-head verified. The external GitHub issue tracker remains a public support path and is not a substitute for the bounded correction-evidence contract.
 
 ## Review and canonical mutation boundary
 
