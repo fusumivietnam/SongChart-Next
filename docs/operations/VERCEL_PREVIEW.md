@@ -1,6 +1,6 @@
 # Vercel preview runbook
 
-Authority: ADR-0016 and issues #140/#150/#161. This runbook is preview/test only. Production remains ADR-0015 and issues #69/#121.
+Authority: ADR-0016 and issues #140/#150/#161/#165. This runbook is preview/test only. Production remains ADR-0015 and issues #69/#121.
 
 ## Resources
 
@@ -16,13 +16,13 @@ Provider-generated IDs and credentials are operational details, not application 
 
 The preview project exists only for preview/test evidence. A Vercel deployment whose target is `production` is rejected as SongChart production evidence even if Vercel creates it automatically; cancel/ignore it rather than allowing it to redefine ADR-0015 or G5.
 
-The Hobby quota guard is intentionally simple:
+The Hobby quota guard skips branches that cannot provide useful application runtime evidence:
 
 ```sh
-[ "$VERCEL_GIT_COMMIT_REF" = "main" ]
+case "$VERCEL_GIT_COMMIT_REF" in main|governance/*|docs/*) exit 0;; *) exit 1;; esac
 ```
 
-As Vercel's Ignored Build Step, exit `0` skips `main`; non-main branches return non-zero and are eligible for Preview builds. This is control-plane configuration, not application authority. It must not be changed into a production deployment path.
+As Vercel's Ignored Build Step, exit `0` skips `main`, `governance/*` and `docs/*`; other non-main branches remain eligible for Preview builds. This is a quota/control-plane optimization, not application authority. A governance/docs work unit that unexpectedly queues a deployment should be canceled instead of accepted as runtime evidence.
 
 Vercel Authentication/SSO remains enabled for preview deployments. Do not make the preview project public merely to simplify automation. For command-line smoke checks, create a temporary authenticated Vercel share URL and pass it to the repository verifier; never commit or print that URL.
 
