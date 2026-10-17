@@ -63,6 +63,15 @@ Acceptance intent: correction evidence is isolated from canonical mutation; malf
 <!-- reconciliation:pr-131 -->
 VS-05a correction evidence persistence was implemented and exact-head verified: typed Artist/Release/Recording canonical subjects, bounded claim/supporting-URL validation and isolated pending correction submissions are stored without a public intake route, reviewer mutation path or canonical-table write. `admin-review` remains candidate and separately activation-gated.
 
+<!-- reconciliation:pr-154 -->
+VS-05b public correction-intake policy was approved in PR #154: initial intake is anonymous with no name/email/account/contact fields, supporting URLs are stored but never fetched, pending evidence is retained for at most 180 days, resolved evidence/decision history for at most 365 days after an authoritative resolution, anonymous throttling is bounded to 5 submissions per 10 minutes and 20 per 24 hours per ephemeral derived client key, request bodies are capped at 8 KiB, identical submissions within 24 hours are suppressed behind the same generic accepted state, and CAPTCHA remains unactivated absent abuse evidence. This policy decision does not activate `admin-review` or canonical mutation.
+
+<!-- reconciliation:pr-156 -->
+VS-05c public correction intake was implemented and exact-head verified in PR #156: `/corrections` accepts anonymous Artist/Release/Recording correction evidence through the existing application boundary, enforces the approved request-size/throttling/duplicate rules, never fetches submitted URLs, exposes deterministic accepted/validation/throttled/unavailable states and leaves canonical rows unchanged. Reviewer UI, approve/reject operations, public accounts and `admin-review` activation remain outside this implementation.
+
+<!-- reconciliation:pr-158 -->
+VS-05d pending-evidence retention enforcement was implemented and exact-head verified in PR #158: `songchart:corrections:prune` deletes only pending correction submissions at the approved 180-day cutoff and runs hourly through Laravel Scheduler with overlap protection. Fresh pending evidence and non-pending evidence are preserved. Resolved-evidence cleanup remains deferred until the review lifecycle provides an authoritative resolution timestamp; this does not activate reviewer capability or production deployment.
+
 ## VS-06 — provider metadata breadth
 Extend the already implemented provider-adapter boundary beyond the Artist-only live path toward the canonical Release, Recording, Release Group, Work and structured relationship model that VS-02 already owns. Start fixture/fake-first: typed provider claims, stable provider identifiers, normalization, idempotency, provenance/evidence retention and explicit admission into existing SongChart use cases. Do not create provider-shaped canonical tables or resolve identity by names alone.
 
