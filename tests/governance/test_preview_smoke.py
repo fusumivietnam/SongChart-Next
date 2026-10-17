@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 import threading
 import unittest
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -11,6 +12,7 @@ MODULE_PATH = Path(__file__).resolve().parents[2] / "scripts" / "preview_smoke.p
 spec = importlib.util.spec_from_file_location("preview_smoke", MODULE_PATH)
 assert spec and spec.loader
 preview_smoke = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = preview_smoke
 spec.loader.exec_module(preview_smoke)
 
 
