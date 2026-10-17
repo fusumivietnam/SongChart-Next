@@ -1,6 +1,6 @@
 # Single-VPS Docker production runbook
 
-Authority: ADR-0015 and issue #118. This runbook prepares G5 execution; it is not evidence that production exists.
+Authority: ADR-0015 and issues #69/#121. This runbook prepares G5 execution; it is not evidence that production exists.
 
 ## Baseline
 
@@ -12,7 +12,7 @@ Authority: ADR-0015 and issue #118. This runbook prepares G5 execution; it is no
 - Nginx is the only container with a host-published HTTP port.
 - secrets live in an owner-readable untracked production env file or a future secret manager.
 
-VPS vendor, DNS provider, TLS mechanism and off-host backup provider are replaceable. They do not become SongChart application authority.
+VPS vendor, DNS provider, TLS mechanism, off-host backup provider and external health-check provider are replaceable. They do not become SongChart application authority.
 
 ## Host prerequisites
 
@@ -20,7 +20,7 @@ VPS vendor, DNS provider, TLS mechanism and off-host backup provider are replace
 2. Install Docker Engine from an approved source and the Docker Compose plugin.
 3. Configure host firewall so only SSH and the intended HTTP/TLS entry points are reachable.
 4. Create a deployment directory owned by the release operator.
-5. Copy `compose.production.yaml` and the repository-owned production helpers to that directory, or deploy from a verified release bundle.
+5. Copy `compose.production.yaml` and repository-owned production helpers to that directory, or deploy from a verified release bundle.
 6. Create the untracked environment file from `deploy/production.env.example`; mode `0600` is recommended.
 7. Keep `HTTP_BIND_ADDRESS=127.0.0.1` until the intended public TLS/network path is ready.
 
@@ -29,13 +29,15 @@ VPS vendor, DNS provider, TLS mechanism and off-host backup provider are replace
 A production attempt requires all of:
 
 - reviewed exact Git SHA;
-- immutable `APP_IMAGE` reference/digest;
-- immutable `WEB_IMAGE` reference/digest built from the same SHA;
+- immutable `APP_IMAGE` and `WEB_IMAGE` references/digests built from that SHA;
 - production `APP_KEY` and database credentials outside Git;
 - `APP_URL` for the intended public hostname;
 - a release-specific migration impact and rollback/forward-fix review;
 - off-host backup destination and retention rule;
+- an external `/health` monitoring path, alert destination and named incident/release owner;
 - release owner approval.
+
+Do not begin public cutover if the health monitor cannot reach the intended endpoint or if an alert has no accountable human/operator destination.
 
 ## Pre-deploy backup
 
@@ -59,13 +61,17 @@ The helper validates Compose, pulls immutable images, waits for PostgreSQL healt
 
 Do not run this command against an unknown database state. A migration failure stops the release and requires the release-specific recovery/forward-fix decision.
 
-## Smoke and health
+## Smoke, health and alerting
 
 ```bash
 bash scripts/production/smoke.sh https://example.com
 ```
 
 Minimum G5 smoke covers `/health`, `/`, and `/search`. `/health` must return the generic healthy JSON state and HTTP 200. Add release-specific canonical journey checks where the release changed those paths.
+
+Before production is accepted as deployed, record evidence that an **external** monitor checks the public `/health` path and can reach the configured alert destination. The first release does not require a dedicated observability stack: a commodity uptime/HTTP checker is sufficient if it is independent of the VPS, has a bounded check interval, identifies the monitored hostname, and routes failure to the named incident/release owner. Prometheus/Grafana/Loki or a second monitoring platform must not be introduced without an independent activation need.
+
+G5 evidence must record the monitor/provider identity (not credentials), monitored URL/hostname, check interval, alert destination/owner and a successful alert-path test or equivalent provider verification. Passing CI or local Compose health is not production monitoring evidence.
 
 ## Application rollback
 

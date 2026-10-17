@@ -1,79 +1,43 @@
-# Vercel preview evidence
+# Vercel preview historical baseline evidence
 
 Issue: #140
 Decision: ADR-0016
+Evidence class: **historical runtime baseline — not current preview state**
 
-This record intentionally separates implementation, runtime verification, infrastructure registration, and production deployment.
+This record preserves the first accepted Vercel + Neon runtime verification. It must not be read as the current deployment, current branch, current route inventory, current cold-start behavior, or current Vercel control-plane configuration. Current operating behavior belongs to `docs/operations/VERCEL_PREVIEW.md`; current runtime/control-plane state must be queried live from Vercel.
 
-## Implemented
-
-- Vercel Hobby project `songchart-next-preview` is linked to the SongChart Next repository.
-- Neon Free project `SongChart-Next-Preview` provides an isolated PostgreSQL 18 preview database.
-- `Dockerfile.vercel` defines the preview-only OCI runtime.
-- `deploy/vercel/start.sh` requires preview secrets, migrates the database, imports deterministic repository fixtures, and starts Laravel on `$PORT`.
-- Preview secrets are stored only in the Vercel Preview control plane; their values are not recorded in GitHub or this evidence file.
-- `DB_URL` uses the direct Neon read-write endpoint for startup DDL/migrations rather than a transaction-pooler endpoint.
-- Vercel forwarded HTTPS is trusted only in the preview environment so generated asset/navigation URLs and session cookies remain HTTPS-correct.
-- The first automatically-classified Vercel deployment that targeted production was canceled and is not accepted as SongChart deployment evidence.
-
-## Verified runtime — 2026-10-15 (Asia/Bangkok)
-
-Exact source revision used for runtime verification:
+## Baseline verification — 2026-10-15 (Asia/Bangkok)
 
 - Git branch: `infra/vercel-free-preview`
 - Git SHA: `53153e9e205e179e20e3bef5d312b75534959186`
 - Vercel deployment: `dpl_Bkv5EabKWnJdK2Tnf5ejZansMVre`
-- Deployment URL: `https://songchart-next-preview-cd417bnj7-fusumivietnam.vercel.app`
-- Vercel target: preview/non-production (`target=null`)
-- Deployment state: `READY`
-- Container image evidence: `sha256:bb7152403ba8f7490ab6c73cfee481b10b4f59a3df4f0ad810bca2d40ebcfca5`
+- target: preview/non-production (`target=null`)
+- state at verification: `READY`
+- database: isolated Neon PostgreSQL 18 preview database
+- container image evidence: `sha256:bb7152403ba8f7490ab6c73cfee481b10b4f59a3df4f0ad810bca2d40ebcfca5`
 
-Runtime evidence:
+The baseline proved migrations against the direct Neon endpoint, deterministic Artist/Release/Recording fixtures, `/health`, Home, Search and canonical Artist/Release/Recording routes, HTTPS-correct generated URLs, Secure session cookies, `X-Robots-Tag: noindex`, and no application error/fatal records during the smoke window.
 
-- startup reported `Nothing to migrate` against the isolated Neon preview database;
-- deterministic Artist fixture import succeeded for `Aster Echo`;
-- deterministic Release/Recording fixture import succeeded for `Signals at Dawn`;
-- Laravel started on the Vercel-provided port;
-- `/health` returned HTTP 200 with `{"status":"ok"}`;
-- Home returned HTTP 200 and exposed deterministic Artist/Release/Recording discovery data;
-- `/search?q=Signals` returned HTTP 200 with the deterministic Release and Recording results;
-- representative Artist, Release, and Recording canonical routes each returned HTTP 200;
-- generated asset/navigation URLs were HTTPS and the Laravel session cookie was `Secure`;
-- preview responses retained `X-Robots-Tag: noindex`;
-- runtime-log review for the verification window showed no application error/fatal record for the smoke journey.
+## Superseded observations
 
-Representative canonical routes:
+The original baseline observed that a completely empty preview database could spend enough time in startup migrations/imports to exceed an initial request budget. That observation is **historical**. PR #153 / issue #150 subsequently introduced the supervised readiness gate: the container binds `$PORT` immediately, returns bounded `503 bootstrapping` while migrations/fixtures run, then hands the port to Laravel only after bootstrap succeeds. Current behavior is defined by `VERCEL_PREVIEW.md`, not by the old observation.
 
-- `/artists/01m4xhg00fj3qgdbn34j43731a/aster-echo`
-- `/releases/01m4xhg22zj51ctppzfqxe07y1/signals-at-dawn`
-- `/recordings/01m4xhg3et77xdjfkhwxedg1qm/signals-at-dawn`
+The original evidence also predated VS-05c public correction intake. Its statement that preview evidence did not authorize correction intake was true for that revision only. `/corrections` is now part of the standard preview smoke contract; this does not make preview production or authorize canonical mutation/reviewer workflows.
 
-The exact runtime SHA also completed the following GitHub workflows successfully before evidence-only registry commits were added:
+## Evidence interpretation rule
 
-- Project governance;
-- Project OS contracts;
-- Roadmap health;
-- Foundation visual render verification;
-- VS-04 launch proof verification;
-- G5 VPS baseline verification;
-- Foundation application checks.
+Historical evidence is append-only proof that a specific revision/runtime was verified. It is not a cached status document. Before recording new preview runtime evidence, query the live control plane and confirm at minimum:
 
-## Registered staging infrastructure
+1. deployment source SHA equals the intended exact Git revision;
+2. deployment target is preview/non-production;
+3. Vercel Authentication/SSO protection remains enabled for preview access;
+4. the Ignored Build Step still matches the repository runbook policy;
+5. preview provider/data boundaries remain intact (`MUSICBRAINZ_LIVE_ENABLED=false`, synthetic preview data only);
+6. `scripts/preview_smoke.py` passes the current route set;
+7. runtime error/fatal logs are clean for the verification window.
 
-After runtime verification, repository governance records:
-
-- technology `vercel-hobby-preview` as verified preview-only `public-web` infrastructure;
-- runtime instance `preview-vercel-public-web` as verified `staging`;
-- runtime instance `preview-neon-postgresql` as verified `staging`, using the existing `postgresql` technology entry.
-
-Both registrations reference this evidence record. The final evidence/registry revision must still pass exact-head repository governance before PR #141 is merge-ready; no additional Vercel runtime deployment is required for evidence-only commits.
-
-## Known preview-only operational constraint
-
-A completely empty preview database can spend enough time on startup migrations and fixture imports to exceed the first request's container startup budget. After the isolated preview database is initialized, the idempotent startup path serves normally. This is a preview operational optimization item, not G5/production evidence; production remains governed by ADR-0015 and its explicit release/migration procedure.
+If any live provider fact cannot be queried, record it as unknown rather than copying a value from this file.
 
 ## Lifecycle boundary
 
-Preview is **implemented and runtime-verified staging infrastructure**. It is not SongChart production deployment evidence.
-
-This evidence does **not** imply `production-deploy=deployed`, does not satisfy G5 issues #69/#121, and does not authorize live provider traffic, correction intake, public API activation, or production data.
+This evidence supports the registered **verified staging preview** baseline only. It never implies `production-deploy=deployed`, never satisfies G5 issues #69/#121, and never substitutes for live preview verification of a later exact SHA.

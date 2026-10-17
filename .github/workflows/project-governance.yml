@@ -15,11 +15,20 @@ jobs:
     timeout-minutes: 10
     env:
       EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+      HEAD_BRANCH: ${{ github.head_ref || '' }}
     steps:
       - name: Check out exact evidence revision
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ env.EVIDENCE_SHA }}
+          fetch-depth: 1
+      - name: Enforce preview-skip branch safety
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          git diff --name-only "$BASE_SHA" "$EVIDENCE_SHA" | \
+            python3 scripts/classify_ci_change.py --assert-preview-skip-branch "$HEAD_BRANCH"
       - name: Run governance regression tests
         run: python3 -m unittest discover -s tests/governance -v
       - name: Verify documentation registry and freshness
