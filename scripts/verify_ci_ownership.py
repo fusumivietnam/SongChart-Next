@@ -15,6 +15,8 @@ EXPECTED = {
     "vs03-discovery-search.yml", "vs04-launch-proof.yml", "work-management-sync.yml",
 }
 RETIRED = {"docker-scaffold.yml"}
+LEGACY_CHECKOUT_SHA = "11bd71901bbe5b1630ceea73d27597364c9af683"
+NODE24_CHECKOUT_SHAS = {"df4cb1c069e1874edd31b4311f1884172cec0e10", "08c6903cd8c0fde910a37f88322edcfb5dd907a8"}
 PR_MAIN_EVIDENCE = {
     "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
     "foundation-visual.yml", "g5-vps-baseline.yml", "project-governance.yml", "project-os.yml",
@@ -41,6 +43,11 @@ def main() -> int:
         errors.append("deterministic CI impact classifier and governance test are required")
 
     for name, content in contents.items():
+        if LEGACY_CHECKOUT_SHA in content:
+            errors.append(f"{name}: legacy Node.js 20 checkout action is forbidden")
+        for checkout_sha in re.findall(r"actions/checkout@([0-9a-f]{40})", content):
+            if checkout_sha not in NODE24_CHECKOUT_SHAS:
+                errors.append(f"{name}: checkout SHA must be approved Node.js 24 pin: {checkout_sha}")
         runners = re.findall(r"^\s*runs-on:\s*(\S+)\s*$", content, flags=re.MULTILINE)
         if not runners or any(r != "ubuntu-24.04" for r in runners):
             errors.append(f"{name}: runners must be ubuntu-24.04; found {runners}")
