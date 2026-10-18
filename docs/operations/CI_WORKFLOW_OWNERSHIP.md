@@ -50,7 +50,7 @@ If `ROADMAP_RECONCILE_TOKEN` is absent, the writer must fail before repository m
 2. `project-os.yml` is the only workflow executing `scripts/verify_project_os.py`.
 3. PR evidence checks out the exact PR head; main evidence checks out the exact merged SHA.
 4. Roadmap health runs on every main push so implementation-only merges cannot hide roadmap drift.
-5. Every job has a bounded timeout, uses `ubuntu-24.04`, and external Actions are pinned to full commit SHAs.
+5. Every job has a bounded timeout, uses `ubuntu-24.04`, and external Actions are pinned to full commit SHAs. Repository checkout actions must use approved Node.js 24-capable pins (checkout v6.0.3 or the existing Node.js 24-capable v5 pin in the G5 workflow); `verify_ci_ownership.py` rejects legacy checkout v4.2.2.
 6. `PROJECT_SYNC_TOKEN` is owned only by `project-projection-sync.yml`.
 7. `ROADMAP_RECONCILE_TOKEN` is owned only by `roadmap-reconcile.yml`; trusted checkout persists no default Git credential; this token never substitutes for the Project token.
 8. Work-management reconciliation is serialized and never receives either specialized mutation token unless its own contract explicitly changes later.
