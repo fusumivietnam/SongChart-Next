@@ -59,10 +59,10 @@ class PreviewSmokeContractTest(unittest.TestCase):
         origin = f"http://127.0.0.1:{self.server.server_port}"
         results = preview_smoke.run_smoke(origin, attempts=3, sleep=lambda _: None)
 
-        self.assertEqual(7, len(results))
+        self.assertEqual(12, len(results))
         self.assertEqual(2, Handler.health_calls)
         self.assertEqual(
-            ["health", "home", "search", "artist", "release", "recording", "corrections"],
+            ["health", "home", "search", "artist", "release", "recording", "corrections", "about", "privacy", "terms", "disclaimer", "support"],
             [result.name for result in results],
         )
         self.assertEqual(2, results[0].attempts)
@@ -75,6 +75,8 @@ class PreviewSmokeContractTest(unittest.TestCase):
         self.assertIn("/releases/01m4xhg22zj51ctppzfqxe07y1/signals-at-dawn", paths)
         self.assertIn("/recordings/01m4xhg3et77xdjfkhwxedg1qm/signals-at-dawn", paths)
         self.assertIn("/corrections", paths)
+        for page in ("/about", "/privacy", "/terms", "/disclaimer", "/support"):
+            self.assertIn(page, paths)
 
 
 if __name__ == "__main__":
