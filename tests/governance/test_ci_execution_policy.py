@@ -50,6 +50,21 @@ class CiExecutionPolicyTests(unittest.TestCase):
         self.assertIn("no canonical mutation", scope)
         self.assertIn("production and commercial/live provider activation are not implied", scope)
 
+    def test_approved_prelaunch_gates_do_not_automatically_activate_capabilities(self):
+        import json
+        charter = (ROOT / "docs/product/PRODUCT_CHARTER.md").read_text(encoding="utf-8")
+        roadmap = (ROOT / "docs/roadmap/VERTICAL_SLICES.md").read_text(encoding="utf-8")
+        capability_map = json.loads((ROOT / "governance/CAPABILITY_MAP.json").read_text(encoding="utf-8"))
+        admin = next(c for c in capability_map["capabilities"] if c["id"] == "admin-review")
+        self.assertEqual(admin["status"], "candidate")
+        self.assertIn("Authenticated internal approve/reject review is required before MVP public launch", charter)
+        self.assertIn("issue #174", charter)
+        self.assertIn("issue #175", charter)
+        self.assertIn("after product/code freeze", charter)
+        self.assertIn("tracked by #173", roadmap)
+        self.assertIn("Issue #174", roadmap)
+        self.assertIn("Issue #175", roadmap)
+
     def test_vs04_operations_trigger_is_bounded(self):
         text = (ROOT / ".github/workflows/vs04-launch-proof.yml").read_text(encoding="utf-8")
         self.assertNotIn("- docs/operations/**", text)
