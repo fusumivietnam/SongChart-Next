@@ -36,6 +36,20 @@ class CiExecutionPolicyTests(unittest.TestCase):
         self.assertNotIn("refreshing the concise README status pointer", roadmap)
         self.assertIn("without editing README or generated projections", roadmap)
 
+    def test_public_web_scope_tracks_merged_correction_slices_without_promotion(self):
+        import json
+        capability_map = json.loads((ROOT / "governance/CAPABILITY_MAP.json").read_text(encoding="utf-8"))
+        public_web = next(c for c in capability_map["capabilities"] if c["id"] == "public-web")
+        admin = next(c for c in capability_map["capabilities"] if c["id"] == "admin-review")
+        scope = public_web["scope"]
+        self.assertEqual(public_web["status"], "verified")
+        self.assertEqual(admin["status"], "candidate")
+        self.assertNotIn("editorial/legal surfaces and the broader MVP public journey remain incomplete", scope)
+        self.assertIn("VS-05c (PR #156)", scope)
+        self.assertIn("VS-05d (PR #158)", scope)
+        self.assertIn("no canonical mutation", scope)
+        self.assertIn("production and commercial/live provider activation are not implied", scope)
+
     def test_vs04_operations_trigger_is_bounded(self):
         text = (ROOT / ".github/workflows/vs04-launch-proof.yml").read_text(encoding="utf-8")
         self.assertNotIn("- docs/operations/**", text)
