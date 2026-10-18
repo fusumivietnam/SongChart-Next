@@ -227,7 +227,7 @@ def audit_markdown(root: Path = ROOT) -> dict:
                     else "github-entrypoint"
                 )}
                 for path, count in inbound.items()
-                if count == 0 and (
+                if count == 0 and path not in {"README.md", "AGENTS.md"} and (
                     path in registry_sources or path in registered or path in implicit_entrypoints
                 )
             ],
