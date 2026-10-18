@@ -81,6 +81,21 @@ The initial SongChart adapter is restricted to fields verified as core/CC0 for t
 
 Provider attribution is retained in provenance and provider-facing operational/debug surfaces even where CC0 does not legally require attribution. Public SongChart pages must not imply MusicBrainz endorsement.
 
+## Public-data rights evaluation checkpoint — 2026-10-18 (research, not activation)
+
+Official-source review for #174: [data licenses](https://musicbrainz.org/doc/About/Data_License), [database class breakdown](https://musicbrainz.org/doc/MusicBrainz_Database), [API terms/usage](https://musicbrainz.org/doc/MusicBrainz_API), [rate limit](https://musicbrainz.org/doc/MusicBrainz_API/Rate_Limiting), [MetaBrainz datasets](https://metabrainz.org/datasets). Recheck these sources at the time of an actual activation decision; this checkpoint documents research, not current legal clearance.
+
+| Data or transport class | Research posture | Decision required before public/commercial activation |
+| --- | --- | --- |
+| Core Artist/Release/Release Group/Recording/Work identity and typed metadata | Candidate CC0 **only when the specific requested field is confirmed in the core database class**. Fixture normalization exists beyond Artist; live fetch approval does not. | Field-level core/supplementary mapping, attribution/provenance, sample quality and ingestion boundaries. |
+| Structured relationships, credits, ISRCs and provider URLs | Fixture-normalization evidence exists; do **not** infer that every nested API response field is CC0. | Review each included field and linked URL's provider/destination terms independently; no unreviewed fetch or public display. |
+| Tags, ratings, user annotations, history, user collections and derived statistics | Supplementary/user data may carry CC BY-NC-SA or privacy restrictions; **excluded** from approved adapter scope. | Independent license/privacy review and explicit activation, or keep excluded. |
+| Cover Art Archive assets and streamed media | **Outside MusicBrainz core license and this adapter approval.** | Separate asset/service/rights/attribution review; no fetch, caching, embed or redistribution assumption. |
+| Hosted MusicBrainz Web Service | Non-commercial access and 1 request/second application limit, identifiable User-Agent; service permission differs from data copyright/license. | Owner must confirm business model and MetaBrainz commercial-service agreement/alternative before hosted commercial/public deployment. |
+| Licensed datasets/bulk distribution | Possible alternate ingestion path, but not approved or implemented. | Evaluate licensing and update/replication cost, field rights, import fidelity, quota/retention and operator budget before a new technology decision. |
+
+**Exit evidence still missing:** intended revenue/commercial posture; per-field license/attribution matrix; representative legally permitted Artist→Release→Recording/Work dataset with quality/disambiguation/coverage samples; data freshness/deletion obligations; owner/legal signoff on hosted API vs bulk. No public-hosted service use, Cover Art Archive, new external destinations, expanded live Release/Recording/Work fetch, or live CI probing follows from this research.
+
 ## Commercial-use boundary
 
 MusicBrainz documents the public web service as free for non-commercial use and directs commercial users to MetaBrainz commercial plans/contact.

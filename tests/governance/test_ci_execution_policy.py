@@ -94,6 +94,15 @@ class CiExecutionPolicyTests(unittest.TestCase):
         self.assertIn("no automatic canonical edit", samples)
         self.assertIn("confirmed 2FA", samples)
 
+    def test_provider_rights_checkpoint_is_non_activating(self):
+        policy = (ROOT / "docs/providers/MUSICBRAINZ.md").read_text(encoding="utf-8")
+        self.assertIn("Public-data rights evaluation checkpoint", policy)
+        self.assertIn("research, not activation", policy)
+        self.assertIn("Hosted MusicBrainz Web Service", policy)
+        self.assertIn("Core Artist/Release/Release Group/Recording/Work", policy)
+        self.assertIn("Exit evidence still missing", policy)
+        self.assertIn("commercial/public production remains blocked", policy)
+
     def test_vs04_operations_trigger_is_bounded(self):
         text = (ROOT / ".github/workflows/vs04-launch-proof.yml").read_text(encoding="utf-8")
         self.assertNotIn("- docs/operations/**", text)
