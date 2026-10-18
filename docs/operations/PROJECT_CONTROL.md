@@ -18,7 +18,6 @@ Follow [Roadmap Governance](../roadmap/ROADMAP_GOVERNANCE.md). `VERTICAL_SLICES.
 - Capability ID in CAPABILITY_MAP: canonical scope/status; technology ID in TECHNOLOGY_REGISTRY: approved/candidate/watch selection.
 - Runtime instance ID in INFRASTRUCTURE_REGISTRY: environment-specific configuration and operational owner, not technology version authority.
 - VERTICAL_SLICES defines slice scope; Issue/PR tracks work; ADR captures major architectural decisions; source and CI establish implementation/verification.
-- `docs/generated/PROJECT_STATUS.md` is generated from declared repository authorities. `scripts/project_status.py` is a read-only diagnostic command. Neither owns live execution or deployment state.
 - Historical evidence records prove a specific revision/environment at a specific time. They must explicitly identify themselves as historical and must never be interpreted as current provider/control-plane state.
 
 ## PR review checklist
