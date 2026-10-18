@@ -76,6 +76,11 @@ class DocumentationFreshnessTests(unittest.TestCase):
         coverage = report["ownership_coverage"]
         self.assertEqual(report["tracked_markdown"], sum(report["roles"].values()))
         self.assertEqual(report["tracked_markdown"], coverage["registered_count"] + coverage["governed_count"] + coverage["unresolved_count"])
+        self.assertEqual([], coverage["unresolved"], "all current tracked Markdown must have a documented coverage path")
+        governed = {entry["path"]: entry["mechanism"] for entry in coverage["governed"]}
+        self.assertEqual("research-governance", governed["docs/research/README.md"])
+        self.assertEqual("architecture", governed["docs/architecture/BUILD_VS_BUY.md"])
+        self.assertEqual("research-registry", governed["docs/research/RES-0004-ux-ui-agent-skills-evaluation.md"])
         self.assertIn("README.md", {entry["path"] for entry in coverage["registered"]})
         self.assertIn("docs/research/RES-0004-ux-ui-agent-skills-evaluation.md",
                       {entry["path"] for entry in coverage["governed"]})
