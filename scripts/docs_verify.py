@@ -148,6 +148,22 @@ def audit_markdown(root: Path = ROOT) -> dict:
     coverage = {"registered": [], "governed": [], "unresolved": []}
     inbound = {relative: 0 for relative in paths}
     tracked = set(paths)
+    # Explicit registry membership and GitHub entrypoint conventions are stronger
+    # usage signals than an incoming Markdown link; neither proves current utility.
+    registry_sources = {
+        source for item in _load(root, REGISTRY_PATH)["documents"]
+        for source in item.get("sources", []) if isinstance(source, str)
+    }
+    registry_sources.update(research)
+    registry_sources.update(
+        item.get("decision_ref") for item in _load(root, "governance/RESEARCH_REGISTRY.json")["research"]
+        if item.get("decision_ref")
+    )
+    implicit_entrypoints = {
+        p for p in paths
+        if p.startswith((".github/ISSUE_TEMPLATE/", ".github/agents/"))
+        or p == ".github/PULL_REQUEST_TEMPLATE.md"
+    }
 
     for relative in paths:
         role = "generated" if relative.startswith("docs/generated/") else (
@@ -204,6 +220,26 @@ def audit_markdown(root: Path = ROOT) -> dict:
             path for path, count in inbound.items()
             if count == 0 and path not in {"README.md", "AGENTS.md"}
         ],
+        "orphan_triage": {
+            "explicit_registry_or_entrypoint": [
+                {"path": path, "signal": (
+                    "registry-reference" if path in registry_sources or path in registered
+                    else "github-entrypoint"
+                )}
+                for path, count in inbound.items()
+                if count == 0 and (
+                    path in registry_sources or path in registered or path in implicit_entrypoints
+                )
+            ],
+            "manual_review": [
+                path for path, count in inbound.items()
+                if count == 0
+                and path not in {"README.md", "AGENTS.md"}
+                and path not in registry_sources
+                and path not in registered
+                and path not in implicit_entrypoints
+            ],
+        },
         "note": "Directory governance and zero inbound Markdown references are advisory signals, not proof of file ownership, usage, redundancy or lifecycle. Generated/ADR/research files must never be deleted based on this audit.",
     }
 
