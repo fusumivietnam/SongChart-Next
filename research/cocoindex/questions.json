@@ -18,7 +18,7 @@
   ],
   "contradiction_probes": [
     {"q": "deployment target selected versus deployment still unselected or blocked", "expect_any": ["docs/adr/ADR-0015-single-vps-docker-production-baseline.md", "docs/operations/VS04_RELEASE_READINESS.md", "README.md"]},
-    {"q": "capability lifecycle wording conflicts with current production-deploy status", "expect_any": ["governance/CAPABILITY_MAP.json", "docs/generated/CAPABILITY_STATUS.md", "docs/operations/VS04_RELEASE_READINESS.md"]},
+    {"q": "capability lifecycle wording conflicts with current production-deploy status", "expect_any": ["governance/CAPABILITY_MAP.json", "docs/generated/PROJECT_STATUS.md", "docs/operations/VS04_RELEASE_READINESS.md"]},
     {"q": "CI or governance test wording that can become stale after an authority decision", "expect_any": ["tests/governance", "scripts/verify_project_os.py", "scripts/docs_verify.py"]}
   ]
 }
