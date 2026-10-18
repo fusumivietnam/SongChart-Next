@@ -26,6 +26,30 @@
       ],
       "decision_ref": null,
       "superseded_by": null
+    },
+    {
+      "id": "RES-0003",
+      "title": "YouTube embedded player requirements and policy research",
+      "source": "docs/research/RES-0003-youtube-embedded-player-policy.md",
+      "status": "evaluated",
+      "capability_ids": [
+        "provider-policy",
+        "public-web"
+      ],
+      "decision_ref": null,
+      "superseded_by": null
+    },
+    {
+      "id": "RES-0004",
+      "title": "UX/UI agent skills as advisory design QA reference",
+      "source": "docs/research/RES-0004-ux-ui-agent-skills-evaluation.md",
+      "status": "evaluated",
+      "capability_ids": [
+        "design-authority",
+        "public-web"
+      ],
+      "decision_ref": null,
+      "superseded_by": null
     }
   ]
 }
