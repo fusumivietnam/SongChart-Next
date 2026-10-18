@@ -70,7 +70,8 @@ Use the same route set for every runtime smoke:
 - `/artists/01m4xhg00fj3qgdbn34j43731a/aster-echo`;
 - `/releases/01m4xhg22zj51ctppzfqxe07y1/signals-at-dawn`;
 - `/recordings/01m4xhg3et77xdjfkhwxedg1qm/signals-at-dawn`;
-- `/corrections` — public correction intake surface.
+- `/corrections` — public correction intake surface;
+- `/about`, `/privacy`, `/terms`, `/disclaimer`, `/support` — public legal and support surfaces.
 
 HTML routes must return 200 and keep `X-Robots-Tag: noindex`; HTTPS must be preserved.
 
