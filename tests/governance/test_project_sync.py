@@ -1,9 +1,18 @@
 import subprocess
+from pathlib import Path
 import sys
 import unittest
 from scripts import project_sync as sync
 
 class ProjectSyncTests(unittest.TestCase):
+    def test_missing_project_token_fails_closed(self):
+        workflow = (Path(__file__).resolve().parents[2] / ".github/workflows/project-projection-sync.yml").read_text(encoding="utf-8")
+        credential_step = workflow.split("      - name: Check Project sync credential", 1)[1].split("      - name: Reconcile user Project 2", 1)[0]
+        self.assertIn('if [[ -z "$PROJECT_SYNC_TOKEN" ]]; then', credential_step)
+        self.assertIn("exit 1", credential_step)
+        self.assertNotIn("exit 0", credential_step)
+        self.assertIn("::error title=Project sync not executed", credential_step)
+
     def test_cli_help_runs_directly(self):
         result = subprocess.run([sys.executable, "scripts/project_sync.py", "--help"], capture_output=True, text=True, check=False)
         self.assertEqual(result.returncode, 0, result.stderr)
