@@ -86,9 +86,13 @@ class DocumentationFreshnessTests(unittest.TestCase):
                       {entry["path"] for entry in coverage["governed"]})
         triage = report["orphan_triage"]
         reviewed = set(triage["manual_review"])
+        literal = {entry["path"] for entry in triage["non_markdown_literal_reference"]}
+        self.assertTrue(all(entry["sources"] for entry in triage["non_markdown_literal_reference"]))
         known = {entry["path"] for entry in triage["explicit_registry_or_entrypoint"]}
         self.assertFalse(reviewed & known)
-        self.assertTrue(reviewed | known <= set(report["unreferenced_candidates"]))
+        self.assertFalse(reviewed & literal)
+        self.assertFalse(literal & known)
+        self.assertEqual(reviewed | known | literal, set(report["unreferenced_candidates"]))
         self.assertNotIn(".github/PULL_REQUEST_TEMPLATE.md", reviewed)
         self.assertNotIn("docs/research/RES-0004-ux-ui-agent-skills-evaluation.md", reviewed)
         self.assertNotIn("README.md", report["unreferenced_candidates"])
