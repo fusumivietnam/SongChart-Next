@@ -1,6 +1,6 @@
 # Architecture & authority — SongChart Next
 
-**Status: candidate architecture.** Do not claim runtime exists until source and verification evidence appear.
+**Status: authored architecture contract with implemented/verified bounded foundations.** `governance/CAPABILITY_MAP.json` owns per-capability lifecycle; this document does not promote candidates, imply all planned interfaces exist, or prove a production deployment. Read actual source and exact-SHA verification for implemented scope.
 
 ## Product boundary
 SongChart owns domain semantics, canonical decisions, source claims/provenance, provider policies, application use cases, approved UI/UX and contracts. OSS owns commodity mechanisms when justified. Modular monolith first; no distributed system by default.
