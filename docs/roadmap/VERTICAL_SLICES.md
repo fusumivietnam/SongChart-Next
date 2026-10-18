@@ -72,6 +72,9 @@ VS-05c public correction intake was implemented and exact-head verified in PR #1
 <!-- reconciliation:pr-158 -->
 VS-05d pending-evidence retention enforcement was implemented and exact-head verified in PR #158: `songchart:corrections:prune` deletes only pending correction submissions at the approved 180-day cutoff and runs hourly through Laravel Scheduler with overlap protection. Fresh pending evidence and non-pending evidence are preserved. Resolved-evidence cleanup remains deferred until the review lifecycle provides an authoritative resolution timestamp; this does not activate reviewer capability or production deployment.
 
+### Pre-launch correction review decision (2026-10-18)
+Authenticated internal approve/reject is a **required MVP release acceptance condition** under Product Charter, tracked by #173. Design the smallest reviewer use case, explicit role/permission matrix, audit/history, resolution timestamp and resolved-retention contract first. The `admin-review` capability stays `candidate`: real unresolved moderation need and human-reviewed roles/authorization tests must satisfy the existing activation trigger and receive a separate decision before implementation. A policy decision or fixture example does not independently prove the trigger; pending public intake does not authorize canonical mutation.
+
 ## VS-06 — provider metadata breadth
 Extend the already implemented provider-adapter boundary beyond the Artist-only live path toward the canonical Release, Recording, Release Group, Work and structured relationship model that VS-02 already owns. Start fixture/fake-first: typed provider claims, stable provider identifiers, normalization, idempotency, provenance/evidence retention and explicit admission into existing SongChart use cases. Do not create provider-shaped canonical tables or resolve identity by names alone.
 
@@ -84,6 +87,9 @@ VS-06a implemented a deterministic fixture/fake MusicBrainz release-lookup adapt
 
 <!-- reconciliation:pr-138 -->
 VS-06b implemented deterministic fixture/fake MusicBrainz Recording-to-Work performance relationship normalization and canonical admission by stable external identity, with fail-closed handling for relationship attributes the current schema cannot represent. No live provider or commercial/public activation is implied.
+
+### Pre-launch provider and UX decisions (2026-10-18)
+Issue #174 owns review of live/public MusicBrainz service terms, rights/attribution, retention, quota and representative legal data coverage. Fixture-first remains the implementation boundary until an explicit rights/activation decision; provider-policy and canonical admission authority stay unchanged. Issue #175 owns exact-revision, SSO-protected preview UX audit covering MVP routes, narrow/wide, empty/error and accessibility states; only reproducible defects justify further implementation. G5 #121/#69 remains deferred until product/code freeze and release-owner approval. These execution issues do not automatically promote any capability.
 
 ## Later / activated only
 Public API/SDK/MCP, dedicated search indexing, Flutter, Kestra, advanced analytics, chart ranking, recommendation, external plugin runtime, schema registry, distributed infrastructure and premium billing remain activation/product decisions rather than committed local MVP slices. Record trigger and decision evidence before adoption.

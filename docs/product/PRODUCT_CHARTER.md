@@ -19,7 +19,7 @@ Home/search -> results by entity type -> Artist -> Release -> Recording/credits 
 - MusicBrainz is the first metadata-provider path: deterministic fixture in VS-01a, live adapter only in VS-01b after provider policy/rights/rate-limit review.
 - Artwork is not a dependency of VS-01a; deterministic placeholders are acceptable. Artwork-provider selection is evaluated separately, no earlier than the Release-oriented work that needs it.
 - International-ready means Unicode/domain correctness, locale-safe presentation and translatable UI structure; multi-language UI is not mandatory for MVP.
-- Public correction submission may feed a basic authenticated internal review decision. Correction input never writes canonical tables directly.
+- Public correction submission is accepted as evidence only. **Authenticated internal approve/reject review is required before MVP public launch** (owner decision 2026-10-18; execution #173); correction input never writes canonical tables directly. `admin-review` remains candidate until real moderation need, human-reviewed roles/authorization and an explicit activation decision are evidenced.
 - Provider navigation means linking to permitted external listening/viewing destinations; SongChart does not redistribute audio/video by default.
 
 ## Approved identity and URL principles
@@ -29,6 +29,12 @@ Canonical merge/split operations require deterministic domain validation, histor
 
 ## Explicitly deferred
 Public user accounts/registration, favorites/follows, personalized recommendations, notification preferences, charts built from unlicensed/undefined rankings, audio/video redistribution, native clients, public plugin marketplace, write-enabled remote MCP, advanced AI agents, partner billing, distributed databases, Kubernetes and multiple redundant control planes.
+
+## Approved 2026-10-18 release sequencing decisions
+- Before public launch, review and decision history for submitted corrections must be authenticated and authorization-tested; the decision does **not** automatically activate `admin-review` (design/trigger issue #173).
+- Evaluate live/public provider data rights, permitted retention/attribution and a representative legal dataset in issue #174. This opens a policy review only: preview/CI stay fixture-first and production/commercial provider fetching or display is not authorized.
+- Audit the existing SSO-protected preview UX with exact-revision browser evidence, including narrow/wide, empty/error/accessibility states (issue #175). Only evidenced defects become implementation issues; lack of testing is unknown, not a pass.
+- Keep VPS/G5 execution (#121 / #69) after product/code freeze and approved release gates; production remains not deployed.
 
 ## Acceptance before public launch
 A representative permitted dataset; end-to-end journey in browser on narrow and wide screens; approved visual baseline; legal/provider rights check; verified redirects, errors and empty states; automated tests; backup **and restore** proof; security/privacy/incident/rollback evidence.
