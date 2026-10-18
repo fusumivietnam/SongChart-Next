@@ -81,6 +81,19 @@ class CiExecutionPolicyTests(unittest.TestCase):
         self.assertIn("Owner-approved reviewer policy", roadmap)
         self.assertIn("never automatically mutates canonical data", roadmap)
 
+    def test_design_samples_follow_existing_authority_and_activation(self):
+        inventory = (ROOT / "design/PAGE_ARCHETYPES.md").read_text(encoding="utf-8")
+        authority = (ROOT / "design/DESIGN_AUTHORITY.md").read_text(encoding="utf-8")
+        samples = (ROOT / "design/MVP_PAGE_SAMPLES.md").read_text(encoding="utf-8")
+        self.assertIn("MVP_PAGE_SAMPLES.md", authority)
+        self.assertIn("MVP_PAGE_SAMPLES.md", inventory)
+        self.assertIn("VS-05c public correction intake implemented/verified", inventory)
+        self.assertIn("design candidate only", samples)
+        for issue in ("#173", "#174", "#175"):
+            self.assertIn(issue, samples)
+        self.assertIn("no automatic canonical edit", samples)
+        self.assertIn("confirmed 2FA", samples)
+
     def test_vs04_operations_trigger_is_bounded(self):
         text = (ROOT / ".github/workflows/vs04-launch-proof.yml").read_text(encoding="utf-8")
         self.assertNotIn("- docs/operations/**", text)

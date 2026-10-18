@@ -16,6 +16,7 @@ A design-tool prototype, AI-generated image or standalone screenshot is a **cand
 - `design/components/COMPONENT_CONTRACTS.md` — shared component anatomy/state rules; only already-rendered Foundation behavior inherits Foundation approval.
 - `design/QUALITY_CONTRACT.md` — responsive, accessibility, content/internationalization and state quality rules.
 - `design/PAGE_ARCHETYPES.md` — complete page-family inventory with explicit approved/candidate/deferred states.
+- `design/MVP_PAGE_SAMPLES.md` — candidate cross-page anatomy/reference samples, linked to existing archetypes, owners and acceptance cases; not a new design system.
 - `design/patterns/SHELL.md`.
 - `design/patterns/ARTIST.md`.
 - `design/patterns/SEARCH.md`.
@@ -64,6 +65,6 @@ React web, Filament and future Flutter share identity, tokens, semantics and inf
 ## Lifecycle boundaries
 
 - `design-authority`: approved Foundation concept/baseline.
-- `public-web`: remains candidate until actual product surfaces are implemented and verified.
+- `public-web`: currently `verified` for its recorded bounded public surfaces in `governance/CAPABILITY_MAP.json`; candidate archetypes and UX audit gaps do not demote that capability or imply complete product acceptance.
 - Candidate Release/Recording/Credits/discovery/editorial/legal/form/error archetypes are planning/design contracts, not implementation evidence.
 - Production deployment and launch remain separate gates.
