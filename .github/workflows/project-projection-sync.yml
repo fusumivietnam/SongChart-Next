@@ -59,7 +59,8 @@ jobs:
               echo "PROJECT_SYNC_TOKEN is not configured; no Project mutation was attempted."
               echo "Create a classic PAT with only the project scope and save it as repository secret PROJECT_SYNC_TOKEN."
             } >> "$GITHUB_STEP_SUMMARY"
-            exit 0
+            echo "::error title=Project sync not executed::PROJECT_SYNC_TOKEN missing; Project #2 was not reconciled."
+            exit 1
           fi
           echo "configured=true" >> "$GITHUB_OUTPUT"
 
