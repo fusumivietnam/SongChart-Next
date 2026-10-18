@@ -132,12 +132,14 @@ def audit_markdown(root: Path = ROOT) -> dict:
     research = {item["source"] for item in _load(root, "governance/RESEARCH_REGISTRY.json")["research"]}
     governed_prefixes = (
         ("docs/adr/", "architecture-decisions"),
+        ("docs/architecture/", "architecture"),
         ("docs/architecture/adr/", "architecture-decisions"),
         ("design/", "design-authority"),
         ("docs/roadmap/", "roadmap-governance"),
         ("docs/operations/", "operations"),
         ("docs/providers/", "provider-policy"),
         ("docs/engineering/", "engineering"),
+        ("docs/research/", "research-governance"),
         ("docs/product/", "product-scope"),
         ("docs/security/", "security-and-recovery"),
         (".github/", "github-workflows"),
