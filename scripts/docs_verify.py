@@ -159,6 +159,29 @@ def audit_markdown(root: Path = ROOT) -> dict:
         item.get("decision_ref") for item in _load(root, "governance/RESEARCH_REGISTRY.json")["research"]
         if item.get("decision_ref")
     )
+    # Literal references from non-Markdown tracked text are weak evidence, but
+    # enough to keep a candidate out of the no-reference inspection queue.
+    # Limit scan size and avoid generated/vendor/lockfile content.
+    tracked_files = subprocess.run(
+        ["git", "ls-files", "-z"], cwd=root, capture_output=True, check=True,
+    ).stdout.split(b"\0")
+    non_markdown_sources = []
+    for entry in tracked_files:
+        if not entry:
+            continue
+        name = entry.decode("utf-8")
+        if name.endswith(".md") or name.endswith((".lock", ".svg", ".png", ".jpg", ".webp", ".map")):
+            continue
+        path = root / name
+        if path.is_file() and path.stat().st_size <= 256_000:
+            try:
+                non_markdown_sources.append((name, path.read_text(encoding="utf-8")))
+            except UnicodeDecodeError:
+                continue
+    literal_refs = {
+        target: [name for name, body in non_markdown_sources if target in body][:5]
+        for target in paths
+    }
     implicit_entrypoints = {
         p for p in paths
         if p.startswith((".github/ISSUE_TEMPLATE/", ".github/agents/"))
@@ -231,6 +254,13 @@ def audit_markdown(root: Path = ROOT) -> dict:
                     path in registry_sources or path in registered or path in implicit_entrypoints
                 )
             ],
+            "non_markdown_literal_reference": [
+                {"path": path, "sources": literal_refs[path]}
+                for path, count in inbound.items()
+                if count == 0 and path not in {"README.md", "AGENTS.md"}
+                and path not in registry_sources and path not in registered
+                and path not in implicit_entrypoints and literal_refs[path]
+            ],
             "manual_review": [
                 path for path, count in inbound.items()
                 if count == 0
@@ -238,9 +268,10 @@ def audit_markdown(root: Path = ROOT) -> dict:
                 and path not in registry_sources
                 and path not in registered
                 and path not in implicit_entrypoints
+                and not literal_refs[path]
             ],
         },
-        "note": "Directory governance and zero inbound Markdown references are advisory signals, not proof of file ownership, usage, redundancy or lifecycle. Generated/ADR/research files must never be deleted based on this audit.",
+        "note": "Directory governance, exact path literals in non-Markdown tracked text, and zero inbound Markdown references are advisory signals, not proof of file ownership, usage, redundancy or lifecycle. Generated/ADR/research files must never be deleted based on this audit.",
     }
 
 
