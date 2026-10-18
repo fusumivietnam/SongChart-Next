@@ -33,7 +33,7 @@ Public user accounts/registration, favorites/follows, personalized recommendatio
 ## Acceptance before public launch
 A representative permitted dataset; end-to-end journey in browser on narrow and wide screens; approved visual baseline; legal/provider rights check; verified redirects, errors and empty states; automated tests; backup **and restore** proof; security/privacy/incident/rollback evidence.
 
-Production deployment platform remains undecided until release/operational gates justify selection. Runtime artifacts must remain portable enough that a project-control dashboard or deployment SaaS is not required to recover the system.
+ADR-0015 selects the initial single-VPS Docker production baseline; this is an approved packaging/architecture choice, not a deployed environment or launch authorization. G5 execution remains blocked on operator inputs and real deployment evidence in issues #121/#69. Runtime artifacts must remain portable enough that a project-control dashboard or deployment SaaS is not required to recover the system.
 
 ## Scope discipline
 Research -> idea -> evaluation -> approved capability -> issue -> PR -> release. Research or a chat conversation never auto-promotes a feature into committed roadmap. Product approval does not imply implementation, verification or deployment.

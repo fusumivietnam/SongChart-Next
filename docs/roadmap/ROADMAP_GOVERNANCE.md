@@ -80,7 +80,7 @@ A PR may carry one hidden `songchart-reconcile` JSON object from `.github/PULL_R
 - retaining exact-head verification evidence for an already approved/implemented capability;
 - promoting an already approved capability to implemented/verified when the reviewed scope and exact evidence support it;
 - appending factual implementation notes to the owning vertical-slice section;
-- refreshing the concise README status pointer.
+- preserving factual links to the owning authored roadmap/capability authority, without editing README or generated projections.
 
 Automatic reconciliation fails closed when metadata declares or implies:
 - a new product/roadmap scope decision;
