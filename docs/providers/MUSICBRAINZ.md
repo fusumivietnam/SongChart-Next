@@ -106,6 +106,28 @@ Owner decision B2, approved 2026-10-04:
 
 This is separate from the CC0 status of core database data: data licensing and hosted web-service usage terms are not the same permission.
 
+## Commercial-first public-use decision — owner approved 2026-10-18
+
+**Product posture approved:** SongChart Next is intended to support potential advertising/partner revenue. Any live/public source selection must therefore be evaluated for commercial use **before** activation, even while revenue is zero. This is a business-model/risk decision, **not** MetaBrainz commercial access approval or a provider runtime change. Owning execution/review: issue #174; do not close it from this policy-only PR.
+
+The earlier B2 scope of bounded non-commercial development/evaluation remains unchanged. All commercial/public production use is blocked until explicit provider rights, field-level eligibility and owner/operator evidence is reviewed.
+
+| Alternative | What may be assessed | Gate before selection |
+| --- | --- | --- |
+| A — MetaBrainz commercial hosted API/service | Negotiate permissible service consumption and limits while using the existing SongChart adapter/normalized claim boundary. | Written commercial terms/quote or other applicable explicit authorization, acceptable usage budget, allowed fields and reuse/retention/attribution, and production failure/rate policy. |
+| B — Official CC0 core database dumps | Evaluate a **bounded** subset of official CC0 snapshot data as offline evidence, not a second canonical database. | Exact dump-file/field license map, updates and freshness budget, import/provenance/idempotency contract, hosting/storage costs, and legal/owner acceptance. Avoid NC supplementary packages and unreviewed derived artifacts. |
+| Live Data Feed / replication | Research only; NOT a default for a one-VPS MVP. | Separate packet license/commercial terms and operating/retirement decision; no feed or mirror activation by this review. |
+
+### Manual selection criteria
+
+1. Confirm commercial contact/terms and **acceptable recurring service budget** for option A, including whether a formal quote is required before any API use in revenue-generating operation.
+2. Compare option B's core-only Artist, Release, Release Group, Recording, Work and relationships coverage with an evidence-backed representative sample; identify exclusions explicitly.
+3. Approve minimum freshness, attribution/disclosure, data-retention and correction/update handling for either source.
+4. Record rights for external provider URLs and artwork independently: CC0 core data does not convey embed, artwork, streamed media or external-platform usage rights.
+5. Choose **one primary MVP ingestion path** after these gates; the unchosen alternative remains research and must not be deployed in parallel.
+
+**STOP:** No code/runtime flag change, MusicBrainz live traffic, database dump import, Cover Art Archive fetch, commercial use or production deployment follows from this decision. Existing provider admission still owns canonical changes; no direct provider-to-canonical writes.
+
 ## Raw evidence retention
 
 Raw provider responses are evidence, not canonical records.
