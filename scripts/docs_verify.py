@@ -164,7 +164,7 @@ def audit_markdown(root: Path = ROOT) -> dict:
     # Limit scan size and avoid generated/vendor/lockfile content.
     tracked_files = subprocess.run(
         ["git", "ls-files", "-z"], cwd=root, capture_output=True, check=True,
-    ).stdout.split(b"\\0")
+    ).stdout.split(b"\0")
     non_markdown_sources = []
     for entry in tracked_files:
         if not entry:
