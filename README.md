@@ -27,8 +27,5 @@ Project governance protocols and evidence ownership: [Project Control](docs/oper
 9. [Roadmap governance](docs/roadmap/ROADMAP_GOVERNANCE.md)
 10. [Vertical slices](docs/roadmap/VERTICAL_SLICES.md)
 
-## Authority rule
-Git owns code and authored decisions; PostgreSQL owns canonical product data where installed; GitHub Issues/Projects own execution work when configured. Generated docs and AI contexts are **read-only projections** of their declared sources. A proposal is not an installed dependency, an approved design, a completed feature or a production release.
-
-## Verification
-Run `python3 scripts/verify_project_os.py` to validate project registry links and lifecycle claims (Python standard library only).
+## Authority and verification
+Follow [Project Control](docs/operations/PROJECT_CONTROL.md) for the authoritative source/evidence split and [Documentation Governance](docs/operations/DOCUMENTATION_GOVERNANCE.md) for generated-document ownership. Run `python3 scripts/verify_project_os.py` for registry/link validation; the [CI Workflow Ownership](docs/operations/CI_WORKFLOW_OWNERSHIP.md) contract defines exact-revision CI evidence. A proposal is not approval, implementation, verification or deployment.
