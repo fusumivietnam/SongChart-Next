@@ -18,7 +18,7 @@ This is an infrastructure execution track, not a new product vertical slice. It 
 
 ## Current execution
 
-The active implementation is issue #140 on branch `infra/vercel-free-preview`. Vercel/Neon are replaceable hosting infrastructure only. PostgreSQL remains canonical data authority and SongChart source remains product/domain authority.
+Issue #140 was closed on 2026-10-15 after the preview infrastructure baseline was recorded. The original `infra/vercel-free-preview` branch is historical implementation provenance, **not** an active work branch or evidence of current preview health. The current preview operating contract is [`VERCEL_PREVIEW.md`](../operations/VERCEL_PREVIEW.md), with historical exact-revision evidence in [`VERCEL_PREVIEW_EVIDENCE.md`](../operations/VERCEL_PREVIEW_EVIDENCE.md); validate live deployment state before claiming a later SHA is verified. UX acceptance for the current MVP is tracked separately by issue #175. Vercel/Neon remain replaceable hosting infrastructure only; PostgreSQL remains canonical data authority and SongChart source remains product/domain authority.
 
 ## Exit criteria
 

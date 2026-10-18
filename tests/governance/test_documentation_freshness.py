@@ -130,6 +130,13 @@ class DocumentationFreshnessTests(unittest.TestCase):
         self.assertTrue(any("forbidden mutable status marker" in error for error in errors))
 
 
+    def test_preview_roadmap_does_not_claim_closed_work_is_active(self) -> None:
+        preview = (ROOT / "docs/roadmap/PREVIEW_ENVIRONMENT.md").read_text(encoding="utf-8")
+        self.assertNotIn("The active implementation is issue #140", preview)
+        self.assertIn("Issue #140 was closed on 2026-10-15", preview)
+        self.assertIn("VERCEL_PREVIEW.md", preview)
+        self.assertIn("VERCEL_PREVIEW_EVIDENCE.md", preview)
+
     def test_research_probes_reference_existing_repository_paths(self) -> None:
         """Advisory research fixtures must not point to removed project authorities."""
         probes = json.loads((ROOT / "research/cocoindex/questions.json").read_text(encoding="utf-8"))
