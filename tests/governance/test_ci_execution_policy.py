@@ -112,6 +112,16 @@ class CiExecutionPolicyTests(unittest.TestCase):
         self.assertIn("All commercial/public production use is blocked", policy)
         self.assertIn("No code/runtime flag change", policy)
 
+    def test_git_markdown_audit_is_read_only_and_single_projection_preserved(self):
+        verifier = (ROOT / "scripts/docs_verify.py").read_text(encoding="utf-8")
+        design = (ROOT / "design/DESIGN_AUTHORITY.md").read_text(encoding="utf-8")
+        self.assertIn("def audit_markdown(", verifier)
+        self.assertIn("git\", \"ls-files", verifier)
+        self.assertIn("--audit-json", verifier)
+        self.assertIn("missing_relative_links", verifier)
+        self.assertIn("bounded legal/support document anatomy was approved in VS-04a", design)
+        self.assertNotIn("Candidate Release/Recording/Credits/discovery/editorial/legal/form/error archetypes", design)
+
     def test_vs04_operations_trigger_is_bounded(self):
         text = (ROOT / ".github/workflows/vs04-launch-proof.yml").read_text(encoding="utf-8")
         self.assertNotIn("- docs/operations/**", text)
