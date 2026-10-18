@@ -127,11 +127,43 @@ def audit_markdown(root: Path = ROOT) -> dict:
     paths = sorted(p.decode("utf-8") for p in process.stdout.split(b"\0") if p)
     roles = {"generated": 0, "historical": 0, "authored": 0}
     missing_links = []
+    # Advisory classification only. A directory contract is not per-file freshness registration.
+    registered = {item["path"]: item["owner"] for item in _load(root, REGISTRY_PATH)["documents"]}
+    research = {item["source"] for item in _load(root, "governance/RESEARCH_REGISTRY.json")["research"]}
+    governed_prefixes = (
+        ("docs/adr/", "architecture-decisions"),
+        ("docs/architecture/adr/", "architecture-decisions"),
+        ("design/", "design-authority"),
+        ("docs/roadmap/", "roadmap-governance"),
+        ("docs/operations/", "operations"),
+        ("docs/providers/", "provider-policy"),
+        ("docs/engineering/", "engineering"),
+        ("docs/product/", "product-scope"),
+        ("docs/security/", "security-and-recovery"),
+        (".github/", "github-workflows"),
+        ("reference/", "developer-reference"),
+    )
+    coverage = {"registered": [], "governed": [], "unresolved": []}
+    inbound = {relative: 0 for relative in paths}
+    tracked = set(paths)
+
     for relative in paths:
         role = "generated" if relative.startswith("docs/generated/") else (
             "historical" if relative.startswith(("docs/adr/", "docs/research/", "design/decisions/", "design/baselines/")) else "authored"
         )
         roles[role] += 1
+        if relative in registered:
+            coverage["registered"].append({"path": relative, "owner": registered[relative]})
+        elif relative in research:
+            coverage["governed"].append({"path": relative, "mechanism": "research-registry"})
+        else:
+            mechanism = next((owner for prefix, owner in governed_prefixes if relative.startswith(prefix)), None)
+            if relative == "AGENTS.md":
+                mechanism = "project-control"
+            if mechanism:
+                coverage["governed"].append({"path": relative, "mechanism": mechanism})
+            else:
+                coverage["unresolved"].append(relative)
         source = root / relative
         if not source.is_file():
             missing_links.append({"source": relative, "target": "<tracked file missing>"})
@@ -150,13 +182,27 @@ def audit_markdown(root: Path = ROOT) -> dict:
             resolved = (source.parent / path_part).resolve()
             if not resolved.is_relative_to(root.resolve()) or not resolved.exists():
                 missing_links.append({"source": relative, "target": target})
+            elif resolved.is_file():
+                local = resolved.relative_to(root.resolve()).as_posix()
+                if local in tracked:
+                    inbound[local] += 1
     return {
         "source": "git ls-files (tracked Markdown at checked-out SHA)",
         "read_only": True,
         "tracked_markdown": len(paths),
         "roles": roles,
         "missing_relative_links": missing_links,
-        "note": "Historical and authored labels are diagnostics only; GitHub Issues/PRs/CI and capability lifecycle must be queried independently.",
+        "ownership_coverage": {
+            "registered_count": len(coverage["registered"]),
+            "governed_count": len(coverage["governed"]),
+            "unresolved_count": len(coverage["unresolved"]),
+            **coverage,
+        },
+        "unreferenced_candidates": [
+            path for path, count in inbound.items()
+            if count == 0 and path not in {"README.md", "AGENTS.md"}
+        ],
+        "note": "Directory governance and zero inbound Markdown references are advisory signals, not proof of file ownership, usage, redundancy or lifecycle. Generated/ADR/research files must never be deleted based on this audit.",
     }
 
 
