@@ -89,4 +89,4 @@ When the PAT expires or is rotated:
 3. manually dispatch **Project projection sync**;
 4. revoke the old PAT.
 
-If the secret is removed, the workflow remains green but reports that Project mutation was skipped. Roadmap health and project governance continue independently.
+If the secret is removed, the Project projection sync workflow **fails closed** with an explicit error and does not mutate Project #2. A green Project sync job therefore requires a configured credential and execution of the reconciliation step; inspect the published report to verify actual fields/cards/views. Roadmap health and project governance continue independently.
