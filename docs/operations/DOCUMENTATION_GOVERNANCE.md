@@ -4,13 +4,11 @@ SongChart Next keeps project authority in Git and machine-readable governance re
 
 ## Document modes
 
-`governance/DOCUMENTATION_REGISTRY.json` registers high-value documentation with one of three modes:
+`governance/DOCUMENTATION_REGISTRY.json` registers high-value documentation with one of two supported modes:
 
 - `authored`: human-maintained explanation or decision-support material. Its declared `sources` show what authority should be reviewed when the document changes.
 - `generated`: byte-deterministic projection. Never edit these files by hand; run `python3 scripts/docs_generate.py`.
-- `mixed`: authored document containing explicitly automation-owned sections. No current `mixed` document is registered; introducing one requires a declared owner and non-overlapping mutation contract.
-
-`README.md` is currently registered as `authored`. Roadmap reconciliation no longer writes a README status block; it updates only its designated roadmap/capability authorities through a reviewed PR. Do not restore an automation-owned README section without a separately approved ownership change.
+`mixed` is not an accepted registry mode (`scripts/docs_verify.py` rejects it). `README.md` is registered as `authored`. Roadmap reconciliation no longer writes a README status block; it updates only designated roadmap/capability authorities through reviewed PRs. Do not restore an automation-owned README section without a separately approved ownership change.
 
 The registry is intentionally incremental. A document only becomes freshness-governed after it is explicitly registered with an owner and source set; do not pretend an unregistered document has automated freshness guarantees.
 
@@ -28,6 +26,8 @@ Verify paths, owners, source references, authority IDs and committed generated o
 python3 scripts/docs_verify.py
 python3 scripts/docs_generate.py --check
 ```
+
+For a read-only, Git-backed inventory of tracked Markdown files and local relative-link diagnostics, run `python3 scripts/docs_verify.py --audit-json`. This audit is generated to stdout only; its warnings do not automatically rewrite authored docs or determine lifecycle status. The `Project governance` workflow runs it on PRs and main alongside strict documentation checks, so new commits are inspected without a chat-driven checklist.
 
 The required `governance` GitHub Actions context runs these checks on the exact PR/main revision. If a projected capability or technology changes status without regenerating its Markdown projection, the merge gate fails.
 
