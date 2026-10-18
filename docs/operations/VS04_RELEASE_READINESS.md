@@ -26,11 +26,12 @@ ADR-0015 selects one Ubuntu 24.04 LTS VPS using Docker Compose, Nginx, PHP-FPM a
 6. Confirm legal/provider policy for any newly exposed provider destination/evidence.
 7. Confirm the actual VPS/environment, access boundary, intended hostname/DNS/TLS path and independent off-host backup destination.
 8. Record immutable app/web image identities/digests built from the approved release revision.
-9. For G5, record production backup result, migration result, `/health` and user-journey smoke evidence, rollback/recovery evidence and release approval.
+9. Confirm an external monitor reaches the production `/health` endpoint; record monitor/provider identity, monitored hostname, check interval, alert destination, accountable incident/release owner, and evidence of a successful alert-path test or equivalent provider verification as required by [VPS Production](VPS_PRODUCTION.md). A CI `/health` check or disposable restore is not production monitoring evidence.
+10. For G5, record production backup result, migration result, `/health` and user-journey smoke evidence, rollback/recovery evidence and release approval.
 
 ## Current stop decision
 
-**STOP before production deployment.** The deployment architecture/package is selected and implemented, but there is no concrete production VPS environment, immutable released app/web digest, production DNS/TLS/network evidence, production database migration/backup, production secret delivery, public production smoke, alerting or production rollback evidence.
+**STOP before production deployment.** The deployment architecture/package is selected and implemented, but there is no concrete production VPS environment, immutable released app/web digest, production DNS/TLS/network evidence, production database migration/backup, production secret delivery, public production smoke, independent health-monitor/alert-routing verification or production rollback evidence.
 
 Issue #69 remains open until the real G5 environment/deployment evidence is recorded. `production-deploy` may be `implemented` because deployable source/config exists, but it must not be described as `deployed` or as a public launch solely from PR #119 or disposable CI. The next production-facing action is environment provisioning and controlled G5 execution.
 
