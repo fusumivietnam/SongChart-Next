@@ -22,6 +22,11 @@ ROUTES = (
     ("release", "/releases/01m4xhg22zj51ctppzfqxe07y1/signals-at-dawn", "html"),
     ("recording", "/recordings/01m4xhg3et77xdjfkhwxedg1qm/signals-at-dawn", "html"),
     ("corrections", "/corrections", "html"),
+    ("about", "/about", "html"),
+    ("privacy", "/privacy", "html"),
+    ("terms", "/terms", "html"),
+    ("disclaimer", "/disclaimer", "html"),
+    ("support", "/support", "html"),
 )
 
 
