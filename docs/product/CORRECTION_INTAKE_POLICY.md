@@ -108,7 +108,13 @@ The dedicated `/corrections` form is the public correction-intake path once VS-0
 
 `admin-review` remains `candidate`. Public intake alone does not activate it.
 
-If unresolved real claims demonstrate a moderation need, a later separately approved review slice must define reviewer identity, authorization, approve/reject semantics and decision history. Any approved canonical mutation must enter through SongChart application/domain validation and must never update canonical tables directly from public-submission code.
+**Owner-approved reviewer policy (2026-10-18; issue #173):** One explicitly provisioned internal reviewer may decide whether correction evidence is accepted or rejected. Public self-registration and arbitrary authenticated-user access to review are prohibited. Reviewer access requires verified internal identity **and mandatory, confirmed two-factor authentication (2FA)**; any missing enrollment, disabled 2FA, unverified identity or revoked reviewer permission must fail closed. Existing Laravel/Fortify authentication features are primitives only and do not grant reviewer permission by themselves.
+
+Approving correction **evidence** never updates canonical Artist/Release/Recording/Work data automatically. A separate explicitly authorized SongChart application/domain use case, validation and review are required for any later canonical mutation. Rejecting evidence also never mutates canonical records.
+
+**Proposed implementation acceptance, not activation:** A later review slice must prove provision/revocation ownership, least-privilege reviewer authorization, enforced 2FA at the decision boundary, CSRF/session protections, pending-only idempotent accepted/rejected transitions with concurrency safety, immutable reviewer-identity/decision timestamp history, an authoritative `resolved_at`, and 365-day resolved-evidence retention/deletion without keeping undeclared copies. Deny anonymous users, ordinary logged-in users, unverified identities, reviewers lacking confirmed 2FA and revoked reviewers. No general-purpose CMS or Filament activation is approved by this policy.
+
+The existing `admin-review` trigger remains unchanged: **real unresolved claims requiring moderation** and a human-reviewed role/authorization test contract must be evidenced before separate capability activation. This approval authorizes design and test preparation only; it does not authorize routes, admin access, decision mutations, migrations or production deployment.
 
 Public self-registration remains out of scope.
 

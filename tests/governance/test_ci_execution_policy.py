@@ -65,6 +65,22 @@ class CiExecutionPolicyTests(unittest.TestCase):
         self.assertIn("Issue #174", roadmap)
         self.assertIn("Issue #175", roadmap)
 
+    def test_reviewer_policy_is_approved_but_activation_stays_gated(self):
+        import json
+        policy = (ROOT / "docs/product/CORRECTION_INTAKE_POLICY.md").read_text(encoding="utf-8")
+        roadmap = (ROOT / "docs/roadmap/VERTICAL_SLICES.md").read_text(encoding="utf-8")
+        capability_map = json.loads((ROOT / "governance/CAPABILITY_MAP.json").read_text(encoding="utf-8"))
+        triggers = json.loads((ROOT / "governance/ACTIVATION_TRIGGERS.json").read_text(encoding="utf-8"))
+        admin = next(c for c in capability_map["capabilities"] if c["id"] == "admin-review")
+        trigger = next(t for t in triggers["triggers"] if t["capability"] == "admin-review")
+        self.assertEqual(admin["status"], "candidate")
+        self.assertEqual(trigger["condition"], "Real unresolved claims require moderation")
+        self.assertIn("One explicitly provisioned internal reviewer", policy)
+        self.assertIn("mandatory, confirmed two-factor authentication (2FA)", policy)
+        self.assertIn("never updates canonical", policy)
+        self.assertIn("Owner-approved reviewer policy", roadmap)
+        self.assertIn("never automatically mutates canonical data", roadmap)
+
     def test_vs04_operations_trigger_is_bounded(self):
         text = (ROOT / ".github/workflows/vs04-launch-proof.yml").read_text(encoding="utf-8")
         self.assertNotIn("- docs/operations/**", text)
