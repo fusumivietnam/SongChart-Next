@@ -84,6 +84,13 @@ class DocumentationFreshnessTests(unittest.TestCase):
         self.assertIn("README.md", {entry["path"] for entry in coverage["registered"]})
         self.assertIn("docs/research/RES-0004-ux-ui-agent-skills-evaluation.md",
                       {entry["path"] for entry in coverage["governed"]})
+        triage = report["orphan_triage"]
+        reviewed = set(triage["manual_review"])
+        known = {entry["path"] for entry in triage["explicit_registry_or_entrypoint"]}
+        self.assertFalse(reviewed & known)
+        self.assertTrue(reviewed | known <= set(report["unreferenced_candidates"]))
+        self.assertNotIn(".github/PULL_REQUEST_TEMPLATE.md", reviewed)
+        self.assertNotIn("docs/research/RES-0004-ux-ui-agent-skills-evaluation.md", reviewed)
         self.assertNotIn("README.md", report["unreferenced_candidates"])
         self.assertTrue(set(report["unreferenced_candidates"]).issubset(
             {entry["path"] for entry in coverage["registered"] + coverage["governed"]}
