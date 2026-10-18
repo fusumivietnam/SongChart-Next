@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from docs_generate import render_outputs  # noqa: E402
-from docs_verify import verify  # noqa: E402
+from docs_verify import audit_markdown, verify  # noqa: E402
 
 
 class DocumentationFreshnessTests(unittest.TestCase):
@@ -70,6 +70,20 @@ class DocumentationFreshnessTests(unittest.TestCase):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(content, encoding="utf-8")
         return root
+
+    def test_git_backed_ownership_and_orphan_diagnostics(self) -> None:
+        report = audit_markdown(ROOT)
+        coverage = report["ownership_coverage"]
+        self.assertEqual(report["tracked_markdown"], sum(report["roles"].values()))
+        self.assertEqual(report["tracked_markdown"], coverage["registered_count"] + coverage["governed_count"] + coverage["unresolved_count"])
+        self.assertIn("README.md", {entry["path"] for entry in coverage["registered"]})
+        self.assertIn("docs/research/RES-0004-ux-ui-agent-skills-evaluation.md",
+                      {entry["path"] for entry in coverage["governed"]})
+        self.assertNotIn("README.md", report["unreferenced_candidates"])
+        self.assertTrue(set(report["unreferenced_candidates"]).issubset(
+            {entry["path"] for entry in coverage["registered"] + coverage["governed"]}
+            | set(coverage["unresolved"])
+        ))
 
     def test_valid_registry_and_generated_projection(self) -> None:
         self.assertEqual([], verify(self._fixture()))
