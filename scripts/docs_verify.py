@@ -2,8 +2,12 @@
 """Verify documentation ownership, references and generated freshness."""
 from __future__ import annotations
 
+import argparse
 import json
+import re
+import subprocess
 from pathlib import Path
+from urllib.parse import unquote, urlsplit
 
 from docs_generate import GENERATORS, REGISTRY_PATH, render_outputs
 
@@ -112,7 +116,57 @@ def verify(root: Path = ROOT) -> list[str]:
     return errors
 
 
+def audit_markdown(root: Path = ROOT) -> dict:
+    """Read-only inventory from tracked Git paths; not a status or lifecycle authority."""
+    process = subprocess.run(
+        ["git", "ls-files", "-z", "--", "*.md"], cwd=root,
+        capture_output=True, check=False,
+    )
+    if process.returncode:
+        raise RuntimeError("Cannot enumerate Git-tracked Markdown: " + process.stderr.decode(errors="replace"))
+    paths = sorted(p.decode("utf-8") for p in process.stdout.split(b"\0") if p)
+    roles = {"generated": 0, "historical": 0, "authored": 0}
+    missing_links = []
+    for relative in paths:
+        role = "generated" if relative.startswith("docs/generated/") else (
+            "historical" if relative.startswith(("docs/adr/", "docs/research/", "design/decisions/", "design/baselines/")) else "authored"
+        )
+        roles[role] += 1
+        source = root / relative
+        if not source.is_file():
+            missing_links.append({"source": relative, "target": "<tracked file missing>"})
+            continue
+        body = source.read_text(encoding="utf-8")
+        # Local inline Markdown links only; URL/anchors and image assets remain external/separate checks.
+        body = re.sub(r"```.*?```", "", body, flags=re.DOTALL)
+        for match in re.finditer(r"(?<!!)\[[^\]\n]+\]\(([^\s)]+)(?:\s+[\"'][^\n]*?[\"'])?\)", body):
+            target = match.group(1)
+            parsed = urlsplit(target)
+            if parsed.scheme or target.startswith(("#", "/", "//", "mailto:")):
+                continue
+            path_part = unquote(parsed.path)
+            if not path_part or path_part.startswith("#"):
+                continue
+            resolved = (source.parent / path_part).resolve()
+            if not resolved.is_relative_to(root.resolve()) or not resolved.exists():
+                missing_links.append({"source": relative, "target": target})
+    return {
+        "source": "git ls-files (tracked Markdown at checked-out SHA)",
+        "read_only": True,
+        "tracked_markdown": len(paths),
+        "roles": roles,
+        "missing_relative_links": missing_links,
+        "note": "Historical and authored labels are diagnostics only; GitHub Issues/PRs/CI and capability lifecycle must be queried independently.",
+    }
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--audit-json', action='store_true', help='print Git-tracked Markdown inventory and link diagnostics (read only)')
+    args = parser.parse_args()
+    if args.audit_json:
+        print(json.dumps(audit_markdown(), indent=2, ensure_ascii=False))
+        return 0
     errors = verify()
     if errors:
         print("Documentation verification failed:")

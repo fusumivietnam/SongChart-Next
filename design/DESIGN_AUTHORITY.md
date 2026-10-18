@@ -66,5 +66,5 @@ React web, Filament and future Flutter share identity, tokens, semantics and inf
 
 - `design-authority`: approved Foundation concept/baseline.
 - `public-web`: currently `verified` for its recorded bounded public surfaces in `governance/CAPABILITY_MAP.json`; candidate archetypes and UX audit gaps do not demote that capability or imply complete product acceptance.
-- Candidate Release/Recording/Credits/discovery/editorial/legal/form/error archetypes are planning/design contracts, not implementation evidence.
+- Candidate archetypes (including editorial, internal review, generalized browse, utility/error and extension patterns) remain design references until approved by owning evidence; bounded legal/support document anatomy was approved in VS-04a and public correction intake implemented in VS-05c. The archetype inventory and capability lifecycle are separate authorities.
 - Production deployment and launch remain separate gates.
