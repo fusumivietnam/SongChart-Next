@@ -75,6 +75,51 @@
         "governance/TECHNOLOGY_REGISTRY.json",
         "docs/roadmap/VERTICAL_SLICES.md"
       ]
+    },
+    {
+      "path": "docs/product/PRODUCT_CHARTER.md",
+      "mode": "authored",
+      "owner": "product-scope",
+      "sources": [
+        "docs/roadmap/VERTICAL_SLICES.md",
+        "governance/CAPABILITY_MAP.json"
+      ]
+    },
+    {
+      "path": "docs/architecture/ARCHITECTURE.md",
+      "mode": "authored",
+      "owner": "architecture",
+      "sources": [
+        "docs/product/PRODUCT_CHARTER.md",
+        "governance/TECHNOLOGY_REGISTRY.json"
+      ]
+    },
+    {
+      "path": "design/DESIGN_AUTHORITY.md",
+      "mode": "authored",
+      "owner": "design-authority",
+      "sources": [
+        "design/IDENTITY.md",
+        "design/tokens/foundation.json"
+      ]
+    },
+    {
+      "path": "docs/operations/PROJECT_CONTROL.md",
+      "mode": "authored",
+      "owner": "project-os",
+      "sources": [
+        "AGENTS.md",
+        "docs/roadmap/ROADMAP_GOVERNANCE.md"
+      ]
+    },
+    {
+      "path": "docs/operations/DOCUMENTATION_GOVERNANCE.md",
+      "mode": "authored",
+      "owner": "project-os",
+      "sources": [
+        "governance/DOCUMENTATION_REGISTRY.json",
+        "scripts/docs_verify.py"
+      ]
     }
   ]
 }
