@@ -137,6 +137,13 @@ class DocumentationFreshnessTests(unittest.TestCase):
         self.assertIn("VERCEL_PREVIEW.md", preview)
         self.assertIn("VERCEL_PREVIEW_EVIDENCE.md", preview)
 
+    def test_preview_setup_checklist_is_historical_not_live_status(self) -> None:
+        checklist = (ROOT / "docs/operations/VERCEL_PREVIEW_SETUP_CHECKLIST.md").read_text(encoding="utf-8")
+        self.assertIn("historical handoff", checklist)
+        self.assertIn("not a live environment checklist", checklist)
+        self.assertIn("VERCEL_PREVIEW_EVIDENCE.md", checklist)
+        self.assertIn("VERCEL_PREVIEW.md", checklist)
+
     def test_research_probes_reference_existing_repository_paths(self) -> None:
         """Advisory research fixtures must not point to removed project authorities."""
         probes = json.loads((ROOT / "research/cocoindex/questions.json").read_text(encoding="utf-8"))
