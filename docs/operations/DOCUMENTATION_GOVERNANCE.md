@@ -8,7 +8,9 @@ SongChart Next keeps project authority in Git and machine-readable governance re
 
 - `authored`: human-maintained explanation or decision-support material. Its declared `sources` show what authority should be reviewed when the document changes.
 - `generated`: byte-deterministic projection. Never edit these files by hand; run `python3 scripts/docs_generate.py`.
-- `mixed`: authored document containing automation-owned sections. `README.md` stays mixed because roadmap reconciliation owns its status block.
+- `mixed`: authored document containing explicitly automation-owned sections. No current `mixed` document is registered; introducing one requires a declared owner and non-overlapping mutation contract.
+
+`README.md` is currently registered as `authored`. Roadmap reconciliation no longer writes a README status block; it updates only its designated roadmap/capability authorities through a reviewed PR. Do not restore an automation-owned README section without a separately approved ownership change.
 
 The registry is intentionally incremental. A document only becomes freshness-governed after it is explicitly registered with an owner and source set; do not pretend an unregistered document has automated freshness guarantees.
 
@@ -35,11 +37,12 @@ The required `governance` GitHub Actions context runs these checks on the exact 
 - `governance/TECHNOLOGY_REGISTRY.json` owns technology adoption state.
 - `docs/roadmap/VERTICAL_SLICES.md` owns slice scope/dependency/acceptance intent, not live execution status.
 - GitHub Issues/PRs and exact-SHA Actions evidence own live execution/evidence.
-- roadmap reconciliation remains the sole automation owner of the README status block.
+- `README.md` is authored navigation and policy context, not a mutable execution/status projection. Roadmap reconciliation does not update README.
+- `docs/generated/PROJECT_STATUS.md` is the single committed generated lifecycle/technology status projection; `scripts/project_status.py` is an offline read-only diagnostic and not another committed status authority.
 - `docs/generated/*` is disposable derived output and can always be rebuilt from declared authority.
 
 ## Semantic indexing and CocoIndex
 
-A later CocoIndex experiment may index code, governance and documentation for semantic retrieval, impact analysis and contradiction discovery. That index must remain a derived cache: it may suggest documents requiring review, but it cannot mutate lifecycle authority, approve decisions or become required application runtime infrastructure without a separately reviewed activation.
+The bounded CocoIndex research spike was evaluated under [Issue #124](https://github.com/fusumivietnam/SongChart-Next/issues/124) and [PR #125](https://github.com/fusumivietnam/SongChart-Next/pull/125). Its recorded evaluation outcome was **defer adoption**: baseline semantic retrieval and document-impact precision were insufficient to justify technology activation. The experimental index remains a rebuildable, disposable research artifact, not an installed production dependency or a documentation authority.
 
-Deterministic registry/generator checks come first. Semantic/LLM-based checks should begin as advisory evidence and only become merge-blocking after a stable deterministic invariant is identified.
+Deterministic registry/generator checks remain merge-blocking. Future semantic/LLM-based document-impact suggestions are advisory unless a separately reviewed, reproducible invariant and adoption decision justify a stronger gate.
