@@ -87,6 +87,17 @@ class PreviewSmokeContractTest(unittest.TestCase):
         finally:
             preview_smoke._request = original
 
+    def test_rejects_same_origin_login_redirect(self) -> None:
+        original = preview_smoke._request
+        try:
+            def login_redirect(*args: object, **kwargs: object) -> tuple[int, dict[str, str], bytes, int, str]:
+                return 200, {"Content-Type": "application/json"}, b'{"status":"ok"}', 1, "https://preview.example/login"
+            preview_smoke._request = login_redirect
+            with self.assertRaisesRegex(RuntimeError, "health redirected away from the expected route"):
+                preview_smoke.run_smoke("https://preview.example")
+        finally:
+            preview_smoke._request = original
+
     def test_fixture_routes_are_stable_and_preview_specific(self) -> None:
         paths = [path for _, path, _ in preview_smoke.ROUTES]
         self.assertIn("/search?q=Signals", paths)
