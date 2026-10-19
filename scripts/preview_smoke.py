@@ -39,9 +39,19 @@ class Result:
     attempts: int
 
 
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Fail closed rather than forward a deployment-scoped secret across redirects."""
+
+    def redirect_request(self, req: object, fp: object, code: int, msg: str, headers: object, newurl: str) -> None:
+        return None
+
+
 def build_opener(bypass_secret: str | None = None) -> urllib.request.OpenerDirector:
     jar = http.cookiejar.CookieJar()
-    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+    handlers = [urllib.request.HTTPCookieProcessor(jar)]
+    if bypass_secret:
+        handlers.append(NoRedirect())
+    opener = urllib.request.build_opener(*handlers)
     if bypass_secret:
         opener.addheaders = [("User-Agent", "SongChart-Preview-Smoke/1"), ("x-vercel-protection-bypass", bypass_secret)]
     opener._songchart_bypass = bypass_secret
