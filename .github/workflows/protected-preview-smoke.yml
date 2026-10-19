@@ -1,0 +1,70 @@
+name: Protected Preview smoke (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: "Exact Vercel Preview source commit SHA (40 hexadecimal characters)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: protected-preview-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: preview-test
+    steps:
+      - name: Checkout trusted smoke verifier
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Verify requested revision and required access
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          PREVIEW_SHARE_URL: ${{ secrets.PREVIEW_SHARE_URL }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::expected_sha must be an exact lowercase 40-character Git commit SHA"
+            exit 1
+          fi
+          if [[ -z "${PREVIEW_SHARE_URL:-}" ]]; then
+            echo "::error::The preview-test environment must provide PREVIEW_SHARE_URL"
+            exit 1
+          fi
+          echo "::add-mask::$PREVIEW_SHARE_URL"
+          echo "Smoke verifier ref: $GITHUB_SHA"
+          echo "Deployment source SHA to verify against Vercel control plane: $EXPECTED_SHA"
+
+      - name: Run protected 12-route HTTP smoke
+        shell: bash
+        env:
+          PREVIEW_SHARE_URL: ${{ secrets.PREVIEW_SHARE_URL }}
+        run: |
+          set -euo pipefail
+          python3 scripts/preview_smoke.py --share-url "$PREVIEW_SHARE_URL"
+
+      - name: Record limited evidence
+        if: success()
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          {
+            echo "### Protected Preview HTTP smoke"
+            echo
+            echo "- Preview deployment source revision (operator-declared; verify in Vercel): \`$EXPECTED_SHA\`"
+            echo "- Smoke implementation revision: \`$GITHUB_SHA\`"
+            echo "- Twelve HTTP routes: passed"
+            echo "- Scope: HTTP status/content type/redirect/noindex checks, not responsive or browser acceptance"
+            echo "- Vercel SSO remains enabled; ephemeral share URL must be revoked after this run"
+          } >> "$GITHUB_STEP_SUMMARY"

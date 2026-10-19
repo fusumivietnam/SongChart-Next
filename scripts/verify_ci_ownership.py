@@ -11,6 +11,7 @@ EXPECTED = {
     "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
     "foundation-visual.yml", "g5-vps-baseline.yml", "project-governance.yml", "project-os.yml",
     "project-projection-sync.yml", "research-cocoindex.yml", "roadmap-health.yml", "roadmap-reconcile.yml",
+    "protected-preview-smoke.yml",
     "vs01a-artist.yml", "vs01b-musicbrainz.yml", "vs02-release-recording.yml",
     "vs03-discovery-search.yml", "vs04-launch-proof.yml", "work-management-sync.yml",
 }

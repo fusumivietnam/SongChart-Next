@@ -20,6 +20,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `vs02-release-recording.yml` | VS-02 Release/Recording/Credits canonical relationships, PostgreSQL integration, canonical redirects and narrow/wide browser evidence; reads shared BuildKit cache only | contents read |
 | `vs03-discovery-search.yml` | VS-03 PostgreSQL-first discovery, journey continuity and deterministic provider-destination evidence; reads shared BuildKit cache only | contents read |
 | `vs04-launch-proof.yml` | VS-04 launch-support and later release/recovery evidence; starts with public legal/support/correction/SEO surfaces, reads shared BuildKit cache only, and must not claim production deployment | contents read |
+| `protected-preview-smoke.yml` | manually dispatched 12-route HTTP smoke of an SSO-protected Vercel Preview using operator-confirmed deployment provenance; not a browser UX or production/G5 verification | contents read + temporary `preview-test` environment secret `PREVIEW_SHARE_URL`; no project credentials or bypass-policy changes |
 | `g5-vps-baseline.yml` | single-VPS production-package verification: production app/web image builds, Compose topology, private service exposure and disposable health/smoke evidence; never performs a real VPS deployment | contents read |
 | `design-review-contract.yml` | one-command local Design Authority review contract | contents read |
 | `codespaces-contract.yml` | devcontainer/Codespaces developer-shell contract | contents read |
