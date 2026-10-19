@@ -34,6 +34,7 @@ jobs:
         shell: bash
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
+          DEPLOYMENT_URL: ${{ inputs.deployment_url }}
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
           set -euo pipefail
@@ -46,7 +47,7 @@ jobs:
             exit 1
           fi
           echo "::add-mask::$VERCEL_AUTOMATION_BYPASS_SECRET"
-          if [[ ! "${{ inputs.deployment_url }}" =~ ^https://songchart-next-preview-[a-z0-9-]+-fusumivietnam[.]vercel[.]app/?$ ]]; then
+          if [[ ! "$DEPLOYMENT_URL" =~ ^https://songchart-next-preview-[a-z0-9-]+-fusumivietnam[.]vercel[.]app/?$ ]]; then
             echo "::error::Provide a deployment-specific Vercel Preview origin; custom/production domains are disallowed"
             exit 1
           fi
@@ -57,9 +58,10 @@ jobs:
         shell: bash
         env:
           VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          DEPLOYMENT_URL: ${{ inputs.deployment_url }}
         run: |
           set -euo pipefail
-          python3 scripts/preview_smoke.py --base-url "${{ inputs.deployment_url }}" --bypass-env
+          python3 scripts/preview_smoke.py --base-url "$DEPLOYMENT_URL" --bypass-env
 
       - name: Record limited evidence
         if: success()
