@@ -98,6 +98,14 @@ class PreviewSmokeContractTest(unittest.TestCase):
         finally:
             preview_smoke._request = original
 
+    def test_bypass_header_is_attached_only_for_explicit_authenticated_mode(self) -> None:
+        ordinary = preview_smoke.build_opener()
+        protected = preview_smoke.build_opener("test-token")
+        self.assertIsNone(ordinary._songchart_bypass)
+        self.assertEqual("test-token", protected._songchart_bypass)
+        self.assertTrue(any(isinstance(handler, preview_smoke.NoRedirect) for handler in protected.handlers))
+        self.assertFalse(any(isinstance(handler, preview_smoke.NoRedirect) for handler in ordinary.handlers))
+
     def test_fixture_routes_are_stable_and_preview_specific(self) -> None:
         paths = [path for _, path, _ in preview_smoke.ROUTES]
         self.assertIn("/search?q=Signals", paths)
