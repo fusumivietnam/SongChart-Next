@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import http.cookiejar
 import json
+import os
 import time
 import urllib.error
 import urllib.parse
@@ -38,9 +39,13 @@ class Result:
     attempts: int
 
 
-def build_opener() -> urllib.request.OpenerDirector:
+def build_opener(bypass_secret: str | None = None) -> urllib.request.OpenerDirector:
     jar = http.cookiejar.CookieJar()
-    return urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(jar))
+    if bypass_secret:
+        opener.addheaders = [("User-Agent", "SongChart-Preview-Smoke/1"), ("x-vercel-protection-bypass", bypass_secret)]
+    opener._songchart_bypass = bypass_secret
+    return opener
 
 
 def authenticate_share_url(opener: urllib.request.OpenerDirector, share_url: str) -> str:
@@ -60,7 +65,10 @@ def _request(
     sleep: Callable[[float], None],
 ) -> tuple[int, object, bytes, int, str]:
     for attempt in range(1, attempts + 1):
-        request = urllib.request.Request(url, headers={"User-Agent": "SongChart-Preview-Smoke/1"})
+        headers = {"User-Agent": "SongChart-Preview-Smoke/1"}
+        if getattr(opener, "_songchart_bypass", None):
+            headers["x-vercel-protection-bypass"] = opener._songchart_bypass
+        request = urllib.request.Request(url, headers=headers)
         try:
             with opener.open(request, timeout=20) as response:
                 return response.status, response.headers, response.read(), attempt, response.geturl()
@@ -80,6 +88,7 @@ def run_smoke(
     base_url: str,
     *,
     opener: urllib.request.OpenerDirector | None = None,
+    bypass_secret: str | None = None,
     attempts: int = 8,
     sleep: Callable[[float], None] = time.sleep,
 ) -> list[Result]:
@@ -88,7 +97,7 @@ def run_smoke(
     if parsed.scheme != "https" and parsed.hostname not in {"127.0.0.1", "localhost"}:
         raise RuntimeError("preview base URL must use HTTPS")
 
-    client = opener or build_opener()
+    client = opener or build_opener(bypass_secret)
     results: list[Result] = []
 
     for name, path, kind in ROUTES:
@@ -131,13 +140,19 @@ def main() -> int:
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument("--base-url", help="Authenticated/unprotected HTTPS preview origin")
     source.add_argument("--share-url", help="Temporary Vercel share URL; never commit or log it")
+    parser.add_argument("--bypass-env", action="store_true", help="Use VERCEL_AUTOMATION_BYPASS_SECRET from environment; never log it")
     parser.add_argument("--attempts", type=int, default=8, help="Maximum attempts per route (default: 8)")
     args = parser.parse_args()
 
     if args.attempts < 1 or args.attempts > 30:
         parser.error("--attempts must be between 1 and 30")
 
-    opener = build_opener()
+    bypass_secret = os.environ.get("VERCEL_AUTOMATION_BYPASS_SECRET") if args.bypass_env else None
+    if args.bypass_env and not bypass_secret:
+        parser.error("VERCEL_AUTOMATION_BYPASS_SECRET is required with --bypass-env")
+    if args.bypass_env and not args.base_url:
+        parser.error("--bypass-env requires --base-url")
+    opener = build_opener(bypass_secret)
     base_url = args.base_url
     if args.share_url:
         base_url = authenticate_share_url(opener, args.share_url)
