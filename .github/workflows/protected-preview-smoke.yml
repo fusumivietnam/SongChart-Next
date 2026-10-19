@@ -3,6 +3,10 @@ name: Protected Preview smoke (manual)
 on:
   workflow_dispatch:
     inputs:
+      deployment_url:
+        description: "Exact Vercel Preview deployment HTTPS origin (not share URL)"
+        required: true
+        type: string
       expected_sha:
         description: "Exact Vercel Preview source commit SHA (40 hexadecimal characters)"
         required: true
@@ -30,28 +34,34 @@ jobs:
         shell: bash
         env:
           EXPECTED_SHA: ${{ inputs.expected_sha }}
-          PREVIEW_SHARE_URL: ${{ secrets.PREVIEW_SHARE_URL }}
+          DEPLOYMENT_URL: ${{ inputs.deployment_url }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
         run: |
           set -euo pipefail
           if [[ ! "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]]; then
             echo "::error::expected_sha must be an exact lowercase 40-character Git commit SHA"
             exit 1
           fi
-          if [[ -z "${PREVIEW_SHARE_URL:-}" ]]; then
-            echo "::error::The preview-test environment must provide PREVIEW_SHARE_URL"
+          if [[ -z "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" ]]; then
+            echo "::error::The preview-test environment must provide VERCEL_AUTOMATION_BYPASS_SECRET"
             exit 1
           fi
-          echo "::add-mask::$PREVIEW_SHARE_URL"
+          echo "::add-mask::$VERCEL_AUTOMATION_BYPASS_SECRET"
+          if [[ ! "$DEPLOYMENT_URL" =~ ^https://songchart-next-preview-[a-z0-9-]+-fusumivietnam[.]vercel[.]app/?$ ]]; then
+            echo "::error::Provide a deployment-specific Vercel Preview origin; custom/production domains are disallowed"
+            exit 1
+          fi
           echo "Smoke verifier ref: $GITHUB_SHA"
           echo "Deployment source SHA to verify against Vercel control plane: $EXPECTED_SHA"
 
       - name: Run protected 12-route HTTP smoke
         shell: bash
         env:
-          PREVIEW_SHARE_URL: ${{ secrets.PREVIEW_SHARE_URL }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          DEPLOYMENT_URL: ${{ inputs.deployment_url }}
         run: |
           set -euo pipefail
-          python3 scripts/preview_smoke.py --share-url "$PREVIEW_SHARE_URL"
+          python3 scripts/preview_smoke.py --base-url "$DEPLOYMENT_URL" --bypass-env
 
       - name: Record limited evidence
         if: success()
@@ -66,5 +76,5 @@ jobs:
             echo "- Smoke implementation revision: \`$GITHUB_SHA\`"
             echo "- Twelve HTTP routes: passed"
             echo "- Scope: HTTP status/content type/redirect/noindex checks, not responsive or browser acceptance"
-            echo "- Vercel SSO remains enabled; ephemeral share URL must be revoked after this run"
+            echo "- Vercel SSO remains enabled; bypass is centrally revocable in Vercel"
           } >> "$GITHUB_STEP_SUMMARY"
