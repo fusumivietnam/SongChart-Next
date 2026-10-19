@@ -77,10 +77,6 @@ class PreviewSmokeContractTest(unittest.TestCase):
             preview_smoke.run_smoke(origin, attempts=3, sleep=lambda _: None)
 
     def test_rejects_cross_origin_redirect(self) -> None:
-        class RedirectingOpener:
-            def open(self, request: object, timeout: int = 20) -> object:
-                raise AssertionError("must use mocked request result")
-
         original = preview_smoke._request
         try:
             def cross_origin(*args: object, **kwargs: object) -> tuple[int, dict[str, str], bytes, int, str]:
