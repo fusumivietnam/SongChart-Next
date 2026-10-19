@@ -101,6 +101,8 @@ def run_smoke(
         final = urllib.parse.urlsplit(final_url)
         if parsed.hostname not in {"127.0.0.1", "localhost"} and final.scheme != "https":
             raise RuntimeError(f"{name} redirected away from HTTPS")
+        if final.netloc != parsed.netloc:
+            raise RuntimeError(f"{name} redirected outside the preview origin")
 
         if kind == "health":
             try:
@@ -110,6 +112,9 @@ def run_smoke(
             if payload != {"status": "ok"}:
                 raise RuntimeError("health did not report status=ok")
         else:
+            content_type = headers.get("Content-Type", "").split(";", 1)[0].strip().lower()
+            if content_type != "text/html":
+                raise RuntimeError(f"{name} returned non-HTML content")
             robots = headers.get("X-Robots-Tag", "")
             if "noindex" not in robots.lower():
                 raise RuntimeError(f"{name} is missing preview X-Robots-Tag: noindex")
