@@ -103,6 +103,8 @@ def run_smoke(
             raise RuntimeError(f"{name} redirected away from HTTPS")
         if final.netloc != parsed.netloc:
             raise RuntimeError(f"{name} redirected outside the preview origin")
+        if final.path != urllib.parse.urlsplit(path).path:
+            raise RuntimeError(f"{name} redirected away from the expected route")
 
         if kind == "health":
             try:
