@@ -18,6 +18,7 @@ spec.loader.exec_module(preview_smoke)
 
 class Handler(BaseHTTPRequestHandler):
     health_calls = 0
+    invalid_content_type = False
 
     def do_GET(self) -> None:  # noqa: N802
         if self.path == "/health":
@@ -34,7 +35,7 @@ class Handler(BaseHTTPRequestHandler):
             return
 
         self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Content-Type", "application/json" if type(self).invalid_content_type else "text/html; charset=utf-8")
         self.send_header("X-Robots-Tag", "noindex, nofollow")
         self.end_headers()
         self.wfile.write(b"<html><body>ok</body></html>")
@@ -46,6 +47,7 @@ class Handler(BaseHTTPRequestHandler):
 class PreviewSmokeContractTest(unittest.TestCase):
     def setUp(self) -> None:
         Handler.health_calls = 0
+        Handler.invalid_content_type = False
         self.server = HTTPServer(("127.0.0.1", 0), Handler)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
         self.thread.start()
@@ -67,6 +69,27 @@ class PreviewSmokeContractTest(unittest.TestCase):
         )
         self.assertEqual(2, results[0].attempts)
         self.assertTrue(all(result.status == 200 for result in results))
+
+    def test_rejects_non_html_response_even_if_status_and_noindex_are_valid(self) -> None:
+        Handler.invalid_content_type = True
+        origin = f"http://127.0.0.1:{self.server.server_port}"
+        with self.assertRaisesRegex(RuntimeError, "home returned non-HTML content"):
+            preview_smoke.run_smoke(origin, attempts=3, sleep=lambda _: None)
+
+    def test_rejects_cross_origin_redirect(self) -> None:
+        class RedirectingOpener:
+            def open(self, request: object, timeout: int = 20) -> object:
+                raise AssertionError("must use mocked request result")
+
+        original = preview_smoke._request
+        try:
+            def cross_origin(*args: object, **kwargs: object) -> tuple[int, dict[str, str], bytes, int, str]:
+                return 200, {"Content-Type": "application/json"}, b'{"status":"ok"}', 1, "https://other.example/health"
+            preview_smoke._request = cross_origin
+            with self.assertRaisesRegex(RuntimeError, "health redirected outside the preview origin"):
+                preview_smoke.run_smoke("https://preview.example")
+        finally:
+            preview_smoke._request = original
 
     def test_fixture_routes_are_stable_and_preview_specific(self) -> None:
         paths = [path for _, path, _ in preview_smoke.ROUTES]
