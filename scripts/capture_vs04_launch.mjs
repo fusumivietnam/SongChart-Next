@@ -85,6 +85,11 @@ for (const surface of surfaces) {
             for (const text of ['id="subject-type"', 'id="subject-id"', 'id="claim"', 'id="evidence-url"']) {
                 if (!dom.includes(text)) throw new Error(`${surface.path} missing correction-intake form contract: ${text}`);
             }
+            // Browser-rendered form accessibility contract: every editable control has an explicit label.
+            for (const id of ['subject-type', 'subject-id', 'claim', 'evidence-url']) {
+                if (!dom.includes(`for="${id}"`)) throw new Error(`${surface.path} missing programmatic label for ${id}`);
+            }
+            if (!dom.includes('type="submit"')) throw new Error(`${surface.path} missing keyboard-operable submit button.`);
             if (dom.includes('https://github.com/fusumivietnam/SongChart-Next/issues/new')) throw new Error(`${surface.path} unexpectedly exposes the old issue-tracker correction action.`);
         }
 
