@@ -2,6 +2,7 @@
 
 - Status: proposed; merge/review must accept this decision before technology activation
 - Date: 2026-10-24
+- Owning issue: #210
 - Capability: `developer-analysis` (existing owner; no new product capability)
 - Scope: developer shell only; no SongChart runtime or delivery authority
 
