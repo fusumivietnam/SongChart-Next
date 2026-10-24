@@ -227,6 +227,17 @@
       "scope": "Codespaces/Codex developer analysis only. Not a SongChart runtime dependency, canonical authority, production service, or automatic roadmap/status source."
     },
     {
+      "id": "archify",
+      "capability": "developer-analysis",
+      "source": "https://github.com/tt-a1i/archify",
+      "status": "candidate",
+      "version_authority": ".devcontainer/install-archify.sh pins v3.2.0 commit 208acba8d412335185b2056fedf54b3405df43fb; manual Codespaces developer-shell installation only",
+      "license_review": "MIT reviewed at the pinned upstream release; bundled viewer/renderer assets and optional update-check egress require bounded review before automatic adoption",
+      "implementation": ".devcontainer/install-archify.sh",
+      "decision": "docs/adr/ADR-0017-archify-developer-visualization.md",
+      "scope": "Proposed opt-in Codex/Codespaces source-backed diagramming. No automatic bootstrap, CI required check, product runtime, production dependency or new architecture/status authority."
+    },
+    {
       "id": "github-projects",
       "capability": "project-os",
       "source": "https://github.com/features/issues",

@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "SongChart Next — public read and correction evidence (historical sample)",
+    "locale": "vi",
+    "output": ".archify/examples/songchart-public-read.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/fusumivietnam/SongChart-Next.git",
+      "provider": "github",
+      "revision": "600162d4b0bc531485d8df685c42745cb13baca6"
+    }
+  },
+  "components": [
+    {"id":"visitor","type":"external","label":"Khách truy cập","sublabel":"Public browser","pos":[40,240],"size":[125,66],"sources":[{"path":"routes/web.php","line":14,"end_line":38}]},
+    {"id":"search","type":"frontend","label":"Search route","sublabel":"GET /search · Inertia","pos":[250,80],"size":[136,70],"sources":[{"path":"app/Http/Controllers/SearchController.php","line":10,"end_line":19}]},
+    {"id":"discovery","type":"backend","label":"DiscoverySearch","sublabel":"Artist / Release / Recording","pos":[500,80],"size":[166,70],"sources":[{"path":"app/Music/Discovery/DiscoverySearch.php","line":16,"end_line":56}]},
+    {"id":"artist","type":"frontend","label":"Artist page","sublabel":"ID + slug canonical redirect","pos":[250,240],"size":[155,70],"sources":[{"path":"app/Http/Controllers/ArtistController.php","line":11,"end_line":25}]},
+    {"id":"artistRead","type":"backend","label":"ArtistReadView","sublabel":"Provenance + credited releases","pos":[500,240],"size":[164,70],"sources":[{"path":"app/Music/Artists/ArtistReadView.php","line":26,"end_line":80}]},
+    {"id":"correction","type":"frontend","label":"Correction intake","sublabel":"POST /corrections · rate limits","pos":[250,420],"size":[165,70],"sources":[{"path":"app/Http/Controllers/CorrectionController.php","line":35,"end_line":96}]},
+    {"id":"submit","type":"backend","label":"Evidence submission","sublabel":"Dedupe; no canonical mutation","pos":[510,420],"size":[170,70],"sources":[{"path":"app/Music/Corrections/SubmitCorrectionEvidence.php","line":31,"end_line":76}]},
+    {"id":"db","type":"database","label":"PostgreSQL models","sublabel":"Canonical + isolated corrections","pos":[840,240],"size":[172,78],"sources":[{"path":"app/Music/Discovery/DiscoverySearch.php","line":27,"end_line":46},{"path":"app/Music/Corrections/SubmitCorrectionEvidence.php","line":37,"end_line":74}]}
+  ],
+  "connections": [
+    {"from":"visitor","to":"search","label":"Tìm kiếm","variant":"emphasis"},
+    {"from":"search","to":"discovery","label":"search(q)"},
+    {"from":"discovery","to":"db","label":"Query canonical"},
+    {"from":"visitor","to":"artist","label":"Xem Artist"},
+    {"from":"artist","to":"artistRead","label":"Build read view"},
+    {"from":"artistRead","to":"db","label":"Reads + credits"},
+    {"from":"visitor","to":"correction","label":"Gửi evidence"},
+    {"from":"correction","to":"submit","label":"Validated input","variant":"security"},
+    {"from":"submit","to":"db","label":"Write correction only","variant":"security"}
+  ],
+  "cards": [
+    {"dot":"cyan","title":"Phạm vi đã truy vết","items":["GET /search, Artist view, POST /corrections ở commit đã ghim.","Release/Recording pages, ingestion, reviewer, CI và deployment không nằm trong mẫu này."]},
+    {"dot":"rose","title":"Ranh giới dữ liệu","items":["Correction intake lưu CorrectionSubmission, không sửa canonical records.","Reviewer approval chưa được chứng minh bởi sơ đồ này."]}
+  ]
+}
