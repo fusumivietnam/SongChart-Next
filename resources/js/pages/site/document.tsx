@@ -161,6 +161,8 @@ export default function SiteDocument({ document, correctionIntake }: Props) {
                                         </label>
                                         <select
                                             id="subject-type"
+                                            aria-invalid={Boolean(form.errors.subject_type)}
+                                            aria-describedby={form.errors.subject_type ? 'subject-type-error' : undefined}
                                             value={form.data.subject_type}
                                             onChange={(event) => form.setData('subject_type', event.target.value)}
                                             className="mt-2 h-10 w-full rounded-[0.625rem] border border-slate-300 bg-white px-3 text-sm outline-none focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
@@ -169,7 +171,7 @@ export default function SiteDocument({ document, correctionIntake }: Props) {
                                             <option value="release">Release</option>
                                             <option value="recording">Recording</option>
                                         </select>
-                                        {form.errors.subject_type && <p className="mt-1 text-sm text-red-700">{form.errors.subject_type}</p>}
+                                        {form.errors.subject_type && <p id="subject-type-error" className="mt-1 text-sm text-red-700">{form.errors.subject_type}</p>}
                                     </div>
 
                                     <div>
@@ -178,13 +180,15 @@ export default function SiteDocument({ document, correctionIntake }: Props) {
                                         </label>
                                         <input
                                             id="subject-id"
+                                            aria-invalid={Boolean(form.errors.subject_id)}
+                                            aria-describedby={form.errors.subject_id ? 'subject-id-error' : undefined}
                                             value={form.data.subject_id}
                                             onChange={(event) => form.setData('subject_id', event.target.value)}
                                             autoComplete="off"
                                             required
                                             className="mt-2 h-10 w-full rounded-[0.625rem] border border-slate-300 bg-white px-3 font-mono text-sm outline-none focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
                                         />
-                                        {form.errors.subject_id && <p className="mt-1 text-sm text-red-700">{form.errors.subject_id}</p>}
+                                        {form.errors.subject_id && <p id="subject-id-error" className="mt-1 text-sm text-red-700">{form.errors.subject_id}</p>}
                                     </div>
 
                                     <div>
@@ -193,6 +197,8 @@ export default function SiteDocument({ document, correctionIntake }: Props) {
                                         </label>
                                         <textarea
                                             id="claim"
+                                            aria-invalid={Boolean(form.errors.claim)}
+                                            aria-describedby={form.errors.claim ? 'claim-error' : undefined}
                                             value={form.data.claim}
                                             onChange={(event) => form.setData('claim', event.target.value)}
                                             maxLength={correctionIntake.limits.claimCharacters}
@@ -201,7 +207,7 @@ export default function SiteDocument({ document, correctionIntake }: Props) {
                                             className="mt-2 w-full rounded-[0.625rem] border border-slate-300 bg-white px-3 py-2 text-sm leading-6 outline-none focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
                                         />
                                         <p className="mt-1 text-xs text-slate-500">Maximum {correctionIntake.limits.claimCharacters} characters.</p>
-                                        {form.errors.claim && <p className="mt-1 text-sm text-red-700">{form.errors.claim}</p>}
+                                        {form.errors.claim && <p id="claim-error" className="mt-1 text-sm text-red-700">{form.errors.claim}</p>}
                                     </div>
 
                                     <div>
@@ -210,6 +216,8 @@ export default function SiteDocument({ document, correctionIntake }: Props) {
                                         </label>
                                         <input
                                             id="evidence-url"
+                                            aria-invalid={Boolean(form.errors.evidence_url)}
+                                            aria-describedby={form.errors.evidence_url ? 'evidence-url-error' : undefined}
                                             type="url"
                                             value={form.data.evidence_url}
                                             onChange={(event) => form.setData('evidence_url', event.target.value)}
@@ -218,7 +226,7 @@ export default function SiteDocument({ document, correctionIntake }: Props) {
                                             className="mt-2 h-10 w-full rounded-[0.625rem] border border-slate-300 bg-white px-3 text-sm outline-none focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
                                         />
                                         <p className="mt-1 text-xs text-slate-500">Stored as submitted; SongChart does not fetch this URL during intake.</p>
-                                        {form.errors.evidence_url && <p className="mt-1 text-sm text-red-700">{form.errors.evidence_url}</p>}
+                                        {form.errors.evidence_url && <p id="evidence-url-error" className="mt-1 text-sm text-red-700">{form.errors.evidence_url}</p>}
                                     </div>
 
                                     <button
