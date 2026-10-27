@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = ROOT / ".github" / "workflows"
 EXPECTED = {
-    "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
+    "archify-browser-contract.yml", "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
     "foundation-visual.yml", "g5-vps-baseline.yml", "project-governance.yml", "project-os.yml",
     "project-projection-sync.yml", "research-cocoindex.yml", "roadmap-health.yml", "roadmap-reconcile.yml",
     "protected-preview-smoke.yml",
@@ -124,6 +124,13 @@ def main() -> int:
             errors.append(f"research-cocoindex.yml: missing research boundary/control: {required}")
     if "secrets." in research:
         errors.append("research-cocoindex.yml: local research spike must not consume repository secrets")
+
+    archify = contents.get("archify-browser-contract.yml", "")
+    for required in ("workflow_dispatch:", "pull_request:", "fetch-depth: 0", "scripts/archify_example.sh", "browser-check", "ARCHIFY_UPDATE_CHECK_DISABLED"):
+        if required not in archify:
+            errors.append(f"archify-browser-contract.yml: missing disposable browser gate: {required}")
+    if "secrets." in archify or "push:" in archify or "upload-artifact" in archify:
+        errors.append("archify-browser-contract.yml: no secrets, main-push amplification or published HTML")
 
     if errors:
         print("CI ownership verification failed:")

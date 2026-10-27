@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "diagram_type": "erd",
+  "meta": {
+    "title": "SongChart Next — Release, medium, track, recording",
+    "subtitle": "Focused migration-defined schema; main cc31819 — excludes identity, work and credit tables",
+    "locale": "en",
+    "output": ".archify/examples/songchart-catalog-core.html",
+    "quality_profile": "standard",
+    "repository": {
+      "url": "https://github.com/fusumivietnam/SongChart-Next.git",
+      "provider": "github",
+      "revision": "cc31819fd074ec7d5f1e4d1b79cfdcbbf2c7e673"
+    }
+  },
+  "layout": {"mode":"grid","gapX":82,"gapY":64,"entityW":332,"rowH":22},
+  "entities": [
+    {"id":"release_groups","label":"release_groups","tag":"Catalog","row":0,"col":0,"attributes":[
+      {"name":"id","type":"ulid","key":"pk"},{"name":"title","type":"varchar(255)"},{"name":"slug","type":"varchar(255)"},{"name":"primary_type","type":"varchar(64) nullable"},{"name":"disambiguation","type":"text nullable"},{"name":"created_at","type":"timestamp"},{"name":"updated_at","type":"timestamp"}
+    ],"sources":[{"path":"database/migrations/2026_10_06_000000_create_release_recording_credit_tables.php","line":12,"end_line":20}]},
+    {"id":"releases","label":"releases","tag":"Catalog","row":0,"col":1,"attributes":[
+      {"name":"id","type":"ulid","key":"pk"},{"name":"release_group_id","type":"ulid nullable","key":"fk","references":"release_groups.id"},{"name":"title","type":"varchar(255)"},{"name":"slug","type":"varchar(255)"},{"name":"status","type":"varchar(64) nullable"},{"name":"country_code","type":"char(2) nullable"},{"name":"release_year","type":"smallint unsigned nullable"},{"name":"release_month","type":"tinyint unsigned nullable"},{"name":"release_day","type":"tinyint unsigned nullable"},{"name":"date_precision","type":"varchar(16) nullable"},{"name":"barcode","type":"varchar(64) nullable"},{"name":"created_at","type":"timestamp"},{"name":"updated_at","type":"timestamp"}
+    ],"sources":[{"path":"database/migrations/2026_10_06_000000_create_release_recording_credit_tables.php","line":22,"end_line":39}]},
+    {"id":"release_media","label":"release_media","tag":"Tracklist","row":1,"col":1,"attributes":[
+      {"name":"id","type":"ulid","key":"pk"},{"name":"release_id","type":"ulid","key":"fk","references":"releases.id"},{"name":"position","type":"smallint unsigned"},{"name":"format","type":"varchar(64) nullable"},{"name":"title","type":"varchar(255) nullable"},{"name":"created_at","type":"timestamp"},{"name":"updated_at","type":"timestamp"}
+    ],"sources":[{"path":"database/migrations/2026_10_06_000000_create_release_recording_credit_tables.php","line":83,"end_line":93}]},
+    {"id":"release_tracks","label":"release_tracks","tag":"Tracklist","row":2,"col":1,"attributes":[
+      {"name":"id","type":"ulid","key":"pk"},{"name":"medium_id","type":"ulid","key":"fk","references":"release_media.id"},{"name":"recording_id","type":"ulid","key":"fk","references":"recordings.id"},{"name":"position","type":"smallint unsigned"},{"name":"number","type":"varchar(32)"},{"name":"title","type":"varchar(255)"},{"name":"length_ms","type":"integer unsigned nullable"},{"name":"created_at","type":"timestamp"},{"name":"updated_at","type":"timestamp"}
+    ],"sources":[{"path":"database/migrations/2026_10_06_000000_create_release_recording_credit_tables.php","line":95,"end_line":109}]},
+    {"id":"recordings","label":"recordings","tag":"Recordings","row":2,"col":0,"attributes":[
+      {"name":"id","type":"ulid","key":"pk"},{"name":"title","type":"varchar(255)"},{"name":"slug","type":"varchar(255)"},{"name":"length_ms","type":"integer unsigned nullable"},{"name":"disambiguation","type":"text nullable"},{"name":"created_at","type":"timestamp"},{"name":"updated_at","type":"timestamp"}
+    ],"sources":[{"path":"database/migrations/2026_10_06_000000_create_release_recording_credit_tables.php","line":41,"end_line":49}]}
+  ],
+  "relationships": [
+    {"from":"release_groups","to":"releases","fromCardinality":"one","toCardinality":"many","fromOptional":true,"toOptional":true,"label":"grouping (nullable FK)"},
+    {"from":"releases","to":"release_media","fromCardinality":"one","toCardinality":"many","toOptional":true,"label":"media"},
+    {"from":"release_media","to":"release_tracks","fromCardinality":"one","toCardinality":"many","toOptional":true,"label":"tracks"},
+    {"from":"recordings","to":"release_tracks","fromCardinality":"one","toCardinality":"many","toOptional":true,"label":"recorded version"}
+  ]
+}
