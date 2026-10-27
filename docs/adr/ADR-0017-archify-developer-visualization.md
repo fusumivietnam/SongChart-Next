@@ -1,6 +1,6 @@
 # ADR-0017 — Archify as opt-in developer architecture visualization
 
-- Status: proposed; merge/review must accept this decision before technology activation
+- Status: approved with conditions by project owner on 2026-10-27; repository adoption remains pending PR #211 review/merge
 - Date: 2026-10-24
 - Owning issue: #210
 - Capability: `developer-analysis` (existing owner; no new product capability)
@@ -12,13 +12,23 @@ Codex and human reviewers need a readable, reproducible visual explanation of bo
 
 The evaluated source is `tt-a1i/archify` v3.2.0 at commit `208acba8d412335185b2056fedf54b3405df43fb`. Its source license is MIT, but bundled brand marks and fonts have separately recorded rights in upstream `THIRD_PARTY_NOTICES.md`; MIT is not a blanket grant for their commercial use or redistribution. Use Node.js 22+ in the optional developer shell or the disposable CI verifier; no additional SongChart application package manager or hosting service is needed.
 
-## Proposed decision
+## Approved decision and limits
 
 Permit opt-in installation through `.devcontainer/install-archify.sh`, pinned to that exact upstream commit, with skill discovery in the Codex-compatible user directory. Do **not** alter `post-create.sh`, application manifests, Dockerfile, Compose, preview, production, or required CI. The script must refuse unknown existing destinations instead of overwriting other skills or checkouts.
 
 Create a small historical source-backed diagram example with a fixed Git revision and a manual command to regenerate its HTML. Derived HTML, browser captures and intermediate artifacts live under ignored `.archify/` and must not be published as maintained architectural truth. Any later automation or generated documentation workflow needs a separate scoped issue/review and CI ownership assessment.
 
 Issue #212 supplies the separate review scope for an optional, read-only browser verification workflow. Consult the exact-head acceptance runs linked from PR #211 rather than treating historical CI output as evergreen evidence. The workflow runs independently of Codespaces quota; it remains non-required, has no main-push trigger, publishes no generated diagram and grants no technology activation. A newer head needs its own CI evidence.
+
+The project owner approved this ADR subject to five mandatory restrictions on 2026-10-27:
+
+1. Archify is an **opt-in internal developer skill** only.
+2. GitHub Actions may replace Codespaces for reproducible browser verification of source-backed diagrams; this does not create a required branch-protection context.
+3. Diagrams remain **derived** and may cite only source revisions and evidence that were actually checked.
+4. Archify cannot automatically alter canonical data, governing architecture, roadmap or implementation status.
+5. Diagrams containing third-party marks or sensitive source information must not be published without separate rights/privacy clearance.
+
+Approval of the decision does not assert the feature is merged, generally deployed, or granted broader permissions. PR #211 remains subject to its own review and merge gates.
 
 ## Authority and evidence
 
@@ -44,4 +54,4 @@ Mermaid can provide lightweight static documentation but not the same validated 
 3. Render the source-backed example with its historical commit, validate HTML/provenance, and complete a real browser check in an approved Codespaces or CI-like development environment.
 4. Keep required workflows and production manifests unchanged.
 
-An artifact passing validation alone does not establish Codespaces/browser verification. Reviewer approval of this ADR precedes registry promotion from `candidate`.
+An artifact passing validation alone does not establish browser verification. The owner's conditional decision permits `approved` technology selection; `implemented`/`verified` and repository adoption require reviewed merge and exact-head evidence. No diagram or CI run grants production or publication rights.

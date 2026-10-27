@@ -230,12 +230,12 @@
       "id": "archify",
       "capability": "developer-analysis",
       "source": "https://github.com/tt-a1i/archify",
-      "status": "candidate",
+      "status": "approved",
       "version_authority": ".devcontainer/install-archify.sh pins v3.2.0 commit 208acba8d412335185b2056fedf54b3405df43fb; optional developer-shell installation and disposable CI browser verification under issue #212",
       "license_review": "MIT applies to Archify code; upstream THIRD_PARTY_NOTICES.md separately identifies brand marks/trademarks (including restrictive logo terms), font and bundled assets. No blanket commercial/public redistribution of marked diagrams is approved. Optional update-check egress is disabled during CI verification; human review required before adoption",
       "implementation": ".devcontainer/install-archify.sh",
       "decision": "docs/adr/ADR-0017-archify-developer-visualization.md",
-      "scope": "Proposed opt-in developer-only source-backed diagramming with disposable exact-revision CI browser evidence; no automatic bootstrap, required CI check, public artifact publication, product runtime, production dependency or new architecture/status authority."
+      "scope": "Owner-approved 2026-10-27 for opt-in internal developer-only source-backed diagramming under five ADR-0017 conditions; adoption awaits reviewed PR #211 merge. Disposable exact-revision CI browser evidence is permitted, but no automatic bootstrap, required CI check, public artifact publication, canonical data/status mutation, product runtime, production dependency or new architecture authority."
     },
     {
       "id": "github-projects",

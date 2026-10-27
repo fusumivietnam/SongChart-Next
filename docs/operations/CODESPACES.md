@@ -98,13 +98,13 @@ Ephemeral `.ua/intermediate/`, `.ua/tmp/`, `.ua/.trash-*` and `.ua/diff-overlay.
 
 The dashboard commonly uses port 5173 or the next available port; port 5174 is predeclared as a private Codespaces forward for the fallback case. Keep graph dashboards private unless separately approved.
 
-## Archify source-backed diagrams (opt-in proposal)
+## Archify source-backed diagrams (conditionally approved, opt-in)
 
-ADR-0017 proposes Archify v3.2.0 solely for Codex-assisted architecture visualization. It is **not** part of Codespaces post-create or the SongChart application toolchain; no automatic installation, required CI gate or production service has been approved.
+ADR-0017 was approved by the project owner on 2026-10-27 for internal, source-checked developer architecture visualization subject to its five restrictions. Adoption into `main` still requires PR #211 review and merge. Archify is **not** part of Codespaces post-create or the SongChart application toolchain; no automatic installation, required CI gate or production service is approved.
 
 Codespaces quota exhaustion does not block bounded developer-analysis verification. Issue #212 scopes a separate, read-only GitHub Actions browser contract that runs on relevant PR changes or manual dispatch, using a disposable Ubuntu runner and no Codespaces compute. Consult the exact-head workflow evidence linked from PR #211 / issue #212; a successful historical browser run is not an approval, an assurance about later heads or a new protected required context.
 
-To try it in the Node 22+ Codespaces developer shell after reviewing the proposed ADR:
+To try it in an optional Node 22+ developer shell (Codespaces is not required), after inspecting the pinned installer:
 
 ```bash
 bash .devcontainer/install-archify.sh
