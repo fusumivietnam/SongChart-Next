@@ -10,7 +10,7 @@
 
 Codex and human reviewers need a readable, reproducible visual explanation of bounded SongChart source paths. The existing Understand Anything developer-analysis tooling focuses on repository comprehension, while Archify creates interactive, independently verifiable HTML diagrams from agent-authored structured JSON. It does **not** independently discover or verify live runtime behavior.
 
-The evaluated source is `tt-a1i/archify` v3.2.0 at commit `208acba8d412335185b2056fedf54b3405df43fb`. The repository and bundled skill identify MIT licensing. Use Node.js 22+ already declared in the Codespaces developer shell; no additional application package manager or hosting service is needed.
+The evaluated source is `tt-a1i/archify` v3.2.0 at commit `208acba8d412335185b2056fedf54b3405df43fb`. Its source license is MIT, but bundled brand marks and fonts have separately recorded rights in upstream `THIRD_PARTY_NOTICES.md`; MIT is not a blanket grant for their commercial use or redistribution. Use Node.js 22+ in the optional developer shell or the disposable CI verifier; no additional SongChart application package manager or hosting service is needed.
 
 ## Proposed decision
 
@@ -18,7 +18,7 @@ Permit opt-in installation through `.devcontainer/install-archify.sh`, pinned to
 
 Create a small historical source-backed diagram example with a fixed Git revision and a manual command to regenerate its HTML. Derived HTML, browser captures and intermediate artifacts live under ignored `.archify/` and must not be published as maintained architectural truth. Any later automation or generated documentation workflow needs a separate scoped issue/review and CI ownership assessment.
 
-Issue #212 supplies the separate review scope for an optional, read-only browser verification workflow. Its exact-PR-revision run may establish browser evidence independently of Codespaces quota, but it must remain non-required, have no main-push trigger, publish no generated diagram and grant no technology activation.
+Issue #212 supplies the separate review scope for an optional, read-only browser verification workflow. Consult the exact-head acceptance runs linked from PR #211 rather than treating historical CI output as evergreen evidence. The workflow runs independently of Codespaces quota; it remains non-required, has no main-push trigger, publishes no generated diagram and grants no technology activation. A newer head needs its own CI evidence.
 
 ## Authority and evidence
 

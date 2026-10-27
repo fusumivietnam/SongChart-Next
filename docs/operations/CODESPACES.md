@@ -100,9 +100,9 @@ The dashboard commonly uses port 5173 or the next available port; port 5174 is p
 
 ## Archify source-backed diagrams (opt-in proposal)
 
-ADR-0017 proposes Archify v3.2.0 solely for Codex-assisted architecture visualization. It is **not** part of Codespaces post-create or the SongChart application toolchain; no automatic installation, CI gate or production service has been approved.
+ADR-0017 proposes Archify v3.2.0 solely for Codex-assisted architecture visualization. It is **not** part of Codespaces post-create or the SongChart application toolchain; no automatic installation, required CI gate or production service has been approved.
 
-Codespaces quota exhaustion does not block bounded developer-analysis verification. Issue #212 proposes a separate, read-only GitHub Actions browser contract that runs on relevant PR changes or manual dispatch, using a disposable Ubuntu runner and no Codespaces compute. It is review evidence only, not technology activation or a new protected required context.
+Codespaces quota exhaustion does not block bounded developer-analysis verification. Issue #212 scopes a separate, read-only GitHub Actions browser contract that runs on relevant PR changes or manual dispatch, using a disposable Ubuntu runner and no Codespaces compute. Consult the exact-head workflow evidence linked from PR #211 / issue #212; a successful historical browser run is not an approval, an assurance about later heads or a new protected required context.
 
 To try it in the Node 22+ Codespaces developer shell after reviewing the proposed ADR:
 
@@ -121,3 +121,4 @@ bash scripts/archify_example.sh
 The command invokes `finalize` for validation, verified delivery and browser checks, writing only ignored `.archify/examples/` output. It must not be described as fully verified if the browser gate is skipped (for example, because Chromium is absent). In a shallow clone, fetch the pinned revision before trying the sample. For **current** architecture, create a fresh candidate using the current HEAD and re-check every cited file/line; never repoint a historical JSON without checking its claims.
 
 Archify's diagram HTML and JSON are derived representations, not another Product Charter, Architecture contract, roadmap, execution tracker or release artifact. Do not upload diagrams with private source excerpts or sensitive data to a public hosting service.
+Archify's MIT software license does not license every packaged brand mark. Its `THIRD_PARTY_NOTICES.md` records individual trademark, attribution, share-alike and noncommercial restrictions; do not publish/export diagrams using those marks without separate rights review.

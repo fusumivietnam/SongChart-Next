@@ -231,11 +231,11 @@
       "capability": "developer-analysis",
       "source": "https://github.com/tt-a1i/archify",
       "status": "candidate",
-      "version_authority": ".devcontainer/install-archify.sh pins v3.2.0 commit 208acba8d412335185b2056fedf54b3405df43fb; manual Codespaces developer-shell installation only",
-      "license_review": "MIT reviewed at the pinned upstream release; bundled viewer/renderer assets and optional update-check egress require bounded review before automatic adoption",
+      "version_authority": ".devcontainer/install-archify.sh pins v3.2.0 commit 208acba8d412335185b2056fedf54b3405df43fb; optional developer-shell installation and disposable CI browser verification under issue #212",
+      "license_review": "MIT applies to Archify code; upstream THIRD_PARTY_NOTICES.md separately identifies brand marks/trademarks (including restrictive logo terms), font and bundled assets. No blanket commercial/public redistribution of marked diagrams is approved. Optional update-check egress is disabled during CI verification; human review required before adoption",
       "implementation": ".devcontainer/install-archify.sh",
       "decision": "docs/adr/ADR-0017-archify-developer-visualization.md",
-      "scope": "Proposed opt-in Codex/Codespaces source-backed diagramming. No automatic bootstrap, CI required check, product runtime, production dependency or new architecture/status authority."
+      "scope": "Proposed opt-in developer-only source-backed diagramming with disposable exact-revision CI browser evidence; no automatic bootstrap, required CI check, public artifact publication, product runtime, production dependency or new architecture/status authority."
     },
     {
       "id": "github-projects",

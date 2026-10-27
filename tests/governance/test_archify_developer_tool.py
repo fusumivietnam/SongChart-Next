@@ -17,6 +17,7 @@ class ArchifyDeveloperToolContractTest(unittest.TestCase):
         self.assertEqual(archify["capability"], "developer-analysis")
         self.assertEqual(archify["status"], "candidate")
         self.assertIn(ARCHIFY_COMMIT, archify["version_authority"])
+        self.assertIn("THIRD_PARTY_NOTICES.md", archify["license_review"])
 
     def test_pinned_opt_in_installer_is_not_in_bootstrap(self):
         installer = (ROOT / ".devcontainer/install-archify.sh").read_text()
