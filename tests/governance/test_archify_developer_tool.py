@@ -8,6 +8,7 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 ARCHIFY_COMMIT = "208acba8d412335185b2056fedf54b3405df43fb"
 EXAMPLE_COMMIT = "600162d4b0bc531485d8df685c42745cb13baca6"
+CATALOG_COMMIT = "cc31819fd074ec7d5f1e4d1b79cfdcbbf2c7e673"
 
 
 class ArchifyDeveloperToolContractTest(unittest.TestCase):
@@ -41,9 +42,26 @@ class ArchifyDeveloperToolContractTest(unittest.TestCase):
         workflow = (ROOT / ".github/workflows/archify-browser-contract.yml").read_text()
         for required in ("pull_request:", "workflow_dispatch:", "fetch-depth: 0", "browser-check", "scripts/archify_example.sh"):
             self.assertIn(required, workflow)
+        self.assertIn("scripts/archify_catalog_example.sh", workflow)
+        self.assertIn("'songchart-catalog-core'", workflow)
+        self.assertIn("${example}.finalize.json", workflow)
         for forbidden in ("secrets.", "upload-artifact", "push:", "contents: write"):
             self.assertNotIn(forbidden, workflow)
         self.assertIn("archify-browser-contract.yml", (ROOT / "docs/operations/CI_WORKFLOW_OWNERSHIP.md").read_text())
+
+    def test_catalog_erd_is_historical_source_backed_and_bounded(self):
+        example = json.loads((ROOT / "docs/architecture/examples/archify-catalog-core.erd.json").read_text())
+        self.assertEqual(example["diagram_type"], "erd")
+        self.assertEqual(example["meta"]["repository"]["revision"], CATALOG_COMMIT)
+        self.assertEqual(example["meta"]["quality_profile"], "standard")
+        self.assertTrue(all(entity.get("sources") for entity in example["entities"]))
+        entities = {entity["id"] for entity in example["entities"]}
+        self.assertEqual(entities, {"release_groups", "releases", "release_media", "release_tracks", "recordings"})
+        for entity in example["entities"]:
+            for attribute in entity["attributes"]:
+                if "fk" in ([attribute.get("key")] if isinstance(attribute.get("key"), str) else attribute.get("key", [])):
+                    self.assertIn(attribute["references"].split(".")[0], entities)
+        self.assertIn(CATALOG_COMMIT, (ROOT / "scripts/archify_catalog_example.sh").read_text())
 
 
 if __name__ == "__main__":

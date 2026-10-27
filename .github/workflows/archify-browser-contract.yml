@@ -5,7 +5,9 @@ on:
     paths:
       - '.devcontainer/install-archify.sh'
       - 'scripts/archify_example.sh'
+      - 'scripts/archify_catalog_example.sh'
       - 'docs/architecture/examples/archify-public-read.architecture.json'
+      - 'docs/architecture/examples/archify-catalog-core.erd.json'
       - 'docs/adr/ADR-0017-archify-developer-visualization.md'
       - '.github/workflows/archify-browser-contract.yml'
   workflow_dispatch:
@@ -42,7 +44,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          bash -n .devcontainer/install-archify.sh scripts/archify_example.sh
+          bash -n .devcontainer/install-archify.sh scripts/archify_example.sh scripts/archify_catalog_example.sh
           node --version
           browser="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
           if [[ -z "$browser" ]]; then
@@ -55,18 +57,21 @@ jobs:
       - name: Install opt-in pinned Archify in disposable runner
         run: bash .devcontainer/install-archify.sh
 
-      - name: Render, validate and browser-check historical example
+      - name: Render, validate and browser-check both pinned historical examples
         shell: bash
         run: |
           set -euo pipefail
           bash scripts/archify_example.sh
+          bash scripts/archify_catalog_example.sh
           node - <<'JS'
           const fs = require('node:fs');
-          const result = JSON.parse(fs.readFileSync('.archify/examples/songchart-public-read.finalize.json', 'utf8'));
-          if (result.status !== 'pass') throw Error(`finalize: ${result.status}`);
-          for (const name of ['validate', 'deliver', 'check', 'browser-check']) {
-            const status = result.stages?.[name]?.status;
-            if (status !== 'pass') throw Error(`${name}: ${status ?? 'missing'}`);
+          for (const example of ['songchart-public-read', 'songchart-catalog-core']) {
+            const result = JSON.parse(fs.readFileSync(`.archify/examples/${example}.finalize.json`, 'utf8'));
+            if (result.status !== 'pass') throw Error(`${example} finalize: ${result.status}`);
+            for (const name of ['validate', 'deliver', 'check', 'browser-check']) {
+              const status = result.stages?.[name]?.status;
+              if (status !== 'pass') throw Error(`${example} ${name}: ${status ?? 'missing'}`);
+            }
           }
-          console.log('Archify exact-source render and real browser gate passed.');
+          console.log('Both pinned Archify examples passed source checks and real browser gates.');
           JS
