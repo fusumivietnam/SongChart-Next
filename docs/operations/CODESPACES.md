@@ -97,3 +97,28 @@ Output under `.ua/` is derived analysis. Never use generated summaries, inferred
 Ephemeral `.ua/intermediate/`, `.ua/tmp/`, `.ua/.trash-*` and `.ua/diff-overlay.json` are ignored. Do not enable upstream `--auto-update` until a separate review decides whether commit-hook mutation is acceptable.
 
 The dashboard commonly uses port 5173 or the next available port; port 5174 is predeclared as a private Codespaces forward for the fallback case. Keep graph dashboards private unless separately approved.
+
+## Archify source-backed diagrams (conditionally approved, opt-in)
+
+ADR-0017 was approved by the project owner on 2026-10-27 for internal, source-checked developer architecture visualization subject to its five restrictions. Adoption into `main` still requires PR #211 review and merge. Archify is **not** part of Codespaces post-create or the SongChart application toolchain; no automatic installation, required CI gate or production service is approved.
+
+Codespaces quota exhaustion does not block bounded developer-analysis verification. Issue #212 scopes a separate, read-only GitHub Actions browser contract that runs on relevant PR changes or manual dispatch, using a disposable Ubuntu runner and no Codespaces compute. Consult the exact-head workflow evidence linked from PR #211 / issue #212; a successful historical browser run is not an approval, an assurance about later heads or a new protected required context.
+
+To try it in an optional Node 22+ developer shell (Codespaces is not required), after inspecting the pinned installer:
+
+```bash
+bash .devcontainer/install-archify.sh
+```
+
+The installer checks out one pinned upstream Git commit under `~/.archify-tool/repo` and links the `archify` skill at `~/.agents/skills/archify`, refusing to replace unrelated destinations. The agent may then use `$archify` or a natural-language request such as: "Read current source and use Archify to diagram the correction intake boundary with file/line evidence."
+
+For a *historical* example, `docs/architecture/examples/archify-public-read.architecture.json` is pinned to `600162d4b0bc531485d8df685c42745cb13baca6` and only covers public Search, Artist read and correction intake. Once that commit is available in the local Git object database, run:
+
+```bash
+bash scripts/archify_example.sh
+```
+
+The command invokes `finalize` for validation, verified delivery and browser checks, writing only ignored `.archify/examples/` output. It must not be described as fully verified if the browser gate is skipped (for example, because Chromium is absent). In a shallow clone, fetch the pinned revision before trying the sample. For **current** architecture, create a fresh candidate using the current HEAD and re-check every cited file/line; never repoint a historical JSON without checking its claims.
+
+Archify's diagram HTML and JSON are derived representations, not another Product Charter, Architecture contract, roadmap, execution tracker or release artifact. Do not upload diagrams with private source excerpts or sensitive data to a public hosting service.
+Archify's MIT software license does not license every packaged brand mark. Its `THIRD_PARTY_NOTICES.md` records individual trademark, attribution, share-alike and noncommercial restrictions; do not publish/export diagrams using those marks without separate rights review.

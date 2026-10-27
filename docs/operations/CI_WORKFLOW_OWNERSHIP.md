@@ -24,6 +24,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `g5-vps-baseline.yml` | single-VPS production-package verification: production app/web image builds, Compose topology, private service exposure and disposable health/smoke evidence; never performs a real VPS deployment | contents read |
 | `design-review-contract.yml` | one-command local Design Authority review contract | contents read |
 | `codespaces-contract.yml` | devcontainer/Codespaces developer-shell contract | contents read |
+| `archify-browser-contract.yml` | scoped developer-analysis browser acceptance for pinned historical Archify sample (#212); no generated output publication or lifecycle promotion | contents read |
 
 `docker-scaffold.yml` is retired because Foundation application checks own Compose/PostgreSQL runtime evidence.
 
