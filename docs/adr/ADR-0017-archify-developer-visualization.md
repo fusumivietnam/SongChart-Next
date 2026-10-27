@@ -18,6 +18,8 @@ Permit opt-in installation through `.devcontainer/install-archify.sh`, pinned to
 
 Create a small historical source-backed diagram example with a fixed Git revision and a manual command to regenerate its HTML. Derived HTML, browser captures and intermediate artifacts live under ignored `.archify/` and must not be published as maintained architectural truth. Any later automation or generated documentation workflow needs a separate scoped issue/review and CI ownership assessment.
 
+Issue #212 supplies the separate review scope for an optional, read-only browser verification workflow. Its exact-PR-revision run may establish browser evidence independently of Codespaces quota, but it must remain non-required, have no main-push trigger, publish no generated diagram and grant no technology activation.
+
 ## Authority and evidence
 
 - Git source/AGENTS, Product Charter, Architecture, ADRs, contracts and governance registries remain authoritative.

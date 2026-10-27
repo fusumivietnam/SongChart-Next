@@ -33,6 +33,14 @@ class ArchifyDeveloperToolContractTest(unittest.TestCase):
         self.assertEqual(example["meta"]["quality_profile"], "showcase")
         self.assertIn(EXAMPLE_COMMIT, (ROOT / "scripts/archify_example.sh").read_text())
 
+    def test_disposable_ci_browser_gate_preserves_opt_in_boundary(self):
+        workflow = (ROOT / ".github/workflows/archify-browser-contract.yml").read_text()
+        for required in ("pull_request:", "workflow_dispatch:", "fetch-depth: 0", "browser-check", "scripts/archify_example.sh"):
+            self.assertIn(required, workflow)
+        for forbidden in ("secrets.", "upload-artifact", "push:", "contents: write"):
+            self.assertNotIn(forbidden, workflow)
+        self.assertIn("archify-browser-contract.yml", (ROOT / "docs/operations/CI_WORKFLOW_OWNERSHIP.md").read_text())
+
 
 if __name__ == "__main__":
     unittest.main()

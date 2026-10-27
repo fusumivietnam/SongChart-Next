@@ -102,6 +102,8 @@ The dashboard commonly uses port 5173 or the next available port; port 5174 is p
 
 ADR-0017 proposes Archify v3.2.0 solely for Codex-assisted architecture visualization. It is **not** part of Codespaces post-create or the SongChart application toolchain; no automatic installation, CI gate or production service has been approved.
 
+Codespaces quota exhaustion does not block bounded developer-analysis verification. Issue #212 proposes a separate, read-only GitHub Actions browser contract that runs on relevant PR changes or manual dispatch, using a disposable Ubuntu runner and no Codespaces compute. It is review evidence only, not technology activation or a new protected required context.
+
 To try it in the Node 22+ Codespaces developer shell after reviewing the proposed ADR:
 
 ```bash
