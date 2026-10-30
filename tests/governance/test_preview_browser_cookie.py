@@ -14,7 +14,7 @@ COOKIE = "_vercel_jwt=fixture-not-a-secret; Path=/; Secure; HttpOnly; SameSite=L
 
 class CookieBootstrapTests(unittest.TestCase):
     def test_accepts_host_only_cookie(self):
-        parsed = mod.verify_cookie(ORIGIN, ORIGIN + "/", 307, [COOKIE])
+        parsed = mod.verify_cookie(ORIGIN, ORIGIN + "/", 200, [COOKIE])
         self.assertEqual(parsed["domain"], "songchart-next-preview-i14zptt45-fusumivietnam.vercel.app")
         self.assertEqual(parsed["name"], "_vercel_jwt")
         self.assertTrue(parsed["secure"])
@@ -29,17 +29,23 @@ class CookieBootstrapTests(unittest.TestCase):
         bad = ("_vercel_jwt=value; Domain=.vercel.app; Path=/; Secure; SameSite=Lax",
                "_vercel_jwt=value; Path=/; SameSite=Lax",
                "_vercel_jwt=value; Path=/; Secure; SameSite=None",
+               "_vercel_jwt=value; Path=/; Secure; SameSite=Lax",
                "session=value; Path=/; Secure; SameSite=Lax",
                "_vercel_jwt=; Path=/; Secure; SameSite=Lax",
                "_vercel_jwt=value; Path=/corrections; Secure; SameSite=Lax")
         for header in bad:
             with self.subTest(header=header), self.assertRaises(ValueError):
-                mod.verify_cookie(ORIGIN, ORIGIN, 302, [header])
+                mod.verify_cookie(ORIGIN, ORIGIN, 200, [header])
+
+    def test_rejects_redirect_status_even_with_cookie(self):
+        for status in (301, 302, 303, 307, 308):
+            with self.subTest(status=status), self.assertRaises(ValueError):
+                mod.verify_cookie(ORIGIN, ORIGIN, status, [COOKIE])
 
     def test_rejects_missing_or_multiple_headers(self):
         for headers in ([], [COOKIE, COOKIE]):
             with self.assertRaises(ValueError):
-                mod.verify_cookie(ORIGIN, ORIGIN, 302, headers)
+                mod.verify_cookie(ORIGIN, ORIGIN, 200, headers)
 
 
 if __name__ == "__main__":
