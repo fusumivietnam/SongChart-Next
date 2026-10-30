@@ -19,7 +19,7 @@ def verify_cookie(origin: str, response_url: str, status: int, set_cookie_header
         raise ValueError("bypass response must remain on the exact HTTPS Preview origin")
     if expected.path not in ("", "/") or expected.query or expected.fragment:
         raise ValueError("bootstrap origin must not contain a path or query")
-    if not (200 <= status < 400):
+    if status != 200:
         raise ValueError("bypass bootstrap did not succeed")
     if len(set_cookie_headers) != 1:
         raise ValueError("expected one isolated bypass cookie header")
@@ -32,7 +32,7 @@ def verify_cookie(origin: str, response_url: str, status: int, set_cookie_header
         raise ValueError("unexpected bypass cookie")
     value = cookie[COOKIE_NAME]
     if (not value.value or value["domain"] or value["path"] not in ("", "/")
-            or not value["secure"] or value["samesite"].lower() not in ("lax", "strict")
+            or not value["secure"] or not value["httponly"] or value["samesite"].lower() not in ("lax", "strict")
             or value["max-age"] and not value["max-age"].isdigit()):
         raise ValueError("bypass cookie must be secure, host-only and restricted")
     # The only secret-containing result is kept in memory, never logged.
