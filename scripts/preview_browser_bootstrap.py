@@ -10,7 +10,7 @@ import urllib.request
 
 from preview_browser_cookie import verify_cookie
 from preview_browser_preflight import validate
-from preview_browser_provenance import verify_deployment
+from preview_browser_provenance import fetch_verified_deployment
 
 
 class RejectRedirect(urllib.request.HTTPRedirectHandler):
@@ -19,13 +19,13 @@ class RejectRedirect(urllib.request.HTTPRedirectHandler):
 
 
 def bootstrap(origin: str, deployment_id: str, expected_sha: str, secret: str,
-              *, deployment_record: dict, opener=None) -> dict[str, object]:
+              *, api_token: str, team_id: str, opener=None, control_plane_opener=None) -> dict[str, object]:
     """Return a host-scoped browser cookie in memory; never log the returned object."""
     normalized = validate(origin, expected_sha, deployment_id, secret_present=bool(secret))
-    # A record alone does not authenticate its source: the caller must retrieve it
-    # from Vercel with authorized control-plane access, never from user input.
-    verify_deployment(deployment_record, origin=normalized,
-                      deployment_id=deployment_id, expected_sha=expected_sha)
+    # Must verify authenticated control-plane provenance before secret-bearing GET.
+    fetch_verified_deployment(normalized, deployment_id, expected_sha,
+                              api_token=api_token, team_id=team_id,
+                              opener=control_plane_opener)
     # Deliberately no cookie jar, proxy credentials or browser-wide authorization.
     transport = opener if opener is not None else urllib.request.build_opener(RejectRedirect())
     request = urllib.request.Request(
