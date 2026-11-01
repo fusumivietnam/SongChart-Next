@@ -43,7 +43,8 @@ def fetch_verified_deployment(origin: str, deployment_id: str, expected_sha: str
     import urllib.error
     import urllib.request
     from urllib.parse import quote
-    if not api_token or not team_id or not deployment_id.startswith("dpl_"):
+    import re
+    if not api_token or not re.fullmatch(r"dpl_[A-Za-z0-9]+", deployment_id) or not re.fullmatch(r"team_[A-Za-z0-9]+", team_id):
         raise ValueError("authenticated Vercel API access is required")
     if not all(char.isalnum() or char in "_-" for char in deployment_id + team_id):
         raise ValueError("invalid Vercel control-plane identifier")
@@ -67,7 +68,7 @@ def fetch_verified_deployment(origin: str, deployment_id: str, expected_sha: str
         with transport.open(request, timeout=15) as response:
             if response.status != 200 or response.geturl() != api_url:
                 raise ValueError("Vercel API response origin/status mismatch")
-            if not response.headers.get("Content-Type", "").lower().startswith("application/json"):
+            if response.headers.get("Content-Type", "").split(";", 1)[0].strip().lower() != "application/json":
                 raise ValueError("Vercel API response is not JSON")
             raw = response.read(1048577)
             if len(raw) > 1048576:
