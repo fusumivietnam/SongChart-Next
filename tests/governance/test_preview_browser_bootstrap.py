@@ -11,6 +11,11 @@ URL = "https://songchart-next-preview-i14zptt45-fusumivietnam.vercel.app"
 SHA = "248d2d2235861415d0f16a6539e63313c85a6e48"
 DEPLOYMENT = "dpl_CWpB5crLyTRswaguC972opHKUgCW"
 COOKIE = "_vercel_jwt=mock-value; Path=/; Secure; HttpOnly; SameSite=Lax"
+RECORD = {"deployment": {"id": DEPLOYMENT, "url": URL.removeprefix("https://"),
+          "target": None, "readyState": "READY",
+          "project": {"id": "prj_JTUUiO0Hb3QwiK7w6NWmvxwej43E"},
+          "meta": {"githubCommitSha": SHA, "githubRepo": "SongChart-Next",
+                   "githubOrg": "fusumivietnam"}}}
 
 
 class Response:
@@ -35,7 +40,7 @@ class BootstrapTests(unittest.TestCase):
         opener = Mock()
         opener.open.return_value = Response()
         result = bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
-                           provenance_verified=True, opener=opener)
+                           deployment_record=RECORD, opener=opener)
         req = opener.open.call_args.args[0]
         self.assertEqual(req.full_url, URL + "/")
         self.assertEqual(req.get_header("X-vercel-protection-bypass"), "fixture-secret")
@@ -47,14 +52,22 @@ class BootstrapTests(unittest.TestCase):
         opener = Mock()
         with self.assertRaises(ValueError):
             bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
-                      provenance_verified=False, opener=opener)
+                      deployment_record={}, opener=opener)
+        opener.open.assert_not_called()
+
+    def test_wrong_provenance_never_calls_transport(self):
+        opener = Mock()
+        invalid = {"deployment": {**RECORD["deployment"], "readyState": "BUILDING"}}
+        with self.assertRaises(ValueError):
+            bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
+                      deployment_record=invalid, opener=opener)
         opener.open.assert_not_called()
 
     def test_wrong_host_never_calls_transport(self):
         opener = Mock()
         with self.assertRaises(ValueError):
             bootstrap("https://evil.test", DEPLOYMENT, SHA, "fixture-secret",
-                      provenance_verified=True, opener=opener)
+                      deployment_record=RECORD, opener=opener)
         opener.open.assert_not_called()
 
     def test_rejects_off_origin_response(self):
@@ -62,7 +75,7 @@ class BootstrapTests(unittest.TestCase):
         opener.open.return_value = Response("https://evil.test/")
         with self.assertRaises(ValueError):
             bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
-                      provenance_verified=True, opener=opener)
+                      deployment_record=RECORD, opener=opener)
 
     def test_redirect_handler_is_fail_closed(self):
         self.assertIsNone(RejectRedirect().redirect_request(None, None, 302, "", {}, "https://evil.test/"))
