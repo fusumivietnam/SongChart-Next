@@ -72,6 +72,21 @@ class VercelApiTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 self._lookup(opener)
 
+    def test_rejects_malformed_identifiers_without_network(self):
+        for deployment, team in (("dpl_", TEAM), ("dpl_valid/evil", TEAM), (ID, "team_"), (ID, "team_x?token=bad")):
+            opener = Mock()
+            with self.subTest(deployment=deployment, team=team), self.assertRaises(ValueError):
+                module.fetch_verified_deployment(ORIGIN, deployment, SHA,
+                    api_token="fixture-only", team_id=team, opener=opener)
+            opener.open.assert_not_called()
+
+    def test_rejects_jsonp_mime(self):
+        opener = Mock()
+        url = "https://api.vercel.com/v13/deployments/" + ID + "?teamId=" + TEAM
+        opener.open.return_value = Response(url, content_type="application/jsonp")
+        with self.assertRaises(ValueError):
+            self._lookup(opener)
+
     def test_rejects_wrong_source(self):
         opener = Mock()
         url = "https://api.vercel.com/v13/deployments/" + ID + "?teamId=" + TEAM
