@@ -1,7 +1,7 @@
 name: Roadmap health
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed, ready_for_review, converted_to_draft, edited]
+    types: [opened, synchronize, reopened, closed, ready_for_review, converted_to_draft]
   issues:
     types: [opened, edited, closed, reopened]
   push:
@@ -83,4 +83,4 @@ jobs:
             roadmap-health.txt
             roadmap-reconcile-health.json
             roadmap-reconcile-health.txt
-          retention-days: 14
+          retention-days: 7
