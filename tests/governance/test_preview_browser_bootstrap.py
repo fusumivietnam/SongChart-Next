@@ -2,7 +2,7 @@
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
 from preview_browser_bootstrap import bootstrap, RejectRedirect
@@ -38,9 +38,12 @@ class Response:
 class BootstrapTests(unittest.TestCase):
     def test_scoped_request_and_no_browser_wide_header(self):
         opener = Mock()
+        control_plane_opener = Mock()
         opener.open.return_value = Response()
-        result = bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
-                           deployment_record=RECORD, opener=opener)
+        with patch("preview_browser_bootstrap.fetch_verified_deployment", return_value=RECORD):
+            result = bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
+                           api_token="fixture-token", team_id="team_fixture", opener=opener,
+                           control_plane_opener=control_plane_opener)
         req = opener.open.call_args.args[0]
         self.assertEqual(req.full_url, URL + "/")
         self.assertEqual(req.get_header("X-vercel-protection-bypass"), "fixture-secret")
@@ -50,32 +53,40 @@ class BootstrapTests(unittest.TestCase):
 
     def test_unverified_provenance_never_calls_transport(self):
         opener = Mock()
+        control_plane_opener = Mock()
         with self.assertRaises(ValueError):
             bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
-                      deployment_record={}, opener=opener)
+                      api_token="", team_id="team_fixture", opener=opener,
+                      control_plane_opener=control_plane_opener)
         opener.open.assert_not_called()
 
     def test_wrong_provenance_never_calls_transport(self):
         opener = Mock()
-        invalid = {"deployment": {**RECORD["deployment"], "readyState": "BUILDING"}}
-        with self.assertRaises(ValueError):
-            bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
-                      deployment_record=invalid, opener=opener)
+        control_plane_opener = Mock()
+        with patch("preview_browser_bootstrap.fetch_verified_deployment", side_effect=ValueError("mismatch")):
+            with self.assertRaises(ValueError):
+                bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
+                          api_token="fixture-token", team_id="team_fixture",
+                          opener=opener, control_plane_opener=control_plane_opener)
         opener.open.assert_not_called()
 
     def test_wrong_host_never_calls_transport(self):
         opener = Mock()
         with self.assertRaises(ValueError):
             bootstrap("https://evil.test", DEPLOYMENT, SHA, "fixture-secret",
-                      deployment_record=RECORD, opener=opener)
+                      api_token="fixture-token", team_id="team_fixture", opener=opener,
+                           control_plane_opener=control_plane_opener)
         opener.open.assert_not_called()
 
     def test_rejects_off_origin_response(self):
         opener = Mock()
+        control_plane_opener = Mock()
         opener.open.return_value = Response("https://evil.test/")
-        with self.assertRaises(ValueError):
-            bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
-                      deployment_record=RECORD, opener=opener)
+        with patch("preview_browser_bootstrap.fetch_verified_deployment", return_value=RECORD):
+            with self.assertRaises(ValueError):
+                bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
+                      api_token="fixture-token", team_id="team_fixture", opener=opener,
+                           control_plane_opener=control_plane_opener)
 
     def test_redirect_handler_is_fail_closed(self):
         self.assertIsNone(RejectRedirect().redirect_request(None, None, 302, "", {}, "https://evil.test/"))
