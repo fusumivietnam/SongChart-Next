@@ -22,10 +22,10 @@ Schedule::command('songchart:corrections:prune')
 Artisan::command('songchart:corrections:moderation-demand', function () {
     // Aggregate-only, operator-invoked evidence for issue #173. No claim content,
     // supporting URLs, subject identities or reviewer/customer data in output.
-    $pending = \\App\\Models\\CorrectionSubmission::query()
+    $pending = \App\Models\CorrectionSubmission::query()
         ->where('status', 'pending')
         ->count();
-    $expired = \\App\\Models\\CorrectionSubmission::query()
+    $expired = \App\Models\CorrectionSubmission::query()
         ->where('status', 'pending')
         ->where('created_at', '<=', now()->subDays(180))
         ->count();
