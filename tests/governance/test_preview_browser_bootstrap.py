@@ -72,6 +72,7 @@ class BootstrapTests(unittest.TestCase):
 
     def test_wrong_host_never_calls_transport(self):
         opener = Mock()
+        control_plane_opener = Mock()
         with self.assertRaises(ValueError):
             bootstrap("https://evil.test", DEPLOYMENT, SHA, "fixture-secret",
                       api_token="fixture-token", team_id="team_fixture", opener=opener,
