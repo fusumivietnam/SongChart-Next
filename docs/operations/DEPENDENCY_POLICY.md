@@ -22,3 +22,11 @@ Common direct OSS dependencies may proceed through the normal repository review 
 Escalate to explicit owner decision when license/edition terms are non-standard or ambiguous, a commercial/community boundary affects required features, a hosted service handles project/user data, redistribution/content rights apply, operating cost or lock-in is material, or the dependency would create a second authority/control plane.
 
 Treat technical installation, license/edition approval, data/privacy approval and production approval as separate claims. Transitive packages remain governed through lockfiles/SBOM and security review rather than individual owner approvals unless a transitive dependency itself creates a material legal/security exception.
+
+## Composer dependency updates vs starter feature installation
+
+`composer update` must not invoke Laravel Chisel's `artisan install:features`: it is a starter customization command capable of rewriting or removing repository-owned source, design and governance files, not a repeatable dependency-maintenance step. The approved `post-update-cmd` only publishes Laravel assets; `post-autoload-dump` still runs package discovery. The `extra.laravel.installer.post-create-project` hook is preserved for fresh starter creation and does not authorize re-running the installer on SongChart Next.
+
+For a scoped update, work from a clean working tree, inspect `git status --short`, run `composer update <package> --with-dependencies --no-interaction` in the approved Docker app, then run `composer audit --locked --no-interaction` and the applicable tests. Inspect the diff before staging only intended manifests/lockfiles; stop and review any unexpected source changes. The temporary `--no-scripts` workaround used in #219 is no longer required solely to avoid `install:features` once this contract merges. If scripts are deliberately disabled for another reason, perform the normally-required discovery/build validations separately.
+
+Issue #220 owns this lifecycle contract. Do not treat a security lockfile update as approval for an unrelated starter rewrite or a Vercel Preview deployment.
