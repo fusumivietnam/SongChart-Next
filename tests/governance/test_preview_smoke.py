@@ -19,13 +19,14 @@ spec.loader.exec_module(preview_smoke)
 class Handler(BaseHTTPRequestHandler):
     health_calls = 0
     health_503_responses = 1
+    health_transient_status = 503
     invalid_content_type = False
 
     def do_GET(self) -> None:  # noqa: N802
         if self.path == "/health":
             type(self).health_calls += 1
             if type(self).health_calls <= type(self).health_503_responses:
-                self.send_response(503)
+                self.send_response(type(self).health_transient_status)
                 self.send_header("Retry-After", "0")
                 self.end_headers()
                 return
@@ -49,6 +50,7 @@ class PreviewSmokeContractTest(unittest.TestCase):
     def setUp(self) -> None:
         Handler.health_calls = 0
         Handler.health_503_responses = 1
+        Handler.health_transient_status = 503
         Handler.invalid_content_type = False
         self.server = HTTPServer(("127.0.0.1", 0), Handler)
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
@@ -83,6 +85,21 @@ class PreviewSmokeContractTest(unittest.TestCase):
         results = preview_smoke.run_smoke(origin, attempts=20, sleep=lambda _: None)
         self.assertEqual(13, results[0].attempts)
         self.assertEqual(12, len(results))
+
+    def test_manual_retry_budget_is_bounded_when_bootstrap_never_recovers(self) -> None:
+        Handler.health_503_responses = 100
+        origin = f"http://127.0.0.1:{self.server.server_port}"
+        with self.assertRaisesRegex(RuntimeError, "HTTP 503 for /health"):
+            preview_smoke.run_smoke(origin, attempts=20, sleep=lambda _: None)
+        self.assertEqual(20, Handler.health_calls)
+
+    def test_non_503_failure_is_not_retried(self) -> None:
+        Handler.health_503_responses = 100
+        Handler.health_transient_status = 500
+        origin = f"http://127.0.0.1:{self.server.server_port}"
+        with self.assertRaisesRegex(RuntimeError, "HTTP 500 for /health"):
+            preview_smoke.run_smoke(origin, attempts=20, sleep=lambda _: None)
+        self.assertEqual(1, Handler.health_calls)
 
     def test_rejects_non_html_response_even_if_status_and_noindex_are_valid(self) -> None:
         Handler.invalid_content_type = True
