@@ -6,6 +6,7 @@ whether to transfer the returned secret cookie into a same-origin browser.
 from __future__ import annotations
 
 from http.cookies import SimpleCookie
+import re
 from urllib.parse import urlsplit
 
 COOKIE_NAME = "_vercel_jwt"
@@ -23,6 +24,10 @@ def verify_cookie(origin: str, response_url: str, status: int, set_cookie_header
         raise ValueError("bypass bootstrap did not succeed")
     if len(set_cookie_headers) != 1:
         raise ValueError("expected one isolated bypass cookie header")
+    # SimpleCookie silently overwrites duplicate cookie names, which would make
+    # the accepted bypass value ambiguous. Reject before parsing.
+    if len(re.findall(r"(?:^|[;,])\\s*_vercel_jwt\\s*=", set_cookie_headers[0], flags=re.IGNORECASE)) != 1:
+        raise ValueError("expected exactly one bypass cookie assignment")
     cookie = SimpleCookie()
     try:
         cookie.load(set_cookie_headers[0])
