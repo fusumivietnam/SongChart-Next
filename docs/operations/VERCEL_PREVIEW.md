@@ -16,13 +16,11 @@ Provider-generated IDs and credentials are operational details, not application 
 
 The preview project exists only for preview/test evidence. A Vercel deployment whose target is `production` is rejected as SongChart production evidence even if Vercel creates it automatically; cancel/ignore it rather than allowing it to redefine ADR-0015 or G5.
 
-The Hobby quota guard skips branches that cannot provide useful application runtime evidence:
+**Git-triggered deployments are disabled by default** in repository-root `vercel.json` using `git.deploymentEnabled: false`. Unlike an Ignored Build Step, this prevents Vercel from creating automatic deployments on every pushed commit; it applies to `main` and all feature/test/governance branches. Source authority: [Vercel Git configuration](https://vercel.com/docs/project-configuration/git-configuration). The project remains connected to Git; no Git disconnect, production deployment or public Preview is authorized by this configuration.
 
-```sh
-case "$VERCEL_GIT_COMMIT_REF" in main|governance/*|docs/*) exit 0;; *) exit 1;; esac
-```
+**Incident boundary (issue #215):** Vercel Container Registry returned `denied: repository has reached the maximum allowed number of images` while pushing the Preview image for SHA `39263bc`. Until the image-count limit is resolved, the provider-side Ignored Build Step is temporarily set to `exit 0` to fail closed. It is an emergency provider setting, not the normal repository policy and not evidence of a successful Preview. Vercel may still record canceled deployments when this older mechanism is used. Do not restore permissive auto-build behavior merely to test the registry.
 
-As Vercel's Ignored Build Step, exit `0` skips `main`, `governance/*` and `docs/*`; other non-main branches remain eligible for Preview builds. `Project governance` enforces the matching branch-safety contract: a `docs/*` or `governance/*` PR may not carry runtime-impacting paths. If runtime work is needed, use a runtime-eligible branch rather than weakening the skip guard.
+**Deliberate Preview acceptance:** After examining registry capacity and existing image references, an authorized operator may use Vercel Dashboard → project → Deployments → Create Deployment with an exact Git SHA / Preview context (see [Vercel Git deployment docs](https://vercel.com/docs/git)), or a reviewed Vercel CLI workflow, only after checking that it respects the repository opt-out and current Ignored Build Step. Verify environment target is Preview, SSO/protection remains enabled, isolated Neon configuration is correct and the SHA is the intended tested revision. If the deployment is blocked by either gate, stop; do not silently override it, expand branch eligibility, disconnect Git or create production deployment. Any documented temporary gate change must be reviewed and reverted once acceptance finishes. Record the resulting deployment URL/ID and runtime evidence in #215/#175 without exposing credentials. Passing GitHub Actions alone is not runtime acceptance.
 
 Vercel Authentication/SSO remains enabled for preview deployments. Do not make the preview project public merely to simplify automation. For command-line smoke checks, create a temporary authenticated Vercel share URL and pass it to the repository verifier; never commit or print that URL.
 
