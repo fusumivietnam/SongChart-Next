@@ -37,6 +37,17 @@ class CookieBootstrapTests(unittest.TestCase):
             with self.subTest(header=header), self.assertRaises(ValueError):
                 mod.verify_cookie(ORIGIN, ORIGIN, 200, [header])
 
+    def test_rejects_duplicate_bypass_cookie_assignment(self):
+        # SimpleCookie silently replaces an earlier value with the last
+        # assignment; reject ambiguity before it reaches the browser.
+        duplicates = (
+            COOKIE + "; _vercel_jwt=overridden; Path=/; Secure; HttpOnly; SameSite=Lax",
+            COOKIE + ", _vercel_jwt=overridden; Path=/; Secure; HttpOnly; SameSite=Lax",
+        )
+        for header in duplicates:
+            with self.subTest(header=header), self.assertRaises(ValueError):
+                mod.verify_cookie(ORIGIN, ORIGIN + "/", 200, [header])
+
     def test_rejects_redirect_status_even_with_cookie(self):
         for status in (301, 302, 303, 307, 308):
             with self.subTest(status=status), self.assertRaises(ValueError):
