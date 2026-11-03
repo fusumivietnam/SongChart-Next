@@ -73,11 +73,22 @@ def verify_codespaces_machine_floor() -> None:
         )
 
 
+def verify_vercel_git_deployments_disabled() -> None:
+    path = ROOT / "vercel.json"
+    if not path.is_file():
+        fail("Vercel Git deployment gate missing: vercel.json")
+    config = json.loads(path.read_text())
+    git_config = config.get("git")
+    if not isinstance(git_config, dict) or git_config.get("deploymentEnabled") is not False:
+        fail("Vercel Git-triggered deployment must remain disabled by default (issue #215)")
+
+
 def main() -> None:
     verify_artifact_retention()
     verify_heavy_workflow_concurrency()
     verify_buildkit_cache_scope()
     verify_codespaces_machine_floor()
+    verify_vercel_git_deployments_disabled()
     print("GitHub usage policy verified")
 
 
