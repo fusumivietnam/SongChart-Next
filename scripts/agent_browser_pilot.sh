@@ -16,7 +16,7 @@ from urllib.parse import urlsplit
 try:
     url = urlsplit(sys.argv[1])
     assert url.scheme == "http"
-    assert url.hostname in {"localhost", "127.0.0.1", "[::1]", "::1"}
+    assert url.hostname in {"localhost", "127.0.0.1"}
     assert url.port is not None and 1 <= url.port <= 65535
     assert not (url.username or url.password or url.query or url.fragment)
     assert url.path in {"", "/", "/search", "/corrections", "/about", "/privacy", "/terms", "/disclaimer", "/support"}
@@ -33,6 +33,9 @@ if ! command -v "$browser" >/dev/null 2>&1; then
   exit 2
 fi
 
+# The CLI enforces this policy for browser subresource loads and redirects too.
+# Explicitly override any broader inherited allowance from an operator shell.
+export AGENT_BROWSER_ALLOWED_DOMAINS='localhost,127.0.0.1'
 session="songchart-local-pilot-$$"
 cleanup() { "$browser" --session "$session" close >/dev/null 2>&1 || true; }
 trap cleanup EXIT
