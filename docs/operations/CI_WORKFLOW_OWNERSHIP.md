@@ -6,7 +6,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 
 | Workflow | Responsibility | Credential boundary |
 | --- | --- | --- |
-| `project-governance.yml` | governance regression suite, read-only status snapshot, CI ownership verifier, GitHub usage-policy verifier, and the merge-blocking preview-skip branch safety assertion for `docs/*` / `governance/*` branches | contents read |
+| `project-governance.yml` | governance regression suite, read-only status snapshot, CI ownership verifier, GitHub usage-policy verifier, and the merge-blocking branch-name scope assertion for `docs/*` / `governance/*` branches (independent of Vercel's default-disabled Git deployments) | contents read |
 | `project-os.yml` | sole owner of `verify_project_os.py` and required `verify` context | contents read |
 | `roadmap-health.yml` | live Issue/PR roadmap reconciliation health, unreconciled-merge detection and required `health` context; runs on every main push | contents/issues/PR/actions read |
 | `roadmap-reconcile.yml` | serialized post-merge proposal writer; triggered only by a merged PR close or explicit workflow dispatch; creates/updates a factual reconciliation PR, waits for normal PR-associated protected checks and safe-merges only after fail-closed gates | default `GITHUB_TOKEN` is repository/PR read-only; checkout must not persist it into Git; mutations use only `ROADMAP_RECONCILE_TOKEN`; Project PAT is forbidden |
@@ -32,7 +32,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 
 A bounded semantic work unit should produce one reviewed PR and, where practical, one visible implementation commit that already includes its source, tests, required documentation and governance changes. Intermediate file-by-file mutations may be prepared before a PR exists, but they must be collapsed before the review branch becomes CI evidence. Observation-only commits and evidence-only commits are not a substitute for exact-head checks.
 
-`scripts/classify_ci_change.py` is the repository-owned deterministic classifier for changed-path impact. Its categories remain advisory groundwork for semantic fan-out. One narrow assertion is merge-blocking: because Vercel intentionally skips `docs/*` and `governance/*`, `project-governance.yml` computes the exact PR diff and rejects either branch prefix when the classifier finds application, database, frontend, provider, production-package, preview-runtime, developer-environment or visual impact. This prevents branch naming from hiding a runtime change. All other classifier output remains advisory unless a separately reviewed workflow contract changes it.
+`scripts/classify_ci_change.py` is the repository-owned deterministic classifier for changed-path impact. Its categories remain advisory groundwork for semantic fan-out. One narrow assertion remains merge-blocking: `project-governance.yml` computes the exact PR diff and rejects `docs/*` or `governance/*` branch prefixes when the classifier finds application, database, frontend, provider, production-package, preview-runtime, developer-environment or visual impact. This prevents branch naming from hiding a runtime change from reviewers and CI classification. The Vercel deployment gate is now separate: root `vercel.json` has `git.deploymentEnabled: false` by default; no branch prefix grants automatic Preview deployment. All other classifier output remains advisory unless a separately reviewed workflow contract changes it.
 
 Roadmap reconciliation deliberately does **not** subscribe to PR `edited` events or general issue comments. Those events previously produced workflow shells that immediately skipped and amplified Actions usage without adding evidence. Normal reconciliation occurs on merged PR close; explicit replay uses `workflow_dispatch` with a merged PR number.
 
@@ -69,7 +69,7 @@ If `ROADMAP_RECONCILE_TOKEN` is absent, the writer must fail before repository m
 19. `g5-vps-baseline.yml` may verify deployable production packaging in disposable CI, but it never proves a VPS exists, never receives production credentials and never promotes `production-deploy` to deployed.
 20. `research-cocoindex.yml` may prove a disposable local research pipeline runs and retain benchmark evidence, but semantic retrieval quality is never a merge-blocking decision and the workflow cannot promote technology/capability lifecycle or consume secrets.
 21. Repository workflow artifacts retain at most 14 days, heavy workflows cancel superseded runs, slice workflows do not create private BuildKit cache scopes, and the default Codespaces requirement remains the quota-conscious baseline defined by `docs/operations/GITHUB_USAGE_GUARDRAILS.md`.
-22. `scripts/classify_ci_change.py` and its governance tests remain deterministic. General category output is advisory; only the documented preview-skip branch safety assertion is merge-blocking.
+22. `scripts/classify_ci_change.py` and its governance tests remain deterministic. General category output is advisory; only the documented branch-name scope safety assertion is merge-blocking.
 
 ## Automated drift check
 
