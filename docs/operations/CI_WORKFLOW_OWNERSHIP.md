@@ -25,6 +25,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `design-review-contract.yml` | one-command local Design Authority review contract | contents read |
 | `codespaces-contract.yml` | devcontainer/Codespaces developer-shell contract | contents read |
 | `archify-browser-contract.yml` | scoped developer-analysis browser acceptance for pinned historical Archify public-read sample (#212) and catalog ERD sample (#213); one disposable runner, no generated output publication or lifecycle promotion | contents read |
+| `agent-browser-pilot.yml` | narrowly path-triggered PR / manual opt-in agent-browser CLI smoke on a disposable localhost HTML fixture; **not** SongChart app E2E, protected Preview authentication, or #175 UX acceptance | contents read; no secrets or artifacts |
 
 `docker-scaffold.yml` is retired because Foundation application checks own Compose/PostgreSQL runtime evidence.
 
