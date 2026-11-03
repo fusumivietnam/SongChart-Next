@@ -38,7 +38,7 @@ def verify_cookie(origin: str, response_url: str, status: int, set_cookie_header
     value = cookie[COOKIE_NAME]
     if (not value.value or value["domain"] or value["path"] not in ("", "/")
             or not value["secure"] or not value["httponly"] or value["samesite"].lower() not in ("lax", "strict")
-            or value["max-age"] and not value["max-age"].isdigit()):
+            or (value["max-age"] and (not value["max-age"].isdigit() or int(value["max-age"]) == 0))):
         raise ValueError("bypass cookie must be secure, host-only and restricted")
     # The only secret-containing result is kept in memory, never logged.
     return {"name": COOKIE_NAME, "value": value.value, "domain": expected.hostname, "path": "/", "secure": True, "httpOnly": bool(value["httponly"]), "sameSite": value["samesite"].capitalize()}
