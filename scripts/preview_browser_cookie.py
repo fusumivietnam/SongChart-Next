@@ -26,7 +26,7 @@ def verify_cookie(origin: str, response_url: str, status: int, set_cookie_header
         raise ValueError("expected one isolated bypass cookie header")
     # SimpleCookie silently overwrites duplicate cookie names, which would make
     # the accepted bypass value ambiguous. Reject before parsing.
-    if len(re.findall(r"(?:^|[;,])\\s*_vercel_jwt\\s*=", set_cookie_headers[0], flags=re.IGNORECASE)) != 1:
+    if len(re.findall(r"(?:^|[;,])\s*_vercel_jwt\s*=", set_cookie_headers[0], flags=re.IGNORECASE)) != 1:
         raise ValueError("expected exactly one bypass cookie assignment")
     cookie = SimpleCookie()
     try:
