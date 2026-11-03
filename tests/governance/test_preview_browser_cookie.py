@@ -32,7 +32,8 @@ class CookieBootstrapTests(unittest.TestCase):
                "_vercel_jwt=value; Path=/; Secure; SameSite=Lax",
                "session=value; Path=/; Secure; SameSite=Lax",
                "_vercel_jwt=; Path=/; Secure; SameSite=Lax",
-               "_vercel_jwt=value; Path=/corrections; Secure; SameSite=Lax")
+               "_vercel_jwt=value; Path=/corrections; Secure; SameSite=Lax",
+               "_vercel_jwt=value; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=0")
         for header in bad:
             with self.subTest(header=header), self.assertRaises(ValueError):
                 mod.verify_cookie(ORIGIN, ORIGIN, 200, [header])
