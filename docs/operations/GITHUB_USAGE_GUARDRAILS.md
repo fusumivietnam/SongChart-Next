@@ -19,7 +19,7 @@ Status: approved repository-operating policy for issue #142. This document contr
 - BuildKit GitHub Actions cache uses the single shared `foundation-buildkit` scope rather than branch/SHA-specific scopes;
 - the default Codespaces host requirement remains 2 CPU, 8 GB RAM and 32 GB storage.
 
-Project governance additionally enforces the Vercel preview-skip safety contract through `scripts/classify_ci_change.py`: a PR whose branch starts with `docs/` or `governance/` must not contain application, database, frontend, provider, production-package, preview-runtime, developer-environment or visual-impact changes. This protects the Vercel Ignored Build Step from silently skipping a runtime change merely because the branch name is classified as non-runtime.
+Project governance enforces branch-name scope integrity through `scripts/classify_ci_change.py`: a PR whose branch starts with `docs/` or `governance/` must not contain application, database, frontend, provider, production-package, preview-runtime, developer-environment or visual-impact changes. This prevents misleading evidence/ownership classification; it no longer determines whether Vercel creates deployments. Repository-root `vercel.json` independently disables Git-triggered Vercel deployments by default (`git.deploymentEnabled: false`).
 
 The classifier remains advisory for general CI fan-out. Only this narrow branch-safety assertion is merge-blocking.
 
@@ -45,7 +45,7 @@ Account-level consumed quota is not stored in the repository because it is live 
 - Re-run failed jobs instead of re-running successful jobs where GitHub permits it.
 - Cache keys/scopes must represent reusable dependency/build state, never evidence identity. Exact SHA belongs in evidence names and workflow metadata, not cache scope names.
 - Main may be the sole writer for expensive shared caches when the owning workflow requires that policy; PRs should read where practical.
-- `docs/*` and `governance/*` branch names are reserved for non-runtime work units because Vercel intentionally skips them; use a runtime-eligible branch for any change that needs preview evidence.
+- `docs/*` and `governance/*` branch names are reserved for non-runtime work units to keep CI impact and review scope truthful; no Git branch automatically deploys to Vercel. A supervised Preview deployment requires the separately reviewed opt-in process in `VERCEL_PREVIEW.md`.
 
 ## Codespaces policy
 
@@ -55,4 +55,4 @@ Repository administrators should keep Codespaces idle timeout conservative and e
 
 ## Change control
 
-Any proposal to increase artifact retention above 14 days, add a new BuildKit cache scope, require a larger default Codespaces machine, weaken preview-skip branch safety, or adopt paid/larger runners must be justified in a bounded issue and update this policy plus its verifier/contract in the same PR.
+Any proposal to increase artifact retention above 14 days, add a new BuildKit cache scope, require a larger default Codespaces machine, weaken branch-name scope safety, or adopt paid/larger runners must be justified in a bounded issue and update this policy plus its verifier/contract in the same PR.
