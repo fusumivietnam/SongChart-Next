@@ -9,7 +9,6 @@ on:
       - scripts/design_review.sh
       - compose.yaml
       - Dockerfile
-      - governance/TECHNOLOGY_REGISTRY.json
       - docs/adr/ADR-0006-codespaces-development-environment.md
       - docs/operations/CODESPACES.md
       - .github/workflows/codespaces-contract.yml
@@ -23,7 +22,6 @@ on:
       - scripts/design_review.sh
       - compose.yaml
       - Dockerfile
-      - governance/TECHNOLOGY_REGISTRY.json
       - docs/adr/ADR-0006-codespaces-development-environment.md
       - docs/operations/CODESPACES.md
       - .github/workflows/codespaces-contract.yml

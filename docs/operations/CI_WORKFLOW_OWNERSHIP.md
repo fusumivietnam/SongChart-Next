@@ -25,8 +25,11 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `design-review-contract.yml` | one-command local Design Authority review contract | contents read |
 | `codespaces-contract.yml` | devcontainer/Codespaces developer-shell contract | contents read |
 | `archify-browser-contract.yml` | scoped developer-analysis browser acceptance for pinned historical Archify public-read sample (#212) and catalog ERD sample (#213); one disposable runner, no generated output publication or lifecycle promotion | contents read |
+| `agent-browser-pilot.yml` | narrowly path-triggered PR / manual opt-in agent-browser CLI smoke on a disposable localhost HTML fixture; **not** SongChart app E2E, protected Preview authentication, or #175 UX acceptance | contents read; no secrets or artifacts |
 
 `docker-scaffold.yml` is retired because Foundation application checks own Compose/PostgreSQL runtime evidence.
+
+The cross-cutting `governance/TECHNOLOGY_REGISTRY.json` is verified by the required Project OS/governance checks. It must not independently fan out into Codespaces or VS-01b Docker-heavy verification: those workflows trigger on their owned source, contracts, runtime manifests and workflow files instead. A technology metadata-only change does not prove a change to either runtime. The narrower triggers do **not** bypass the required governance, `verify` or `health` contexts; changes to provider policy in `docs/providers/MUSICBRAINZ.md` still activate VS-01b.
 
 ## Low-amplification execution
 
