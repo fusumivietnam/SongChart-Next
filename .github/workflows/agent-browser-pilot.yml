@@ -1,0 +1,67 @@
+name: Agent-browser local pilot
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/agent-browser-pilot.yml'
+      - 'scripts/agent_browser_pilot.sh'
+      - 'tests/governance/test_agent_browser_pilot.py'
+      - 'tests/fixtures/agent-browser-pilot/**'
+      - 'docs/operations/AGENT_BROWSER_PILOT.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: agent-browser-pilot-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  local-fixture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      EVIDENCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Check out exact evidence SHA
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3 (Node.js 24)
+        with:
+          ref: ${{ env.EVIDENCE_SHA }}
+          persist-credentials: false
+
+      - name: Set up Node 24 for opt-in CLI only
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0 (Node.js 24)
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Check CLI guardrails and runner browser
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m unittest tests.governance.test_agent_browser_pilot -v
+          browser="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [[ -z "$browser" ]]; then
+            echo 'Runner Chrome/Chromium absent; browser proof cannot be skipped.' >&2
+            exit 1
+          fi
+          "$browser" --version
+          echo "AGENT_BROWSER_EXECUTABLE_PATH=$browser" >> "$GITHUB_ENV"
+
+      - name: Execute browser snapshots against isolated localhost fixture
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8765 --bind 127.0.0.1 --directory tests/fixtures/agent-browser-pilot >"$RUNNER_TEMP/agent-browser-fixture-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..20}; do
+            if curl --fail --silent --output /dev/null http://127.0.0.1:8765/; then break; fi
+            sleep 0.2
+          done
+          curl --fail --silent --output /dev/null http://127.0.0.1:8765/
+          npm exec --yes --package=agent-browser@0.41.1 -- bash scripts/agent_browser_pilot.sh http://127.0.0.1:8765/ | tee "$RUNNER_TEMP/agent-browser-local-snapshots.txt"
+          grep -F 'Fixture action' "$RUNNER_TEMP/agent-browser-local-snapshots.txt"
+          grep -F 'Home' "$RUNNER_TEMP/agent-browser-local-snapshots.txt"
+          echo 'Actual browser snapshots contained both fixture controls. No SongChart app or protected Preview UX was tested.' >> "$GITHUB_STEP_SUMMARY"
