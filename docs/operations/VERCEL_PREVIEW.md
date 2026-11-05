@@ -109,7 +109,7 @@ Before recording **new** preview runtime evidence, query Vercel live rather than
 1. deployment source SHA equals the intended exact Git revision;
 2. deployment target is preview/non-production;
 3. Vercel Authentication/SSO protection is enabled for preview access;
-4. the Ignored Build Step matches the approved `main|governance/*|docs/*` skip policy;
+4. repository-root `vercel.json` on the verified source revision has `git.deploymentEnabled: false`; check the provider-side Ignored Build Step separately: during incident #215 it is temporarily `exit 0`, and any supervised one-off Preview change must be explicitly reviewed, scoped and reverted afterward; do **not** restore the obsolete `main|governance/*|docs/*` branch-skip policy;
 5. Preview environment retains the approved non-production provider/data boundary, including `MUSICBRAINZ_LIVE_ENABLED=false`;
 6. runtime startup has no application error/fatal record for the verification window;
 7. `scripts/preview_smoke.py` passes the current standard route set;
