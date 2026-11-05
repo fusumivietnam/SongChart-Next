@@ -150,3 +150,16 @@ The preview environment is disposable:
 - platform incompatibility: retire the preview infrastructure entry and select another preview provider without modifying SongChart domain/application architecture.
 
 No backup of synthetic preview data is required. Repository migrations and deterministic fixtures are the recovery authority for this disposable environment.
+
+## Protected Preview browser runner preparation (#215 / #175)
+
+The workflow `protected-preview-browser-preflight.yml` is **manual only**, restricted to trusted `main`, the protected `preview-test` GitHub environment and an exact deployment URL, ID and source SHA. It independently verifies READY Preview provenance through authenticated Vercel REST and performs one same-origin, redirect-blocked bypass-cookie bootstrap. The cookie is immediately discarded in memory: no browser session, DOM assertion, screenshot, correction POST, token or cookie artifact is produced. This proves the authentication boundary **only**, not #175 UX acceptance. This narrow step reuses the existing PR #216 Python modules without installing a browser dependency.
+
+Operator-owned setup, **before any manual dispatch**:
+
+1. Confirm `preview-test` environment protection requires an authorized human reviewer and is restricted to the trusted default branch. Preserve the existing Vercel SSO and `VERCEL_AUTOMATION_BYPASS_SECRET` secret; do not reproduce or rotate its value here.
+2. Review Vercel access-token permissions. Provision a **separate**, shortest practical lifetime token with the narrowest team/project scope enabling authenticated deployment GET; label it `VERCEL_API_READ_TOKEN` as a `preview-test` environment secret. The workflow executes no Vercel mutation API. If the provider/account cannot scope the token adequately, **do not add a broad management token**; stop and use authorized manual review instead. Configure non-secret `VERCEL_TEAM_ID` in the same environment variables.
+3. An operator checks the deployment is READY, is Preview (not production), belongs to the expected project, and represents the intended source SHA before entering `deployment_url`, `deployment_id`, `expected_sha` as workflow inputs. Never enter a share URL, bypass token or API token as an input.
+4. Dispatch `Protected Preview browser credential preflight (manual)` on `main`, approve the `preview-test` environment gate and inspect only the sanitized pass/fail summary. A failed/blocked run does not authorize relaxing protection.
+
+Actual authenticated browser navigation requires a **separate reviewed handoff** using a locked and security-reviewed browser dependency and an in-memory host-only cookie transfer. Until then keep the issue #175 interactive UX matrix UNKNOWN; the existing protected Preview HTTP smoke remains its own separate workflow owner. No deployment/production authority, paid browser SaaS, public exposure or automatic Git push trigger is introduced.

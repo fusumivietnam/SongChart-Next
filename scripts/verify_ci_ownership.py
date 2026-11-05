@@ -11,7 +11,7 @@ EXPECTED = {
     "agent-browser-pilot.yml", "archify-browser-contract.yml", "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
     "foundation-visual.yml", "g5-vps-baseline.yml", "project-governance.yml", "project-os.yml",
     "project-projection-sync.yml", "research-cocoindex.yml", "roadmap-health.yml", "roadmap-reconcile.yml",
-    "protected-preview-smoke.yml",
+    "protected-preview-smoke.yml", "protected-preview-browser-preflight.yml",
     "vs01a-artist.yml", "vs01b-musicbrainz.yml", "vs02-release-recording.yml",
     "vs03-discovery-search.yml", "vs04-launch-proof.yml", "work-management-sync.yml",
 }
@@ -44,6 +44,20 @@ def main() -> int:
         for owned_path in expected_owned_paths:
             if owned_path not in content:
                 errors.append(f"{name}: owned path trigger missing: {owned_path}")
+
+    protected_browser = contents.get("protected-preview-browser-preflight.yml", "")
+    for required in (
+        "workflow_dispatch:", "environment: preview-test", "github.ref == 'refs/heads/main'",
+        "timeout-minutes: 10", "contents: read", "persist-credentials: false",
+        "secrets.VERCEL_API_READ_TOKEN", "secrets.VERCEL_AUTOMATION_BYPASS_SECRET",
+        "vars.VERCEL_TEAM_ID", "from preview_browser_bootstrap import bootstrap",
+        "NO browser UX executed",
+    ):
+        if required not in protected_browser:
+            errors.append(f"protected-preview-browser-preflight.yml: missing guarded preflight control: {required}")
+    for forbidden in ("pull_request:", "push:", "upload-artifact", "contents: write", "set-bypass-cookie: samesitenone"):
+        if forbidden in protected_browser:
+            errors.append(f"protected-preview-browser-preflight.yml: disallowed auto-trigger/artifact/permission: {forbidden}")
 
     owners = sorted(name for name, c in contents.items() if "scripts/verify_project_os.py" in c)
     if owners != ["project-os.yml"]:
