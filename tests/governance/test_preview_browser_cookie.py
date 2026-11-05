@@ -54,6 +54,15 @@ class CookieBootstrapTests(unittest.TestCase):
             with self.subTest(status=status), self.assertRaises(ValueError):
                 mod.verify_cookie(ORIGIN, ORIGIN, status, [COOKIE])
 
+    def test_redirect_cookie_needs_independent_same_origin_approval(self):
+        parsed = mod.verify_cookie(ORIGIN, ORIGIN + "/", 307, [COOKIE],
+                                   verified_redirect=True)
+        self.assertEqual(parsed["name"], "_vercel_jwt")
+        for status in (301, 401, 503):
+            with self.subTest(status=status), self.assertRaises(ValueError):
+                mod.verify_cookie(ORIGIN, ORIGIN + "/", status, [COOKIE],
+                                  verified_redirect=True)
+
     def test_rejects_missing_or_multiple_headers(self):
         for headers in ([], [COOKIE, COOKIE]):
             with self.assertRaises(ValueError):

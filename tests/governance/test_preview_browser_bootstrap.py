@@ -2,6 +2,7 @@
 import sys
 import unittest
 import urllib.error
+from email.message import Message
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -142,6 +143,48 @@ class BootstrapTests(unittest.TestCase):
                 bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
                           api_token="fixture-token", team_id="team_fixture", opener=opener)
             self.assertEqual(invalid.exception.code, "COOKIE_INVALID")
+
+    def test_accepts_vercel_same_origin_redirect_cookie_without_following(self):
+        for code in (302, 303, 307, 308):
+            for location in ("/", URL + "/"):
+                with self.subTest(code=code, location=location):
+                    headers = Message()
+                    headers.add_header("Location", location)
+                    headers.add_header("Set-Cookie", COOKIE)
+                    opener = Mock()
+                    opener.open.side_effect = urllib.error.HTTPError(URL + "/", code, "redirect", headers, None)
+                    with patch("preview_browser_bootstrap.fetch_verified_deployment", return_value=RECORD):
+                        cookie = bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
+                                           api_token="fixture-token", team_id="team_fixture", opener=opener)
+                    self.assertEqual(cookie["name"], "_vercel_jwt")
+                    opener.open.assert_called_once()
+
+    def test_rejects_external_or_ambiguous_redirect_without_following(self):
+        for location in ("https://evil.test/", "//evil.test/", "/corrections", "/?token=example", ""):
+            with self.subTest(location=location):
+                headers = Message()
+                if location:
+                    headers.add_header("Location", location)
+                headers.add_header("Set-Cookie", COOKIE)
+                opener = Mock()
+                opener.open.side_effect = urllib.error.HTTPError(URL + "/", 307, "redirect", headers, None)
+                with patch("preview_browser_bootstrap.fetch_verified_deployment", return_value=RECORD):
+                    with self.assertRaises(PreflightBlocked) as blocked:
+                        bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
+                                  api_token="fixture-token", team_id="team_fixture", opener=opener)
+                self.assertEqual(blocked.exception.code, "BYPASS_REJECTED")
+                opener.open.assert_called_once()
+
+    def test_rejects_redirect_missing_cookie(self):
+        headers = Message()
+        headers.add_header("Location", "/")
+        opener = Mock()
+        opener.open.side_effect = urllib.error.HTTPError(URL + "/", 307, "redirect", headers, None)
+        with patch("preview_browser_bootstrap.fetch_verified_deployment", return_value=RECORD):
+            with self.assertRaises(PreflightBlocked) as blocked:
+                bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
+                          api_token="fixture-token", team_id="team_fixture", opener=opener)
+        self.assertEqual(blocked.exception.code, "COOKIE_INVALID")
 
 
 if __name__ == "__main__":
