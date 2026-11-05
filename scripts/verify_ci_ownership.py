@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = ROOT / ".github" / "workflows"
 EXPECTED = {
-    "archify-browser-contract.yml", "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
+    "agent-browser-pilot.yml", "archify-browser-contract.yml", "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
     "foundation-visual.yml", "g5-vps-baseline.yml", "project-governance.yml", "project-os.yml",
     "project-projection-sync.yml", "research-cocoindex.yml", "roadmap-health.yml", "roadmap-reconcile.yml",
     "protected-preview-smoke.yml",
@@ -34,9 +34,28 @@ def main() -> int:
             errors.append(f"{label}: {', '.join(sorted(values))}")
     contents = {name: (WORKFLOWS / name).read_text(encoding="utf-8") for name in EXPECTED if (WORKFLOWS / name).exists()}
 
+    for name, expected_owned_paths in {
+        "codespaces-contract.yml": (".devcontainer/**", "scripts/codespaces_doctor.sh"),
+        "vs01b-musicbrainz.yml": ("app/Music/Providers/**", "docs/providers/MUSICBRAINZ.md"),
+    }.items():
+        content = contents.get(name, "")
+        if "governance/TECHNOLOGY_REGISTRY.json" in content:
+            errors.append(f"{name}: cross-cutting registry metadata must not trigger unrelated heavy verification")
+        for owned_path in expected_owned_paths:
+            if owned_path not in content:
+                errors.append(f"{name}: owned path trigger missing: {owned_path}")
+
     owners = sorted(name for name, c in contents.items() if "scripts/verify_project_os.py" in c)
     if owners != ["project-os.yml"]:
         errors.append(f"scripts/verify_project_os.py must be owned only by project-os.yml; found {owners}")
+
+    pilot = contents.get("agent-browser-pilot.yml", "")
+    for required in ("pull_request:", "workflow_dispatch:", "contents: read", "timeout-minutes: 10", "persist-credentials: false", "AGENT_BROWSER_EXECUTABLE_PATH", "127.0.0.1:8765", "agent-browser@0.41.1"):
+        if required not in pilot:
+            errors.append(f"agent-browser-pilot.yml: missing no-secret local browser control: {required}")
+    for forbidden in ("secrets.", "environment: preview-test", "push:", "upload-artifact", "docker build"):
+        if forbidden in pilot:
+            errors.append(f"agent-browser-pilot.yml: forbidden credential, main-push, or artifact scope: {forbidden}")
 
     classifier = ROOT / "scripts" / "classify_ci_change.py"
     classifier_test = ROOT / "tests" / "governance" / "test_ci_change_classifier.py"
