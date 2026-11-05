@@ -34,6 +34,17 @@ def main() -> int:
             errors.append(f"{label}: {', '.join(sorted(values))}")
     contents = {name: (WORKFLOWS / name).read_text(encoding="utf-8") for name in EXPECTED if (WORKFLOWS / name).exists()}
 
+    for name, expected_owned_paths in {
+        "codespaces-contract.yml": (".devcontainer/**", "scripts/codespaces_doctor.sh"),
+        "vs01b-musicbrainz.yml": ("app/Music/Providers/**", "docs/providers/MUSICBRAINZ.md"),
+    }.items():
+        content = contents.get(name, "")
+        if "governance/TECHNOLOGY_REGISTRY.json" in content:
+            errors.append(f"{name}: cross-cutting registry metadata must not trigger unrelated heavy verification")
+        for owned_path in expected_owned_paths:
+            if owned_path not in content:
+                errors.append(f"{name}: owned path trigger missing: {owned_path}")
+
     owners = sorted(name for name, c in contents.items() if "scripts/verify_project_os.py" in c)
     if owners != ["project-os.yml"]:
         errors.append(f"scripts/verify_project_os.py must be owned only by project-os.yml; found {owners}")
