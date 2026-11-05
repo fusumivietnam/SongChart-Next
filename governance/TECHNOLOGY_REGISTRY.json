@@ -238,6 +238,16 @@
       "scope": "Owner-approved 2026-10-27 for opt-in internal developer-only source-backed diagramming under five ADR-0017 conditions; adoption awaits reviewed PR #211 merge. Disposable exact-revision CI browser evidence is permitted, but no automatic bootstrap, required CI check, public artifact publication, canonical data/status mutation, product runtime, production dependency or new architecture authority."
     },
     {
+      "id": "agent-browser-local-pilot",
+      "capability": "design-authority",
+      "source": "https://github.com/vercel-labs/agent-browser",
+      "status": "candidate",
+      "version_authority": "Exact npm agent-browser@0.41.1 in opt-in operator instructions and scoped disposable CI command; no application package or lockfile adoption",
+      "license_review": "npm agent-browser@0.41.1 reports Apache-2.0 and Node >=24; transitive dependency provenance/security and CLI network behavior require further review before broader CI/application adoption",
+      "implementation": "scripts/agent_browser_pilot.sh",
+      "scope": "Candidate local fixture UX reconnaissance under #175 with opt-in operator helper and narrowly scoped, non-required PR/manual CI browser-harness smoke. Not protected Preview browser acceptance (#215/PR #216), approved app dependency, SongChart UI assertion, main-push verification, or production tool. See docs/operations/AGENT_BROWSER_PILOT.md."
+    },
+    {
       "id": "github-projects",
       "capability": "project-os",
       "source": "https://github.com/features/issues",
