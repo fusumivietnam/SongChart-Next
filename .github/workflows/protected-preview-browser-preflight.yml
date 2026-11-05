@@ -50,7 +50,7 @@ jobs:
           set -euo pipefail
           set +x
           if [[ -z "${VERCEL_API_READ_TOKEN:-}" || -z "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" || -z "${VERCEL_TEAM_ID:-}" ]]; then
-            echo "::error::preview-test requires separately approved VERCEL_API_READ_TOKEN, VERCEL_AUTOMATION_BYPASS_SECRET and VERCEL_TEAM_ID"
+            echo "::error::PREVIEW BROWSER CREDENTIAL PREFLIGHT BLOCKED [CONFIG_MISSING]"
             exit 1
           fi
           echo "::add-mask::$VERCEL_API_READ_TOKEN"
@@ -60,6 +60,7 @@ jobs:
           import sys
           sys.path.insert(0, "scripts")
           from preview_browser_bootstrap import bootstrap
+          from preview_browser_bootstrap import PreflightBlocked
 
           try:
               cookie = bootstrap(
@@ -75,8 +76,11 @@ jobs:
               # Explicitly discard the secret-bearing cookie without displaying,
               # writing, uploading or passing it to a second process.
               del cookie
+          except PreflightBlocked as error:
+              print(f"PREVIEW BROWSER CREDENTIAL PREFLIGHT BLOCKED [{error.code}]", file=sys.stderr)
+              raise SystemExit(1)
           except (ValueError, KeyError, OSError):
-              print("PREVIEW BROWSER CREDENTIAL PREFLIGHT BLOCKED (no secrets disclosed)", file=sys.stderr)
+              print("PREVIEW BROWSER CREDENTIAL PREFLIGHT BLOCKED [UNCLASSIFIED]", file=sys.stderr)
               raise SystemExit(1)
           print("PREVIEW BROWSER CREDENTIAL PREFLIGHT PASSED; cookie discarded; NO browser UX executed")
           PY
