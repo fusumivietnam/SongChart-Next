@@ -10,7 +10,15 @@ import urllib.request
 
 from preview_browser_cookie import verify_cookie
 from preview_browser_preflight import validate
-from preview_browser_provenance import fetch_verified_deployment
+from preview_browser_provenance import ApiLookupFailed, fetch_verified_deployment
+
+
+class PreflightBlocked(ValueError):
+    """Safe diagnostic category only; never include credential-bearing details."""
+
+    def __init__(self, code: str):
+        self.code = code
+        super().__init__(code)
 
 
 class RejectRedirect(urllib.request.HTTPRedirectHandler):
@@ -21,11 +29,19 @@ class RejectRedirect(urllib.request.HTTPRedirectHandler):
 def bootstrap(origin: str, deployment_id: str, expected_sha: str, secret: str,
               *, api_token: str, team_id: str, opener=None, control_plane_opener=None) -> dict[str, object]:
     """Return a host-scoped browser cookie in memory; never log the returned object."""
-    normalized = validate(origin, expected_sha, deployment_id, secret_present=bool(secret))
+    try:
+        normalized = validate(origin, expected_sha, deployment_id, secret_present=bool(secret))
+    except ValueError:
+        raise PreflightBlocked("INPUT_INVALID") from None
     # Must verify authenticated control-plane provenance before secret-bearing GET.
-    fetch_verified_deployment(normalized, deployment_id, expected_sha,
-                              api_token=api_token, team_id=team_id,
-                              opener=control_plane_opener)
+    try:
+        fetch_verified_deployment(normalized, deployment_id, expected_sha,
+                                  api_token=api_token, team_id=team_id,
+                                  opener=control_plane_opener)
+    except ApiLookupFailed:
+        raise PreflightBlocked("API_LOOKUP_FAILED") from None
+    except ValueError:
+        raise PreflightBlocked("PROVENANCE_REJECTED") from None
     # Deliberately no cookie jar, proxy credentials or browser-wide authorization.
     transport = opener if opener is not None else urllib.request.build_opener(RejectRedirect())
     request = urllib.request.Request(
@@ -42,7 +58,10 @@ def bootstrap(origin: str, deployment_id: str, expected_sha: str, secret: str,
             headers = response.headers.get_all("Set-Cookie", [])
             # Do not read or retain response bodies.
     except urllib.error.HTTPError:
-        raise ValueError("bypass bootstrap rejected by deployment") from None
+        raise PreflightBlocked("BYPASS_REJECTED") from None
     except (urllib.error.URLError, TimeoutError):
-        raise ValueError("bypass bootstrap connection failed") from None
-    return verify_cookie(normalized, final_url, status, headers)
+        raise PreflightBlocked("BYPASS_UNAVAILABLE") from None
+    try:
+        return verify_cookie(normalized, final_url, status, headers)
+    except ValueError:
+        raise PreflightBlocked("COOKIE_INVALID") from None

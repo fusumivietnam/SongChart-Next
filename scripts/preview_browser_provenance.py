@@ -9,6 +9,10 @@ from urllib.parse import urlsplit
 from typing import Any
 
 
+class ApiLookupFailed(ValueError):
+    """Authenticated control-plane lookup could not be completed safely."""
+
+
 def verify_deployment(record: dict[str, Any], *, origin: str, deployment_id: str,
                       expected_sha: str) -> None:
     deployment = record.get("deployment", record)
@@ -74,7 +78,7 @@ def fetch_verified_deployment(origin: str, deployment_id: str, expected_sha: str
             if len(raw) > 1048576:
                 raise ValueError("Vercel deployment response exceeds limit")
     except (urllib.error.HTTPError, urllib.error.URLError, TimeoutError):
-        raise ValueError("authenticated Vercel API lookup failed") from None
+        raise ApiLookupFailed("authenticated Vercel API lookup failed") from None
     try:
         deployment = json.loads(raw)
     except (ValueError, UnicodeDecodeError):

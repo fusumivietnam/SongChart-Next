@@ -1,11 +1,13 @@
 """Offline assertions: no redirect following, no secret egress or network use."""
 import sys
 import unittest
+import urllib.error
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
-from preview_browser_bootstrap import bootstrap, RejectRedirect
+from preview_browser_bootstrap import bootstrap, PreflightBlocked, RejectRedirect
+from preview_browser_provenance import ApiLookupFailed
 
 URL = "https://songchart-next-preview-i14zptt45-fusumivietnam.vercel.app"
 SHA = "248d2d2235861415d0f16a6539e63313c85a6e48"
@@ -91,6 +93,55 @@ class BootstrapTests(unittest.TestCase):
 
     def test_redirect_handler_is_fail_closed(self):
         self.assertIsNone(RejectRedirect().redirect_request(None, None, 302, "", {}, "https://evil.test/"))
+
+    def test_safe_input_classification_never_calls_transport(self):
+        opener = Mock()
+        with self.assertRaises(PreflightBlocked) as caught:
+            bootstrap("https://evil.test", DEPLOYMENT, SHA, "fixture-secret",
+                      api_token="fixture-token", team_id="team_fixture", opener=opener)
+        self.assertEqual(caught.exception.code, "INPUT_INVALID")
+        opener.open.assert_not_called()
+
+    def test_safe_api_classification_never_sends_bypass(self):
+        opener = Mock()
+        with patch("preview_browser_bootstrap.fetch_verified_deployment",
+                   side_effect=ApiLookupFailed("sensitive fixture detail")):
+            with self.assertRaises(PreflightBlocked) as caught:
+                bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
+                          api_token="fixture-token", team_id="team_fixture", opener=opener)
+        self.assertEqual(caught.exception.code, "API_LOOKUP_FAILED")
+        self.assertNotIn("sensitive", str(caught.exception))
+        opener.open.assert_not_called()
+
+    def test_safe_provenance_classification_never_sends_bypass(self):
+        opener = Mock()
+        with patch("preview_browser_bootstrap.fetch_verified_deployment",
+                   side_effect=ValueError("sensitive fixture detail")):
+            with self.assertRaises(PreflightBlocked) as caught:
+                bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
+                          api_token="fixture-token", team_id="team_fixture", opener=opener)
+        self.assertEqual(caught.exception.code, "PROVENANCE_REJECTED")
+        opener.open.assert_not_called()
+
+    def test_safe_bypass_and_cookie_classification(self):
+        opener = Mock()
+        with patch("preview_browser_bootstrap.fetch_verified_deployment", return_value=RECORD):
+            opener.open.side_effect = urllib.error.HTTPError(URL, 403, "denied", {}, None)
+            with self.assertRaises(PreflightBlocked) as denied:
+                bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
+                          api_token="fixture-token", team_id="team_fixture", opener=opener)
+            self.assertEqual(denied.exception.code, "BYPASS_REJECTED")
+            opener.open.side_effect = urllib.error.URLError("unreachable")
+            with self.assertRaises(PreflightBlocked) as unavailable:
+                bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
+                          api_token="fixture-token", team_id="team_fixture", opener=opener)
+            self.assertEqual(unavailable.exception.code, "BYPASS_UNAVAILABLE")
+            opener.open.side_effect = None
+            opener.open.return_value = Response(cookies=[])
+            with self.assertRaises(PreflightBlocked) as invalid:
+                bootstrap(URL, DEPLOYMENT, SHA, "fixture-secret",
+                          api_token="fixture-token", team_id="team_fixture", opener=opener)
+            self.assertEqual(invalid.exception.code, "COOKIE_INVALID")
 
 
 if __name__ == "__main__":
