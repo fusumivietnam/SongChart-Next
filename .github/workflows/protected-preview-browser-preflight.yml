@@ -1,0 +1,93 @@
+name: Protected Preview browser credential preflight (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_url:
+        description: "Exact deployment-specific HTTPS Preview origin (never a share URL)"
+        required: true
+        type: string
+      deployment_id:
+        description: "Vercel deployment ID (dpl_...)"
+        required: true
+        type: string
+      expected_sha:
+        description: "Exact 40-character source Git SHA of the deployment"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: protected-preview-browser-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  credential-preflight:
+    # No secrets or browser verifier from a PR/ref outside trusted main.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment: preview-test
+    steps:
+      - name: Checkout trusted verifier revision only
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3 (Node.js 24)
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Verify provider provenance and isolated bypass cookie
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ inputs.deployment_url }}
+          DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          VERCEL_API_READ_TOKEN: ${{ secrets.VERCEL_API_READ_TOKEN }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          set +x
+          if [[ -z "${VERCEL_API_READ_TOKEN:-}" || -z "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" || -z "${VERCEL_TEAM_ID:-}" ]]; then
+            echo "::error::preview-test requires separately approved VERCEL_API_READ_TOKEN, VERCEL_AUTOMATION_BYPASS_SECRET and VERCEL_TEAM_ID"
+            exit 1
+          fi
+          echo "::add-mask::$VERCEL_API_READ_TOKEN"
+          echo "::add-mask::$VERCEL_AUTOMATION_BYPASS_SECRET"
+          python3 - <<'PY'
+          import os
+          import sys
+          sys.path.insert(0, "scripts")
+          from preview_browser_bootstrap import bootstrap
+
+          try:
+              cookie = bootstrap(
+                  os.environ["DEPLOYMENT_URL"],
+                  os.environ["DEPLOYMENT_ID"],
+                  os.environ["EXPECTED_SHA"],
+                  os.environ["VERCEL_AUTOMATION_BYPASS_SECRET"],
+                  api_token=os.environ["VERCEL_API_READ_TOKEN"],
+                  team_id=os.environ["VERCEL_TEAM_ID"],
+              )
+              if cookie.get("name") != "_vercel_jwt" or not cookie.get("secure") or not cookie.get("httpOnly"):
+                  raise ValueError("unsafe bypass cookie")
+              # Explicitly discard the secret-bearing cookie without displaying,
+              # writing, uploading or passing it to a second process.
+              del cookie
+          except (ValueError, KeyError, OSError):
+              print("PREVIEW BROWSER CREDENTIAL PREFLIGHT BLOCKED (no secrets disclosed)", file=sys.stderr)
+              raise SystemExit(1)
+          print("PREVIEW BROWSER CREDENTIAL PREFLIGHT PASSED; cookie discarded; NO browser UX executed")
+          PY
+
+      - name: Record non-sensitive preflight scope
+        if: success()
+        run: |
+          {
+            echo '### Protected Preview browser credential preflight'
+            echo '- Vercel deployment provenance and same-origin bypass cookie: verified'
+            echo '- Browser navigation, DOM, keyboard, screenshots, corrections POST: NOT RUN'
+            echo '- No cookies, tokens, share URLs, response bodies or artifacts retained'
+            echo '- Does not close #175; browser handoff needs separately reviewed locked dependency and adapter'
+          } >> "$GITHUB_STEP_SUMMARY"
