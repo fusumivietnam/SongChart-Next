@@ -12,7 +12,8 @@ from urllib.parse import urlsplit
 COOKIE_NAME = "_vercel_jwt"
 
 
-def verify_cookie(origin: str, response_url: str, status: int, set_cookie_headers: list[str]) -> dict[str, object]:
+def verify_cookie(origin: str, response_url: str, status: int, set_cookie_headers: list[str],
+                  *, verified_redirect: bool = False) -> dict[str, object]:
     """Fail closed if the bootstrap response is off-origin or the cookie is unsafe."""
     expected = urlsplit(origin)
     actual = urlsplit(response_url)
@@ -20,7 +21,9 @@ def verify_cookie(origin: str, response_url: str, status: int, set_cookie_header
         raise ValueError("bypass response must remain on the exact HTTPS Preview origin")
     if expected.path not in ("", "/") or expected.query or expected.fragment:
         raise ValueError("bootstrap origin must not contain a path or query")
-    if status != 200:
+    # A redirect cookie is accepted only after the caller independently proves
+    # that Location is the same HTTPS origin/root and does NOT follow it.
+    if status != 200 and not (verified_redirect and status in (302, 303, 307, 308)):
         raise ValueError("bypass bootstrap did not succeed")
     if len(set_cookie_headers) != 1:
         raise ValueError("expected one isolated bypass cookie header")

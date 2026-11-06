@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import urllib.error
 import urllib.request
+from urllib.parse import urljoin
 
 from preview_browser_cookie import verify_cookie
 from preview_browser_preflight import validate
@@ -51,17 +52,30 @@ def bootstrap(origin: str, deployment_id: str, expected_sha: str, secret: str,
                  "User-Agent": "SongChart-Preview-UX/1"},
         method="GET",
     )
+    verified_redirect = False
     try:
         with transport.open(request, timeout=15) as response:
             status = response.status
             final_url = response.geturl()
             headers = response.headers.get_all("Set-Cookie", [])
             # Do not read or retain response bodies.
-    except urllib.error.HTTPError:
-        raise PreflightBlocked("BYPASS_REJECTED") from None
+    except urllib.error.HTTPError as error:
+        # Vercel can supply the bypass cookie on a redirect. Never follow the
+        # redirect with the secret-bearing request; validate its destination
+        # and cookie locally without reading the response body.
+        if error.code not in (302, 303, 307, 308):
+            raise PreflightBlocked("BYPASS_REJECTED") from None
+        location = error.headers.get("Location", "")
+        if not location or urljoin(normalized + "/", location) != normalized + "/":
+            raise PreflightBlocked("BYPASS_REJECTED") from None
+        status = error.code
+        final_url = normalized + "/"
+        headers = error.headers.get_all("Set-Cookie", [])
+        verified_redirect = True
     except (urllib.error.URLError, TimeoutError):
         raise PreflightBlocked("BYPASS_UNAVAILABLE") from None
     try:
-        return verify_cookie(normalized, final_url, status, headers)
+        return verify_cookie(normalized, final_url, status, headers,
+                             verified_redirect=verified_redirect)
     except ValueError:
         raise PreflightBlocked("COOKIE_INVALID") from None
