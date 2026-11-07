@@ -14,6 +14,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `work-management-sync.yml` | declared labels and explicitly managed milestones | contents read + issues write; no Project PAT |
 | `research-cocoindex.yml` | bounded local-only CocoIndex repository-context benchmark; preserves derived timing/retrieval evidence and never makes lifecycle decisions | contents read; no repository secrets |
 | `foundation-app.yml` | Docker app/PostgreSQL/tests/audit/SBOM/production-target evidence; sole writer of the shared `foundation-buildkit` cache | contents read |
+| `composer-security-candidate.yml` | manual, trusted-main-only candidate generation for Issue #234: resolves patched Symfony dependency lock using the repo Docker PHP toolchain, audits it, and uploads a seven-day review artifact; creates no branch/PR and cannot substitute for Foundation exact-head checks | contents read; no secrets, write token, database or cache ownership |
 | `foundation-visual.yml` | deterministic Foundation design render evidence; reads shared BuildKit cache only | contents read |
 | `vs01a-artist.yml` | VS-01a canonical Artist PostgreSQL integration, canonical URL and narrow/wide browser evidence; reads shared BuildKit cache only | contents read |
 | `vs01b-musicbrainz.yml` | VS-01b MusicBrainz adapter contracts and request-spacing evidence; never automatic live provider traffic; reads shared BuildKit cache only | contents read |
