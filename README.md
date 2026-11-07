@@ -1,31 +1,43 @@
 # SongChart Next
 
-SongChart Next is a new, independent music knowledge and discovery project. **This repository is its sole project authority.** Previous SongChart repositories, chat summaries, ZIP bundles and historical stage plans are not dependencies or implementation evidence.
+**Discover music. Explore the people and stories behind it.**
 
-## Docker-first local development
-- GitHub Codespaces is an optional repository-owned developer shell under [ADR-0006](docs/adr/ADR-0006-codespaces-development-environment.md). See the [Codespaces runbook](docs/operations/CODESPACES.md). The app/database still run through the approved Docker Compose baseline; Codespaces is not a production runtime.
-- ADR-0001 governs local Compose and [ADR-0003](docs/adr/ADR-0003-foundation-runtime.md) records the accepted Foundation app/toolchain baseline. The [Docker development runbook](docs/operations/DOCKER_DEVELOPMENT.md) documents app + PostgreSQL 18.6 startup after real lockfiles and checks are available.
-- [PR #1](https://github.com/fusumivietnam/SongChart-Next/pull/1), [PR #2](https://github.com/fusumivietnam/SongChart-Next/pull/2), [PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6) and [PR #8](https://github.com/fusumivietnam/SongChart-Next/pull/8) are merged; see [pinned upstream provenance](docs/engineering/UPSTREAM_STARTER.md).
+SongChart Next is an independent music knowledge and discovery project. It aims to help listeners find artists, releases and recordings, understand credits and connections, and follow permitted links to official places to listen or watch.
 
-## Project state
-The repository-owned lifecycle and technology summary is the generated [Project status projection](docs/generated/PROJECT_STATUS.md). It is rebuilt from canonical governance registries and is never an execution authority.
+The goal is to make music easier to explore—not to host or redistribute songs and videos.
 
-Live work, CI and deployment evidence remain in GitHub Issues, Pull Requests, Actions and registered runtime/provider records and must be queried live before claiming active work, verification or deployment. Planned slice scope remains [Vertical slices](docs/roadmap/VERTICAL_SLICES.md). Preview/staging evidence never implies production deployment.
+## What we're building
 
-## Project control (read-only status, no chat authority)
-Project governance protocols and evidence ownership: [Project Control](docs/operations/PROJECT_CONTROL.md) and [CI Workflow Ownership](docs/operations/CI_WORKFLOW_OWNERSHIP.md). Research and environment-scoped runtime inventories: [Research Registry](governance/RESEARCH_REGISTRY.json) and [Infrastructure Registry](governance/INFRASTRUCTURE_REGISTRY.json). See [Delivery Contract](docs/engineering/DELIVERY_CONTRACT.md), [Acceptance Gates](docs/operations/ACCEPTANCE_GATES.md), and [Dependency Policy](docs/operations/DEPENDENCY_POLICY.md). Run `python3 scripts/verify_project_os.py` and `python3 scripts/project_status.py`; the latter is an offline projection and must not be treated as current GitHub Issue/PR or deployment status. This documentation does not approve product choices or mark any product feature as implemented.
+The approved MVP journey is simple:
 
-## Start here
-1. [Project charter](docs/product/PRODUCT_CHARTER.md)
-2. [Architecture and source authority](docs/architecture/ARCHITECTURE.md)
-3. [Capability map](governance/CAPABILITY_MAP.json)
-4. [Technology registry](governance/TECHNOLOGY_REGISTRY.json)
-5. [Activation triggers](governance/ACTIVATION_TRIGGERS.json)
-6. [Design authority](design/DESIGN_AUTHORITY.md)
-7. [Developer reference](reference/README.md)
-8. [AI/developer instructions](AGENTS.md)
-9. [Roadmap governance](docs/roadmap/ROADMAP_GOVERNANCE.md)
-10. [Vertical slices](docs/roadmap/VERTICAL_SLICES.md)
+1. **Discover** an artist, release or recording through search.
+2. **Explore** details, credits and the sources behind music information.
+3. **Follow** links to permitted listening and viewing destinations.
+4. **Help improve accuracy** through corrections that require editorial review before changing canonical data.
 
-## Authority and verification
-Follow [Project Control](docs/operations/PROJECT_CONTROL.md) for the authoritative source/evidence split and [Documentation Governance](docs/operations/DOCUMENTATION_GOVERNANCE.md) for generated-document ownership. Run `python3 scripts/verify_project_os.py` for registry/link validation; the [CI Workflow Ownership](docs/operations/CI_WORKFLOW_OWNERSHIP.md) contract defines exact-revision CI evidence. A proposal is not approval, implementation, verification or deployment.
+SongChart Next prioritizes clear provenance, responsible use of music data, accessibility and a consistent experience across screen sizes. See the [Product Charter](docs/product/PRODUCT_CHARTER.md) for approved scope and exclusions.
+
+## Where the project stands
+
+SongChart Next is **in development, not publicly launched**. Features and approval decisions move through separate stages; a successful test or Preview deployment does not mean a feature is released.
+
+- [Roadmap and vertical slices](docs/roadmap/VERTICAL_SLICES.md) — what is planned and how acceptance is defined.
+- [Project status projection](docs/generated/PROJECT_STATUS.md) — a generated overview of repository governance, not live delivery evidence.
+- [GitHub Issues](https://github.com/fusumivietnam/SongChart-Next/issues) and [Pull Requests](https://github.com/fusumivietnam/SongChart-Next/pulls) — live work and review.
+- [GitHub Actions](https://github.com/fusumivietnam/SongChart-Next/actions) — revision-specific test evidence.
+
+## Get started
+
+| If you want to… | Start here |
+| --- | --- |
+| Understand the product | [Product Charter](docs/product/PRODUCT_CHARTER.md) and [Roadmap](docs/roadmap/VERTICAL_SLICES.md) |
+| Explore the design | [Design Authority](design/DESIGN_AUTHORITY.md) |
+| Run the app locally | [Docker development guide](docs/operations/DOCKER_DEVELOPMENT.md) or [Codespaces guide](docs/operations/CODESPACES.md) |
+| Contribute code or work with AI | [AGENTS.md](AGENTS.md), [Architecture](docs/architecture/ARCHITECTURE.md) and [Developer Reference](reference/README.md) |
+| Review decisions and delivery evidence | [Project Control](docs/operations/PROJECT_CONTROL.md), [Acceptance Gates](docs/operations/ACCEPTANCE_GATES.md) and [CI Workflow Ownership](docs/operations/CI_WORKFLOW_OWNERSHIP.md) |
+
+## Repository authority
+
+This repository is the **sole source of truth** for SongChart Next code, approved decisions and project governance. Previous SongChart repositories, ZIP archives, research notes and chat history do not establish current implementation status.
+
+The [Capability Map](governance/CAPABILITY_MAP.json), [Technology Registry](governance/TECHNOLOGY_REGISTRY.json), [Activation Triggers](governance/ACTIVATION_TRIGGERS.json), [Research Registry](governance/RESEARCH_REGISTRY.json), [Infrastructure Registry](governance/INFRASTRUCTURE_REGISTRY.json) and [Roadmap Governance](docs/roadmap/ROADMAP_GOVERNANCE.md) retain their existing authority. [Documentation Governance](docs/operations/DOCUMENTATION_GOVERNANCE.md), [Delivery Contract](docs/engineering/DELIVERY_CONTRACT.md) and [Dependency Policy](docs/operations/DEPENDENCY_POLICY.md) govern updates; the README is an entry point, not a competing status or decision record.
