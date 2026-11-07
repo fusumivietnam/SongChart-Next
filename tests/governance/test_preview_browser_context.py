@@ -5,7 +5,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
-from preview_browser_context import BrowserContextRejected, install_isolated_cookie
+from preview_browser_context import BrowserContextRejected, _is_allowed_request, install_isolated_cookie
 
 ORIGIN = "https://songchart-next-preview-i14zptt45-fusumivietnam.vercel.app"
 COOKIE = {"name": "_vercel_jwt", "value": "fixture-only", "domain": ORIGIN[8:],
@@ -40,6 +40,12 @@ class FakeRoute:
 
 
 class BrowserContextTests(unittest.TestCase):
+    def test_request_guard_supports_tls_loopback_fixture_without_weakening_preview_origin(self):
+        self.assertTrue(_is_allowed_request("https://localhost:8765/", "https://localhost:8765"))
+        self.assertFalse(_is_allowed_request("https://localhost:8766/", "https://localhost:8765"))
+        self.assertFalse(_is_allowed_request("http://localhost:8765/", "https://localhost:8765"))
+        self.assertFalse(_is_allowed_request("https://evil.test@localhost:8765/", "https://localhost:8765"))
+
     def test_installs_guard_before_host_only_cookie(self):
         context = FakeContext()
         install_isolated_cookie(context, ORIGIN, COOKIE)

@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = ROOT / ".github" / "workflows"
 EXPECTED = {
-    "agent-browser-pilot.yml", "archify-browser-contract.yml", "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
+    "agent-browser-pilot.yml", "preview-browser-loopback-containment.yml", "archify-browser-contract.yml", "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
     "foundation-visual.yml", "g5-vps-baseline.yml", "project-governance.yml", "project-os.yml",
     "project-projection-sync.yml", "research-cocoindex.yml", "roadmap-health.yml", "roadmap-reconcile.yml",
     "protected-preview-smoke.yml", "protected-preview-browser-preflight.yml",
@@ -70,6 +70,17 @@ def main() -> int:
     for forbidden in ("secrets.", "environment: preview-test", "push:", "upload-artifact", "docker build"):
         if forbidden in pilot:
             errors.append(f"agent-browser-pilot.yml: forbidden credential, main-push, or artifact scope: {forbidden}")
+
+    loopback = contents.get("preview-browser-loopback-containment.yml", "")
+    for required in ("workflow_dispatch:", "github.ref == 'refs/heads/main'", "contents: read",
+                     "persist-credentials: false", "timeout-minutes: 10", "--require-hashes",
+                     "requirements-browser.lock", "verify_preview_browser_containment.py"):
+        if required not in loopback:
+            errors.append(f"preview-browser-loopback-containment.yml: missing isolated runner control: {required}")
+    for forbidden in ("pull_request:", "push:", "secrets.", "environment: preview-test",
+                      "upload-artifact", "docker build", "VERCEL_AUTOMATION_BYPASS_SECRET"):
+        if forbidden in loopback:
+            errors.append(f"preview-browser-loopback-containment.yml: forbidden credential/auto-trigger scope: {forbidden}")
 
     classifier = ROOT / "scripts" / "classify_ci_change.py"
     classifier_test = ROOT / "tests" / "governance" / "test_ci_change_classifier.py"

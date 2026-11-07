@@ -24,12 +24,25 @@ def _origin_host(origin: str) -> str:
     return parts.hostname
 
 
-def _is_allowed_request(url: str, host: str) -> bool:
+def _is_allowed_request(url: str, allowed_origin: str) -> bool:
     try:
         parts = urlsplit(url)
-        return parts.scheme == "https" and parts.hostname == host and parts.netloc == host
+        allowed = urlsplit(allowed_origin)
+        return (parts.scheme == allowed.scheme == "https" and parts.netloc == allowed.netloc
+                and parts.username is None and parts.password is None)
     except ValueError:
         return False
+
+
+def _install_origin_guard(context, allowed_origin: str) -> None:
+    """Route all context requests; loopback fixture may exercise this independently."""
+    def origin_only(route):
+        if _is_allowed_request(route.request.url, allowed_origin):
+            route.continue_()
+        else:
+            route.abort()
+
+    context.route("**/*", origin_only)
 
 
 def install_isolated_cookie(context, origin: str, cookie: dict[str, object]) -> None:
@@ -46,14 +59,8 @@ def install_isolated_cookie(context, origin: str, cookie: dict[str, object]) -> 
             or cookie["sameSite"] not in ("Lax", "Strict")):
         raise BrowserContextRejected("invalid isolated cookie contract")
 
-    def origin_only(route):
-        if _is_allowed_request(route.request.url, host):
-            route.continue_()
-        else:
-            route.abort()
-
     # Install the browser-wide egress guard BEFORE handing over the cookie.
-    context.route("**/*", origin_only)
+    _install_origin_guard(context, "https://" + host)
     # Playwright `url` form, not a Domain attribute, keeps this host-only.
     context.add_cookies([{
         "url": "https://" + host + "/",
