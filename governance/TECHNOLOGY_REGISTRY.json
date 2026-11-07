@@ -238,6 +238,16 @@
       "scope": "Owner-approved 2026-10-27 for opt-in internal developer-only source-backed diagramming under five ADR-0017 conditions; adoption awaits reviewed PR #211 merge. Disposable exact-revision CI browser evidence is permitted, but no automatic bootstrap, required CI check, public artifact publication, canonical data/status mutation, product runtime, production dependency or new architecture authority."
     },
     {
+      "id": "playwright-python-preview-candidate",
+      "capability": "design-authority",
+      "source": "https://github.com/microsoft/playwright-python",
+      "status": "candidate",
+      "version_authority": "requirements-browser.in pins playwright==1.64.1; requirements-browser.lock pins resolved Python transitive packages with hashes (Python 3.12). No app package or image integration",
+      "license_review": "Microsoft Playwright Python Apache-2.0; PyPI release 1.64.1 declares Python >=3.10 and published provenance. Runner, browser-binary/system dependency, security/network containment and privacy review remain unapproved",
+      "implementation": "scripts/preview_browser_context.py",
+      "scope": "Candidate, manual-only protected Preview browser adapter for #215/#175. Existing Node/Vitest/Playwright E2E and agent-browser localhost pilot retain their own owners. No credential-bearing runner, browser installation, automatic workflow, production package or UX acceptance is activated by this lockfile."
+    },
+    {
       "id": "agent-browser-local-pilot",
       "capability": "design-authority",
       "source": "https://github.com/vercel-labs/agent-browser",
