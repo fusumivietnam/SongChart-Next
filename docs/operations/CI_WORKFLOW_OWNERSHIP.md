@@ -32,6 +32,8 @@ This contract defines who owns each CI concern and the controls that prevent wor
 
 The cross-cutting `governance/TECHNOLOGY_REGISTRY.json` is verified by the required Project OS/governance checks. It must not independently fan out into Codespaces or VS-01b Docker-heavy verification: those workflows trigger on their owned source, contracts, runtime manifests and workflow files instead. A technology metadata-only change does not prove a change to either runtime. The narrower triggers do **not** bypass the required governance, `verify` or `health` contexts; changes to provider policy in `docs/providers/MUSICBRAINZ.md` still activate VS-01b.
 
+Artifact-upload steps use the immutable `actions/upload-artifact` v6.0.0 commit (`b7c566a772e6b6bfb58ed0dc250532a479d7789f`, Node.js 24), enforced by `scripts/verify_ci_ownership.py`. This upgrade changes only the Actions upload mechanism, not artifact paths, retention, cache ownership, triggering or acceptance scope. Existing `ubuntu-24.04` hosted runners satisfy the upstream minimum runner version; validate exact-head CI before merge.
+
 ## Low-amplification execution
 
 A bounded semantic work unit should produce one reviewed PR and, where practical, one visible implementation commit that already includes its source, tests, required documentation and governance changes. Intermediate file-by-file mutations may be prepared before a PR exists, but they must be collapsed before the review branch becomes CI evidence. Observation-only commits and evidence-only commits are not a substitute for exact-head checks.
