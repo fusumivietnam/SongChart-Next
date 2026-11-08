@@ -15,12 +15,17 @@ COOKIE = {"name": "_vercel_jwt", "value": "fixture-only", "domain": ORIGIN[8:],
 class FakeContext:
     def __init__(self):
         self.routes = []
+        self.socket_routes = []
         self.cookies = []
         self.events = []
 
     def route(self, pattern, handler):
         self.events.append("route")
         self.routes.append((pattern, handler))
+
+    def route_web_socket(self, pattern, handler):
+        self.events.append("socket_route")
+        self.socket_routes.append((pattern, handler))
 
     def add_cookies(self, cookies):
         self.events.append("cookies")
@@ -59,7 +64,11 @@ class BrowserContextTests(unittest.TestCase):
     def test_installs_guard_before_host_only_cookie(self):
         context = FakeContext()
         install_isolated_cookie(context, ORIGIN, COOKIE)
-        self.assertEqual(context.events, ["route", "cookies"])
+        self.assertEqual(context.events, ["route", "socket_route", "cookies"])
+        self.assertEqual(context.socket_routes[0][0], "**/*")
+        socket = SimpleNamespace(close=lambda: context.events.append("socket_closed"))
+        context.socket_routes[0][1](socket)
+        self.assertEqual(context.events[-1], "socket_closed")
         self.assertEqual(context.cookies[0]["url"], ORIGIN + "/")
         self.assertNotIn("domain", context.cookies[0])
         self.assertEqual(context.routes[0][0], "**/*")

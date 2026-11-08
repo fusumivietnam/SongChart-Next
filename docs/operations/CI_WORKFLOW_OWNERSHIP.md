@@ -14,7 +14,6 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `work-management-sync.yml` | declared labels and explicitly managed milestones | contents read + issues write; no Project PAT |
 | `research-cocoindex.yml` | bounded local-only CocoIndex repository-context benchmark; preserves derived timing/retrieval evidence and never makes lifecycle decisions | contents read; no repository secrets |
 | `foundation-app.yml` | Docker app/PostgreSQL/tests/audit/SBOM/production-target evidence; sole writer of the shared `foundation-buildkit` cache | contents read |
-| `composer-security-candidate.yml` | manual, trusted-main-only candidate generation for Issue #234: resolves patched Symfony dependency lock using the repo Docker PHP toolchain, audits it, and uploads a seven-day review artifact; creates no branch/PR and cannot substitute for Foundation exact-head checks | contents read; no secrets, write token, database or cache ownership |
 | `foundation-visual.yml` | deterministic Foundation design render evidence; reads shared BuildKit cache only | contents read |
 | `vs01a-artist.yml` | VS-01a canonical Artist PostgreSQL integration, canonical URL and narrow/wide browser evidence; reads shared BuildKit cache only | contents read |
 | `vs01b-musicbrainz.yml` | VS-01b MusicBrainz adapter contracts and request-spacing evidence; never automatic live provider traffic; reads shared BuildKit cache only | contents read |
@@ -29,12 +28,11 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `archify-browser-contract.yml` | scoped developer-analysis browser acceptance for pinned historical Archify public-read sample (#212) and catalog ERD sample (#213); one disposable runner, no generated output publication or lifecycle promotion | contents read |
 | `agent-browser-pilot.yml` | narrowly path-triggered PR / manual opt-in agent-browser CLI smoke on a disposable localhost HTML fixture; **not** SongChart app E2E, protected Preview authentication, or #175 UX acceptance | contents read; no secrets or artifacts |
 | `preview-browser-loopback-containment.yml` | manually dispatched disposable Chromium + hash-locked Python Playwright HTTPS loopback origin/redirect/popup egress smoke; **not** protected Preview navigation or UX acceptance | contents read; trusted-main-only; no environment, secrets, artifacts or deployment |
+| `protected-preview-browser-read-probe.yml` | proposed manual-only narrow/wide protected Preview **read probe** after exact deployment provenance and host-only cookie bootstrap; not the HTTP smoke owner, correction mutation or complete #175 UX acceptance | contents read; trusted-main-only; protected `preview-test` reviewers, existing narrowly scoped Vercel API token, team ID and bypass secret; no artifacts, screenshots, traces or deployments; owner review before merge |
 
 `docker-scaffold.yml` is retired because Foundation application checks own Compose/PostgreSQL runtime evidence.
 
 The cross-cutting `governance/TECHNOLOGY_REGISTRY.json` is verified by the required Project OS/governance checks. It must not independently fan out into Codespaces or VS-01b Docker-heavy verification: those workflows trigger on their owned source, contracts, runtime manifests and workflow files instead. A technology metadata-only change does not prove a change to either runtime. The narrower triggers do **not** bypass the required governance, `verify` or `health` contexts; changes to provider policy in `docs/providers/MUSICBRAINZ.md` still activate VS-01b.
-
-Artifact-upload steps use the immutable `actions/upload-artifact` v6.0.0 commit (`b7c566a772e6b6bfb58ed0dc250532a479d7789f`, Node.js 24), enforced by `scripts/verify_ci_ownership.py`. This upgrade changes only the Actions upload mechanism, not artifact paths, retention, cache ownership, triggering or acceptance scope. Existing `ubuntu-24.04` hosted runners satisfy the upstream minimum runner version; validate exact-head CI before merge.
 
 ## Low-amplification execution
 

@@ -84,6 +84,8 @@ def main() -> int:
                         page.goto(primary_origin + "/", wait_until="load", timeout=15000)
                         assert page.locator("#fixture").inner_text() == "Fixture ready"
                         page.evaluate("url => window.open(url, '_blank')", foreign_origin + "/popup")
+                        page.evaluate("url => { try { new WebSocket(url); } catch (_) {} }",
+                                      foreign_origin.replace("https://", "wss://") + "/socket")
                         try:
                             page.goto(primary_origin + "/redirect", timeout=10000)
                         except PlaywrightError:

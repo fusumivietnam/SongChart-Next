@@ -1,0 +1,70 @@
+name: Protected Preview browser read probe (manual candidate)
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_url:
+        description: "Exact deployment-specific HTTPS origin; no share URL"
+        required: true
+        type: string
+      deployment_id:
+        description: "Vercel deployment ID (dpl_...)"
+        required: true
+        type: string
+      expected_sha:
+        description: "Deployment's full 40-character source Git SHA"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: protected-preview-browser-read-probe-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  read-probe:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: preview-test
+    steps:
+      - name: Checkout trusted exact revision without token persistence
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Install hash-locked browser library in disposable virtualenv
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m venv "$RUNNER_TEMP/preview-browser-venv"
+          "$RUNNER_TEMP/preview-browser-venv/bin/python" -m pip install --require-hashes --disable-pip-version-check -r requirements-browser.lock
+
+      - name: Verify provenance and read-only browser visit with in-memory cookie
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ inputs.deployment_url }}
+          DEPLOYMENT_ID: ${{ inputs.deployment_id }}
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+          VERCEL_API_READ_TOKEN: ${{ secrets.VERCEL_API_READ_TOKEN }}
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+          VERCEL_TEAM_ID: ${{ vars.VERCEL_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          set +x
+          if [[ -z "${VERCEL_API_READ_TOKEN:-}" || -z "${VERCEL_AUTOMATION_BYPASS_SECRET:-}" || -z "${VERCEL_TEAM_ID:-}" ]]; then
+            echo '::error::PROTECTED PREVIEW BROWSER BLOCKED [CONFIG_MISSING]'
+            exit 1
+          fi
+          echo "::add-mask::$VERCEL_API_READ_TOKEN"
+          echo "::add-mask::$VERCEL_AUTOMATION_BYPASS_SECRET"
+          chrome="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          if [[ -z "$chrome" ]]; then
+            echo '::error::PROTECTED PREVIEW BROWSER BLOCKED [CHROME_MISSING]'
+            exit 1
+          fi
+          "$RUNNER_TEMP/preview-browser-venv/bin/python" scripts/verify_protected_preview_browser.py --chrome "$chrome"
+          echo 'Two viewport read-only navigation probes passed; no screenshots, traces, artifacts, mutation or full UX acceptance.' >> "$GITHUB_STEP_SUMMARY"
