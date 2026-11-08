@@ -28,12 +28,22 @@ class FakeContext:
 
 
 class FakeRoute:
-    def __init__(self, url):
+    def __init__(self, url, status=200, location=None, fetch_error=False):
         self.request = SimpleNamespace(url=url)
         self.action = None
+        self.response = SimpleNamespace(status=status, headers={"location": location} if location else {})
+        self.fetch_error = fetch_error
+        self.redirect_limit = None
 
-    def continue_(self):
-        self.action = "continued"
+    def fetch(self, *, max_redirects):
+        self.redirect_limit = max_redirects
+        if self.fetch_error:
+            raise RuntimeError("fixture network failure")
+        return self.response
+
+    def fulfill(self, *, response):
+        assert response is self.response
+        self.action = "fulfilled"
 
     def abort(self):
         self.action = "aborted"
@@ -55,7 +65,7 @@ class BrowserContextTests(unittest.TestCase):
         self.assertEqual(context.routes[0][0], "**/*")
 
         callback = context.routes[0][1]
-        for url, expected in ((ORIGIN + "/search", "continued"),
+        for url, expected in ((ORIGIN + "/search", "fulfilled"),
                               ("https://evil.test/", "aborted"),
                               (ORIGIN.replace("https:", "http:") + "/", "aborted"),
                               ("https://evil.test@" + ORIGIN[8:] + "/", "aborted"),
@@ -64,6 +74,27 @@ class BrowserContextTests(unittest.TestCase):
                 route = FakeRoute(url)
                 callback(route)
                 self.assertEqual(route.action, expected)
+                self.assertEqual(route.redirect_limit, 0 if expected == "fulfilled" else None)
+
+    def test_redirect_hops_are_checked_before_browser_can_follow(self):
+        context = FakeContext()
+        install_isolated_cookie(context, ORIGIN, COOKIE)
+        callback = context.routes[0][1]
+        for location, expected in (("/same-origin", "fulfilled"),
+                                   (ORIGIN + "/other", "fulfilled"),
+                                   ("https://evil.test/leak", "aborted"),
+                                   ("//evil.test/leak", "aborted"),
+                                   ("http://" + ORIGIN[8:] + "/leak", "aborted"),
+                                   (None, "aborted")):
+            with self.subTest(location=location):
+                route = FakeRoute(ORIGIN + "/redirect", status=302, location=location)
+                callback(route)
+                self.assertEqual(route.action, expected)
+                self.assertEqual(route.redirect_limit, 0)
+
+        route = FakeRoute(ORIGIN + "/", fetch_error=True)
+        callback(route)
+        self.assertEqual(route.action, "aborted")
 
     def test_invalid_origin_and_cookie_never_reach_context(self):
         for origin, cookie in (("https://evil.test", COOKIE),

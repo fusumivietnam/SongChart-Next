@@ -6,7 +6,7 @@ serialized, printed, or made available as a general request header.
 """
 from __future__ import annotations
 
-from urllib.parse import urlsplit
+from urllib.parse import urljoin, urlsplit
 
 from preview_browser_preflight import HOST
 
@@ -35,11 +35,30 @@ def _is_allowed_request(url: str, allowed_origin: str) -> bool:
 
 
 def _install_origin_guard(context, allowed_origin: str) -> None:
-    """Route all context requests; loopback fixture may exercise this independently."""
+    """Guard each hop, including redirects, before releasing a browser response.
+
+    ``route.continue_()`` hands redirects to Chromium without routing each hop;
+    that can send a protected cookie/request outside the approved origin.
+    Fetch exactly one hop and fulfill it only if its redirect target is safe.
+    """
     def origin_only(route):
-        if _is_allowed_request(route.request.url, allowed_origin):
-            route.continue_()
-        else:
+        if not _is_allowed_request(route.request.url, allowed_origin):
+            route.abort()
+            return
+
+        try:
+            response = route.fetch(max_redirects=0)
+            if 300 <= response.status < 400:
+                location = response.headers.get("location")
+                if not location or not _is_allowed_request(
+                    urljoin(route.request.url, location), allowed_origin
+                ):
+                    route.abort()
+                    return
+            route.fulfill(response=response)
+        except Exception:
+            # Network/redirect verification failures must not fall back to
+            # Chromium's unguarded network continuation.
             route.abort()
 
     context.route("**/*", origin_only)
