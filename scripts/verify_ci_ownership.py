@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = ROOT / ".github" / "workflows"
 EXPECTED = {
-    "agent-browser-pilot.yml", "archify-browser-contract.yml", "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
+    "agent-browser-pilot.yml", "archify-browser-contract.yml", "codespaces-contract.yml", "composer-security-candidate.yml", "design-review-contract.yml", "foundation-app.yml",
     "foundation-visual.yml", "g5-vps-baseline.yml", "project-governance.yml", "project-os.yml",
     "project-projection-sync.yml", "research-cocoindex.yml", "roadmap-health.yml", "roadmap-reconcile.yml",
     "protected-preview-smoke.yml", "protected-preview-browser-preflight.yml",
@@ -63,6 +63,19 @@ def main() -> int:
     owners = sorted(name for name, c in contents.items() if "scripts/verify_project_os.py" in c)
     if owners != ["project-os.yml"]:
         errors.append(f"scripts/verify_project_os.py must be owned only by project-os.yml; found {owners}")
+
+    composer_candidate = contents.get("composer-security-candidate.yml", "")
+    for required in (
+        "workflow_dispatch:", "github.ref == 'refs/heads/main'", "contents: read",
+        "persist-credentials: false", "ref: ${{ github.sha }}", "--no-scripts", "--no-plugins",
+        "composer audit --locked --no-interaction", "git diff --name-only",
+        "composer.lock", "if-no-files-found: error", "retention-days: 7",
+    ):
+        if required not in composer_candidate:
+            errors.append(f"composer-security-candidate.yml: missing read-only manual candidate control: {required}")
+    for forbidden in ("pull_request:", "push:", "contents: write", "pull-requests: write", "secrets.", "gh pr create", "git push", "docker compose down"):
+        if forbidden in composer_candidate:
+            errors.append(f"composer-security-candidate.yml: forbidden trigger, writer, credential or cleanup: {forbidden}")
 
     pilot = contents.get("agent-browser-pilot.yml", "")
     for required in ("pull_request:", "workflow_dispatch:", "contents: read", "timeout-minutes: 10", "persist-credentials: false", "AGENT_BROWSER_EXECUTABLE_PATH", "127.0.0.1:8765", "agent-browser@0.41.1"):

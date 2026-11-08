@@ -1,0 +1,69 @@
+name: Composer security lockfile candidate
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: composer-security-candidate
+  cancel-in-progress: false
+
+jobs:
+  candidate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Check out trusted main without Git credentials
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3 (Node.js 24)
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - name: Build repository-owned PHP and Composer toolchain
+        run: docker build --target php-toolchain --tag songchart-composer-maintenance:local .
+
+      - name: Resolve only Issue 234 Symfony packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run --rm --network bridge \
+            --volume "$PWD:/var/www/html" --workdir /var/www/html \
+            songchart-composer-maintenance:local \
+            composer update \
+              symfony/http-foundation symfony/http-kernel symfony/routing \
+              symfony/serializer symfony/yaml \
+              --with-all-dependencies --no-interaction --no-progress --no-scripts --no-plugins
+
+      - name: Validate lockfile and prevent unrelated changes
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed="$(git diff --name-only)"
+          if [[ "$changed" != "composer.lock" ]]; then
+            echo "Expected only composer.lock to change; got: $changed" >&2
+            exit 1
+          fi
+          docker run --rm --network bridge \
+            --volume "$PWD:/var/www/html" --workdir /var/www/html \
+            songchart-composer-maintenance:local \
+            composer validate --strict --no-interaction --no-plugins
+          docker run --rm --network bridge \
+            --volume "$PWD:/var/www/html" --workdir /var/www/html \
+            songchart-composer-maintenance:local \
+            composer audit --locked --no-interaction --no-plugins
+          git diff --check
+          git diff -- composer.lock > composer-security-234.patch
+          test -s composer-security-234.patch
+
+      - name: Preserve review-only candidate
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 (Node.js 24)
+        with:
+          name: composer-security-234-${{ github.sha }}
+          path: |
+            composer.lock
+            composer-security-234.patch
+          if-no-files-found: error
+          retention-days: 7
