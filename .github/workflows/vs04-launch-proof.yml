@@ -294,7 +294,7 @@ jobs:
 
       - name: Preserve VS-04 launch evidence
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 (Node.js 24)
         with:
           name: vs04-launch-${{ env.EVIDENCE_SHA }}
           path: artifacts/vs04-launch/
@@ -303,7 +303,7 @@ jobs:
 
       - name: Preserve VS-04 recovery evidence
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 (Node.js 24)
         with:
           name: vs04-recovery-${{ env.EVIDENCE_SHA }}
           path: artifacts/vs04-recovery/
@@ -312,7 +312,7 @@ jobs:
 
       - name: Preserve VS-04 health evidence
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 (Node.js 24)
         with:
           name: vs04-health-${{ env.EVIDENCE_SHA }}
           path: artifacts/vs04-health/

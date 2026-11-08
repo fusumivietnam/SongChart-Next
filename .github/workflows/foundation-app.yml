@@ -136,7 +136,7 @@ jobs:
           test -s pnpm-licenses.json
 
       - name: Preserve dependency license inventory
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 (Node.js 24)
         with:
           name: foundation-license-inventory-${{ github.sha }}
           path: |
@@ -159,7 +159,7 @@ jobs:
 
       - name: Preserve pnpm audit diagnostics
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 (Node.js 24)
         with:
           name: foundation-pnpm-audit-${{ github.sha }}
           path: pnpm-audit.json
@@ -193,7 +193,7 @@ jobs:
           cat foundation-provenance.txt >> "$GITHUB_STEP_SUMMARY"
 
       - name: Preserve Foundation provenance
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 (Node.js 24)
         with:
           name: foundation-provenance-${{ github.sha }}
           path: |
@@ -269,7 +269,7 @@ jobs:
           dependency-snapshot: false
 
       - name: Preserve Foundation SBOMs
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0 (Node.js 24)
         with:
           name: foundation-sbom-${{ github.sha }}
           path: |
