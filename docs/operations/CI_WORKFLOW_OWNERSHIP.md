@@ -14,6 +14,7 @@ This contract defines who owns each CI concern and the controls that prevent wor
 | `work-management-sync.yml` | declared labels and explicitly managed milestones | contents read + issues write; no Project PAT |
 | `research-cocoindex.yml` | bounded local-only CocoIndex repository-context benchmark; preserves derived timing/retrieval evidence and never makes lifecycle decisions | contents read; no repository secrets |
 | `foundation-app.yml` | Docker app/PostgreSQL/tests/audit/SBOM/production-target evidence; sole writer of the shared `foundation-buildkit` cache | contents read |
+| `composer-security-candidate.yml` | manual, trusted-main-only candidate generation for Issue #234: resolves patched Symfony dependency lock using the repo Docker PHP toolchain, audits it, and uploads a seven-day review artifact; creates no branch/PR and cannot substitute for Foundation exact-head checks | contents read; no secrets, write token, database or cache ownership |
 | `foundation-visual.yml` | deterministic Foundation design render evidence; reads shared BuildKit cache only | contents read |
 | `vs01a-artist.yml` | VS-01a canonical Artist PostgreSQL integration, canonical URL and narrow/wide browser evidence; reads shared BuildKit cache only | contents read |
 | `vs01b-musicbrainz.yml` | VS-01b MusicBrainz adapter contracts and request-spacing evidence; never automatic live provider traffic; reads shared BuildKit cache only | contents read |
@@ -32,6 +33,8 @@ This contract defines who owns each CI concern and the controls that prevent wor
 `docker-scaffold.yml` is retired because Foundation application checks own Compose/PostgreSQL runtime evidence.
 
 The cross-cutting `governance/TECHNOLOGY_REGISTRY.json` is verified by the required Project OS/governance checks. It must not independently fan out into Codespaces or VS-01b Docker-heavy verification: those workflows trigger on their owned source, contracts, runtime manifests and workflow files instead. A technology metadata-only change does not prove a change to either runtime. The narrower triggers do **not** bypass the required governance, `verify` or `health` contexts; changes to provider policy in `docs/providers/MUSICBRAINZ.md` still activate VS-01b.
+
+Artifact-upload steps use the immutable `actions/upload-artifact` v6.0.0 commit (`b7c566a772e6b6bfb58ed0dc250532a479d7789f`, Node.js 24), enforced by `scripts/verify_ci_ownership.py`. This upgrade changes only the Actions upload mechanism, not artifact paths, retention, cache ownership, triggering or acceptance scope. Existing `ubuntu-24.04` hosted runners satisfy the upstream minimum runner version; validate exact-head CI before merge.
 
 ## Low-amplification execution
 
