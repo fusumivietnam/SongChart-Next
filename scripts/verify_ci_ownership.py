@@ -8,7 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOWS = ROOT / ".github" / "workflows"
 EXPECTED = {
-    "agent-browser-pilot.yml", "preview-browser-loopback-containment.yml", "archify-browser-contract.yml", "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
+    "agent-browser-pilot.yml", "preview-browser-loopback-containment.yml", "archify-browser-contract.yml", "codespaces-contract.yml", "composer-security-candidate.yml", "design-review-contract.yml", "foundation-app.yml",
     "foundation-visual.yml", "g5-vps-baseline.yml", "project-governance.yml", "project-os.yml",
     "project-projection-sync.yml", "research-cocoindex.yml", "roadmap-health.yml", "roadmap-reconcile.yml",
     "protected-preview-smoke.yml", "protected-preview-browser-preflight.yml",
@@ -19,6 +19,7 @@ EXPECTED = {
 RETIRED = {"docker-scaffold.yml"}
 LEGACY_CHECKOUT_SHA = "11bd71901bbe5b1630ceea73d27597364c9af683"
 NODE24_CHECKOUT_SHAS = {"df4cb1c069e1874edd31b4311f1884172cec0e10", "08c6903cd8c0fde910a37f88322edcfb5dd907a8"}
+NODE24_UPLOAD_ARTIFACT_SHA = "b7c566a772e6b6bfb58ed0dc250532a479d7789f"  # v6.0.0
 PR_MAIN_EVIDENCE = {
     "codespaces-contract.yml", "design-review-contract.yml", "foundation-app.yml",
     "foundation-visual.yml", "g5-vps-baseline.yml", "project-governance.yml", "project-os.yml",
@@ -76,6 +77,19 @@ def main() -> int:
     if owners != ["project-os.yml"]:
         errors.append(f"scripts/verify_project_os.py must be owned only by project-os.yml; found {owners}")
 
+    composer_candidate = contents.get("composer-security-candidate.yml", "")
+    for required in (
+        "workflow_dispatch:", "github.ref == 'refs/heads/main'", "contents: read",
+        "persist-credentials: false", "ref: ${{ github.sha }}", "--no-scripts", "--no-plugins",
+        "composer audit --locked --no-interaction", "git diff --name-only",
+        "composer.lock", "if-no-files-found: error", "retention-days: 7",
+    ):
+        if required not in composer_candidate:
+            errors.append(f"composer-security-candidate.yml: missing read-only manual candidate control: {required}")
+    for forbidden in ("pull_request:", "push:", "contents: write", "pull-requests: write", "secrets.", "gh pr create", "git push", "docker compose down"):
+        if forbidden in composer_candidate:
+            errors.append(f"composer-security-candidate.yml: forbidden trigger, writer, credential or cleanup: {forbidden}")
+
     pilot = contents.get("agent-browser-pilot.yml", "")
     for required in ("pull_request:", "workflow_dispatch:", "contents: read", "timeout-minutes: 10", "persist-credentials: false", "AGENT_BROWSER_EXECUTABLE_PATH", "127.0.0.1:8765", "agent-browser@0.41.1"):
         if required not in pilot:
@@ -101,6 +115,9 @@ def main() -> int:
         errors.append("deterministic CI impact classifier and governance test are required")
 
     for name, content in contents.items():
+        for upload_sha in re.findall(r"actions/upload-artifact@([0-9a-f]{40})", content):
+            if upload_sha != NODE24_UPLOAD_ARTIFACT_SHA:
+                errors.append(f"{name}: upload-artifact must use pinned Node.js 24 v6.0.0")
         if LEGACY_CHECKOUT_SHA in content:
             errors.append(f"{name}: legacy Node.js 20 checkout action is forbidden")
         for checkout_sha in re.findall(r"actions/checkout@([0-9a-f]{40})", content):
