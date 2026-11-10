@@ -62,9 +62,11 @@ def _install_origin_guard(context, allowed_origin: str) -> None:
             route.abort()
 
     context.route("**/*", origin_only)
-    # HTTP request routes do not govern WebSocket handshakes. This conservative
-    # read-only probe never needs WebSockets; block them before cookie injection.
-    context.route_web_socket("**/*", lambda socket: socket.close())
+    # HTTP request routes do not govern WebSocket handshakes. Playwright mocks
+    # routed WebSockets unless the handler calls connect_to_server(); leaving
+    # the handler empty prevents outbound handshakes without a synchronous
+    # close() call that can stall page.evaluate() in the loopback fixture.
+    context.route_web_socket("**/*", lambda _socket: None)
 
 
 def install_isolated_cookie(context, origin: str, cookie: dict[str, object]) -> None:

@@ -68,7 +68,7 @@ class BrowserContextTests(unittest.TestCase):
         self.assertEqual(context.socket_routes[0][0], "**/*")
         socket = SimpleNamespace(close=lambda: context.events.append("socket_closed"))
         context.socket_routes[0][1](socket)
-        self.assertEqual(context.events[-1], "socket_closed")
+        self.assertNotIn("socket_closed", context.events)
         self.assertEqual(context.cookies[0]["url"], ORIGIN + "/")
         self.assertNotIn("domain", context.cookies[0])
         self.assertEqual(context.routes[0][0], "**/*")
