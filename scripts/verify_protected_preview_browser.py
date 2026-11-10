@@ -10,9 +10,9 @@ import argparse
 import os
 import sys
 
-from preview_browser_bootstrap import bootstrap
+from preview_browser_bootstrap import PreflightBlocked, bootstrap
 from preview_browser_context import install_isolated_cookie
-from preview_browser_discovery import discover
+from preview_browser_discovery import DiscoveryBlocked, discover
 from preview_browser_preflight import validate
 
 
@@ -20,10 +20,12 @@ def run_probe(*, origin: str, deployment_id: str, expected_sha: str,
               secret: str, api_token: str, team_id: str, chrome: str) -> None:
     """Perform one provenance-bound in-memory bootstrap and two read-only visits."""
     normalized = validate(origin, expected_sha, deployment_id, secret_present=bool(secret))
+    print("PROTECTED PREVIEW PHASE: input-validated", flush=True)
     # Import only after validating the CLI inputs, on a trusted ephemeral runner.
     from playwright.sync_api import sync_playwright
     cookie = bootstrap(normalized, deployment_id, expected_sha, secret,
                        api_token=api_token, team_id=team_id)
+    print("PROTECTED PREVIEW PHASE: provenance-and-cookie-verified", flush=True)
     try:
         with sync_playwright() as playwright:
             browser = playwright.chromium.launch(executable_path=chrome, headless=True)
@@ -44,6 +46,7 @@ def run_probe(*, origin: str, deployment_id: str, expected_sha: str,
                         if page.evaluate("document.documentElement.scrollWidth > innerWidth + 1"):
                             raise RuntimeError("HORIZONTAL_OVERFLOW")
                         # No third-party navigation, form submission or page captures.
+                        print("PROTECTED PREVIEW PHASE: viewport-verified", flush=True)
                     finally:
                         context.close()
             finally:
@@ -62,7 +65,9 @@ def main() -> int:
         supplied = (os.environ.get("DEPLOYMENT_URL", ""), os.environ.get("DEPLOYMENT_ID", ""),
                     os.environ.get("EXPECTED_SHA", ""))
         if not any(supplied):
+            print("PROTECTED PREVIEW PHASE: discovery-started", flush=True)
             origin, deployment_id, expected_sha = discover(api_token=api_token, team_id=team_id)
+            print("PROTECTED PREVIEW PHASE: discovery-verified", flush=True)
         elif all(supplied):
             origin, deployment_id, expected_sha = supplied
         else:
@@ -71,6 +76,12 @@ def main() -> int:
                   expected_sha=expected_sha,
                   secret=os.environ["VERCEL_AUTOMATION_BYPASS_SECRET"],
                   api_token=api_token, team_id=team_id, chrome=args.chrome)
+    except DiscoveryBlocked as error:
+        print(f"PROTECTED PREVIEW BROWSER BLOCKED [{error.code}]", file=sys.stderr)
+        return 1
+    except PreflightBlocked as error:
+        print(f"PROTECTED PREVIEW BROWSER BLOCKED [{error.code}]", file=sys.stderr)
+        return 1
     except Exception:
         # Never print exception details: Playwright exceptions can contain URLs.
         print("PROTECTED PREVIEW BROWSER BLOCKED [SAFE_FAILURE]", file=sys.stderr)
