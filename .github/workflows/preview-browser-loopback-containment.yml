@@ -38,5 +38,8 @@ jobs:
             echo 'Chrome/Chromium unavailable; fail closed.' >&2
             exit 1
           fi
-          "$RUNNER_TEMP/preview-browser-venv/bin/python" scripts/verify_preview_browser_containment.py --chrome "$chrome"
+          # Bound hung Chromium/WebSocket fixture probes independently of the
+          # job timeout; preserve only non-sensitive phase checkpoints.
+          timeout --signal=TERM --kill-after=5s 90s \
+            "$RUNNER_TEMP/preview-browser-venv/bin/python" scripts/verify_preview_browser_containment.py --chrome "$chrome"
           echo 'Loopback-only browser egress exercised; no Preview, secret, screenshot, artifact or acceptance run.' >> "$GITHUB_STEP_SUMMARY"
