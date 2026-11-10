@@ -1,5 +1,6 @@
 """No-network contract for the reviewed-candidate protected browser runner."""
 import sys
+import os
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -64,6 +65,24 @@ class FakePlaywright:
 
 
 class ProtectedPreviewRunnerTests(unittest.TestCase):
+    def test_zero_input_discovers_and_partial_input_fails_closed(self):
+        env = {"VERCEL_API_READ_TOKEN": "fixture", "VERCEL_TEAM_ID": "team_Abc123",
+               "VERCEL_AUTOMATION_BYPASS_SECRET": "fixture"}
+        with patch.dict(os.environ, env, clear=True), \
+             patch.object(sys, "argv", ["probe", "--chrome", "/fixture/chrome"]), \
+             patch.object(runner, "discover", return_value=(ORIGIN, "dpl_Abc123", SHA)) as discovery, \
+             patch.object(runner, "run_probe") as probe:
+            self.assertEqual(runner.main(), 0)
+        discovery.assert_called_once()
+        probe.assert_called_once()
+        with patch.dict(os.environ, {**env, "DEPLOYMENT_URL": ORIGIN}, clear=True), \
+             patch.object(sys, "argv", ["probe", "--chrome", "/fixture/chrome"]), \
+             patch.object(runner, "discover") as discovery, \
+             patch.object(runner, "run_probe") as probe:
+            self.assertEqual(runner.main(), 1)
+        discovery.assert_not_called()
+        probe.assert_not_called()
+
     def test_handoff_stays_in_process_at_two_viewports(self):
         events = []
         fake_playwright = SimpleNamespace(sync_playwright=lambda: FakePlaywright(events))

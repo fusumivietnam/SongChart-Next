@@ -12,6 +12,7 @@ import sys
 
 from preview_browser_bootstrap import bootstrap
 from preview_browser_context import install_isolated_cookie
+from preview_browser_discovery import discover
 from preview_browser_preflight import validate
 
 
@@ -57,12 +58,19 @@ def main() -> int:
     parser.add_argument("--chrome", required=True)
     args = parser.parse_args()
     try:
-        run_probe(origin=os.environ["DEPLOYMENT_URL"],
-                  deployment_id=os.environ["DEPLOYMENT_ID"],
-                  expected_sha=os.environ["EXPECTED_SHA"],
+        api_token, team_id = os.environ["VERCEL_API_READ_TOKEN"], os.environ["VERCEL_TEAM_ID"]
+        supplied = (os.environ.get("DEPLOYMENT_URL", ""), os.environ.get("DEPLOYMENT_ID", ""),
+                    os.environ.get("EXPECTED_SHA", ""))
+        if not any(supplied):
+            origin, deployment_id, expected_sha = discover(api_token=api_token, team_id=team_id)
+        elif all(supplied):
+            origin, deployment_id, expected_sha = supplied
+        else:
+            raise ValueError("partial deployment inputs forbidden")
+        run_probe(origin=origin, deployment_id=deployment_id,
+                  expected_sha=expected_sha,
                   secret=os.environ["VERCEL_AUTOMATION_BYPASS_SECRET"],
-                  api_token=os.environ["VERCEL_API_READ_TOKEN"],
-                  team_id=os.environ["VERCEL_TEAM_ID"], chrome=args.chrome)
+                  api_token=api_token, team_id=team_id, chrome=args.chrome)
     except Exception:
         # Never print exception details: Playwright exceptions can contain URLs.
         print("PROTECTED PREVIEW BROWSER BLOCKED [SAFE_FAILURE]", file=sys.stderr)

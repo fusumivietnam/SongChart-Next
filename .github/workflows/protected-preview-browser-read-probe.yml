@@ -4,16 +4,16 @@ on:
   workflow_dispatch:
     inputs:
       deployment_url:
-        description: "Exact deployment-specific HTTPS origin; no share URL"
-        required: true
+        description: "Optional exact deployment HTTPS origin; leave all inputs blank for verified auto-discovery"
+        required: false
         type: string
       deployment_id:
-        description: "Vercel deployment ID (dpl_...)"
-        required: true
+        description: "Optional Vercel deployment ID (dpl_...); supply all three or none"
+        required: false
         type: string
       expected_sha:
-        description: "Deployment's full 40-character source Git SHA"
-        required: true
+        description: "Optional full 40-character deployment source SHA; supply all three or none"
+        required: false
         type: string
 
 permissions:
@@ -43,7 +43,7 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/preview-browser-venv"
           "$RUNNER_TEMP/preview-browser-venv/bin/python" -m pip install --require-hashes --disable-pip-version-check -r requirements-browser.lock
 
-      - name: Verify provenance and read-only browser visit with in-memory cookie
+      - name: Discover and verify Preview provenance; run guarded read-only browser visit
         shell: bash
         env:
           DEPLOYMENT_URL: ${{ inputs.deployment_url }}
@@ -67,4 +67,4 @@ jobs:
             exit 1
           fi
           "$RUNNER_TEMP/preview-browser-venv/bin/python" scripts/verify_protected_preview_browser.py --chrome "$chrome"
-          echo 'Two viewport read-only navigation probes passed; no screenshots, traces, artifacts, mutation or full UX acceptance.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Auto-discovered and authenticated Preview deployment provenance (or verified complete explicit input); two viewport read-only probes passed; no screenshots, traces, artifacts, mutation or full UX acceptance.' >> "$GITHUB_STEP_SUMMARY"
