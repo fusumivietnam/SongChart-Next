@@ -1,0 +1,75 @@
+#!/usr/bin/env python3
+"""Reviewed-candidate, manual-only protected Preview browser read probe.
+
+No screenshots, traces, HAR, downloads, response bodies, credentials or URL
+are emitted. Failure codes are deliberately constant and non-sensitive.
+"""
+from __future__ import annotations
+
+import argparse
+import os
+import sys
+
+from preview_browser_bootstrap import bootstrap
+from preview_browser_context import install_isolated_cookie
+from preview_browser_preflight import validate
+
+
+def run_probe(*, origin: str, deployment_id: str, expected_sha: str,
+              secret: str, api_token: str, team_id: str, chrome: str) -> None:
+    """Perform one provenance-bound in-memory bootstrap and two read-only visits."""
+    normalized = validate(origin, expected_sha, deployment_id, secret_present=bool(secret))
+    # Import only after validating the CLI inputs, on a trusted ephemeral runner.
+    from playwright.sync_api import sync_playwright
+    cookie = bootstrap(normalized, deployment_id, expected_sha, secret,
+                       api_token=api_token, team_id=team_id)
+    try:
+        with sync_playwright() as playwright:
+            browser = playwright.chromium.launch(executable_path=chrome, headless=True)
+            try:
+                for width, height in ((390, 844), (1440, 1024)):
+                    context = browser.new_context(
+                        viewport={"width": width, "height": height},
+                        service_workers="block", accept_downloads=False,
+                    )
+                    try:
+                        install_isolated_cookie(context, normalized, cookie)
+                        page = context.new_page()
+                        response = page.goto(normalized + "/", wait_until="domcontentloaded", timeout=15000)
+                        if response is None or response.status >= 400:
+                            raise RuntimeError("NAVIGATION_FAILED")
+                        if page.locator("body").count() != 1:
+                            raise RuntimeError("DOCUMENT_MISSING")
+                        if page.evaluate("document.documentElement.scrollWidth > innerWidth + 1"):
+                            raise RuntimeError("HORIZONTAL_OVERFLOW")
+                        # No third-party navigation, form submission or page captures.
+                    finally:
+                        context.close()
+            finally:
+                browser.close()
+    finally:
+        # The cookie is never serialized or handed to a child process.
+        del cookie
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="Manual, protected Preview read-only browser probe")
+    parser.add_argument("--chrome", required=True)
+    args = parser.parse_args()
+    try:
+        run_probe(origin=os.environ["DEPLOYMENT_URL"],
+                  deployment_id=os.environ["DEPLOYMENT_ID"],
+                  expected_sha=os.environ["EXPECTED_SHA"],
+                  secret=os.environ["VERCEL_AUTOMATION_BYPASS_SECRET"],
+                  api_token=os.environ["VERCEL_API_READ_TOKEN"],
+                  team_id=os.environ["VERCEL_TEAM_ID"], chrome=args.chrome)
+    except Exception:
+        # Never print exception details: Playwright exceptions can contain URLs.
+        print("PROTECTED PREVIEW BROWSER BLOCKED [SAFE_FAILURE]", file=sys.stderr)
+        return 1
+    print("PROTECTED PREVIEW BROWSER READ PROBE PASS; no artifacts")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

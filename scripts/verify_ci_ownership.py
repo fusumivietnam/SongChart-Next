@@ -12,6 +12,7 @@ EXPECTED = {
     "foundation-visual.yml", "g5-vps-baseline.yml", "project-governance.yml", "project-os.yml",
     "project-projection-sync.yml", "research-cocoindex.yml", "roadmap-health.yml", "roadmap-reconcile.yml",
     "protected-preview-smoke.yml", "protected-preview-browser-preflight.yml",
+    "protected-preview-browser-read-probe.yml",
     "vs01a-artist.yml", "vs01b-musicbrainz.yml", "vs02-release-recording.yml",
     "vs03-discovery-search.yml", "vs04-launch-proof.yml", "work-management-sync.yml",
 }
@@ -59,6 +60,18 @@ def main() -> int:
     for forbidden in ("pull_request:", "push:", "upload-artifact", "contents: write", "set-bypass-cookie: samesitenone"):
         if forbidden in protected_browser:
             errors.append(f"protected-preview-browser-preflight.yml: disallowed auto-trigger/artifact/permission: {forbidden}")
+
+    read_probe = contents.get("protected-preview-browser-read-probe.yml", "")
+    for required in ("workflow_dispatch:", "environment: preview-test", "github.ref == 'refs/heads/main'",
+                     "contents: read", "persist-credentials: false", "timeout-minutes: 15",
+                     "--require-hashes", "requirements-browser.lock", "verify_protected_preview_browser.py",
+                     "secrets.VERCEL_API_READ_TOKEN", "secrets.VERCEL_AUTOMATION_BYPASS_SECRET",
+                     "vars.VERCEL_TEAM_ID"):
+        if required not in read_probe:
+            errors.append(f"protected-preview-browser-read-probe.yml: missing guarded control: {required}")
+    for forbidden in ("pull_request:", "push:", "upload-artifact", "contents: write", "docker build"):
+        if forbidden in read_probe:
+            errors.append(f"protected-preview-browser-read-probe.yml: disallowed trigger/artifact/permission: {forbidden}")
 
     owners = sorted(name for name, c in contents.items() if "scripts/verify_project_os.py" in c)
     if owners != ["project-os.yml"]:

@@ -62,6 +62,9 @@ def _install_origin_guard(context, allowed_origin: str) -> None:
             route.abort()
 
     context.route("**/*", origin_only)
+    # HTTP request routes do not govern WebSocket handshakes. This conservative
+    # read-only probe never needs WebSockets; block them before cookie injection.
+    context.route_web_socket("**/*", lambda socket: socket.close())
 
 
 def install_isolated_cookie(context, origin: str, cookie: dict[str, object]) -> None:
