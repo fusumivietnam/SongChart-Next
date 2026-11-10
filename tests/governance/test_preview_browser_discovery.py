@@ -20,6 +20,9 @@ def candidate(created=NOW - 1000, **overrides):
 
 
 class DiscoveryTests(unittest.TestCase):
+    def test_diagnostic_code_never_reflects_untrusted_text(self):
+        self.assertEqual(DiscoveryBlocked("token=should-not-log").code, "DISCOVERY_REJECTED")
+
     def test_newest_matching_ready_preview_selected(self):
         older = candidate(created=NOW - 3000, uid="dpl_Older123")
         newer = candidate()

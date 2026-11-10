@@ -22,6 +22,11 @@ MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000
 class DiscoveryBlocked(ValueError):
     """No control-plane detail or deployment metadata is disclosed."""
 
+    def __init__(self, code: str):
+        # Safe diagnostic categories are static identifiers, not API responses.
+        self.code = code if re.fullmatch(r"[A-Z_]+", code) else "DISCOVERY_REJECTED"
+        super().__init__(self.code)
+
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
