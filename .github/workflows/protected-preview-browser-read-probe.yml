@@ -27,7 +27,7 @@ jobs:
   read-probe:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 6
     environment: preview-test
     steps:
       - name: Checkout trusted exact revision without token persistence
@@ -66,5 +66,8 @@ jobs:
             echo '::error::PROTECTED PREVIEW BROWSER BLOCKED [CHROME_MISSING]'
             exit 1
           fi
-          "$RUNNER_TEMP/preview-browser-venv/bin/python" scripts/verify_protected_preview_browser.py --chrome "$chrome"
+          # Bound a stuck Chromium/control-plane call without relaxing any fail-closed guard.
+          # A timeout exits 124 and the last fixed phase checkpoint identifies the stalled step.
+          timeout --signal=TERM --kill-after=5s 150s \
+            "$RUNNER_TEMP/preview-browser-venv/bin/python" scripts/verify_protected_preview_browser.py --chrome "$chrome"
           echo 'Auto-discovered and authenticated Preview deployment provenance (or verified complete explicit input); two viewport read-only probes passed; no screenshots, traces, artifacts, mutation or full UX acceptance.' >> "$GITHUB_STEP_SUMMARY"

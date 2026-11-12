@@ -2,6 +2,8 @@
 import sys
 import os
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -85,13 +87,23 @@ class ProtectedPreviewRunnerTests(unittest.TestCase):
 
     def test_handoff_stays_in_process_at_two_viewports(self):
         events = []
+        output = StringIO()
         fake_playwright = SimpleNamespace(sync_playwright=lambda: FakePlaywright(events))
         with patch.dict(sys.modules, {"playwright": SimpleNamespace(sync_api=fake_playwright),
                                       "playwright.sync_api": fake_playwright}), \
              patch.object(runner, "bootstrap", return_value=COOKIE) as bootstrap, \
              patch.object(runner, "install_isolated_cookie", side_effect=lambda _c, _o, _k: events.append("cookie")):
-            runner.run_probe(origin=ORIGIN, deployment_id="dpl_Abc123", expected_sha=SHA,
-                             secret="fixture", api_token="fixture", team_id="fixture", chrome="/fixture/chrome")
+            with redirect_stdout(output):
+                runner.run_probe(origin=ORIGIN, deployment_id="dpl_Abc123", expected_sha=SHA,
+                                 secret="fixture", api_token="fixture", team_id="fixture", chrome="/fixture/chrome")
+        phases = output.getvalue()
+        for name in ("chromium-launch-started", "chromium-launched", "mobile-guard-and-cookie-installed",
+                     "mobile-navigation-started", "mobile-navigation-returned", "mobile-viewport-verified",
+                     "desktop-guard-and-cookie-installed", "desktop-navigation-started",
+                     "desktop-navigation-returned", "desktop-viewport-verified"):
+            self.assertIn("PROTECTED PREVIEW PHASE: " + name, phases)
+        self.assertNotIn(ORIGIN, phases)
+        self.assertNotIn("fixture-only", phases)
         self.assertEqual(bootstrap.call_count, 1)
         self.assertEqual(events, ["context:390", "cookie", "goto:" + ORIGIN + "/",
                                   "context_closed", "context:1440", "cookie",
