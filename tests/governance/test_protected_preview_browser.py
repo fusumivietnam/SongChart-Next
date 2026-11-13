@@ -115,6 +115,32 @@ class ProtectedPreviewRunnerTests(unittest.TestCase):
                              secret="fixture", api_token="fixture", team_id="fixture", chrome="/fixture/chrome")
         bootstrap.assert_not_called()
 
+    def test_read_response_failure_codes_are_fixed_and_do_not_expose_page_data(self):
+        cases = (
+            (None, 1, False, "HTTP_RESPONSE_REJECTED"),
+            (SimpleNamespace(status=403), 1, False, "HTTP_RESPONSE_REJECTED"),
+            (SimpleNamespace(status=200), 0, False, "DOCUMENT_MISSING"),
+            (SimpleNamespace(status=200), 1, True, "HORIZONTAL_OVERFLOW"),
+        )
+        for response, body_count, overflow, expected in cases:
+            with self.subTest(expected=expected, response=response):
+                page = SimpleNamespace(
+                    locator=lambda _selector: SimpleNamespace(count=lambda: body_count),
+                    evaluate=lambda _expression: overflow,
+                )
+                with self.assertRaises(runner.BrowserReadBlocked) as raised:
+                    runner.verify_read_response(response, page)
+                self.assertEqual(raised.exception.code, expected)
+                self.assertNotIn(ORIGIN, str(raised.exception))
+                self.assertNotIn("fixture-only", str(raised.exception))
+
+    def test_successful_read_response_has_no_extra_side_effects(self):
+        page = SimpleNamespace(
+            locator=lambda _selector: SimpleNamespace(count=lambda: 1),
+            evaluate=lambda _expression: False,
+        )
+        self.assertIsNone(runner.verify_read_response(SimpleNamespace(status=200), page))
+
 
 if __name__ == "__main__":
     unittest.main()
