@@ -41,6 +41,6 @@ The VS-01b exact-SHA workflow must prove on PostgreSQL:
 - meaningful User-Agent and allowed Artist normalization boundary;
 - typed success, 404, malformed, network and 503 outcomes;
 - bounded 503 retry/backoff/jitter;
-- deployment-wide sequential request spacing;
+- deployment-wide sequential request spacing and cross-process serialization using two independent PHP workers with separate PostgreSQL connections;
 - no canonical Artist mutation on provider failure;
 - live external network access remains disabled in CI.
