@@ -187,6 +187,21 @@ class CiExecutionPolicyTests(unittest.TestCase):
             )
             self.assertTrue(any("unexpected positive app path" in error for error in validate(unsafe_override)), name)
 
+    def test_preview_runbook_matches_manual_browser_ownership_without_promoting_ux(self):
+        runbook = (ROOT / "docs/operations/VERCEL_PREVIEW.md").read_text(encoding="utf-8")
+        ownership = (ROOT / "docs/operations/CI_WORKFLOW_OWNERSHIP.md").read_text(encoding="utf-8")
+        workflow = (ROOT / ".github/workflows/protected-preview-browser-read-probe.yml").read_text(encoding="utf-8")
+        self.assertIn("protected-preview-browser-read-probe.yml", runbook)
+        self.assertIn("zero-input discovery", runbook)
+        self.assertIn("HORIZONTAL_OVERFLOW", runbook)
+        self.assertIn("interactive UX matrix remains incomplete/UNKNOWN", runbook)
+        self.assertNotIn("Candidate browser-context handoff (not activated)", runbook)
+        self.assertIn("manual-only narrow/wide", ownership)
+        self.assertIn("workflow_dispatch:", workflow)
+        self.assertIn("environment: preview-test", workflow)
+        self.assertNotIn("  pull_request:", workflow)
+        self.assertNotIn("  push:", workflow)
+
     def test_vs04_operations_trigger_is_bounded(self):
         text = (ROOT / ".github/workflows/vs04-launch-proof.yml").read_text(encoding="utf-8")
         self.assertNotIn("- docs/operations/**", text)
