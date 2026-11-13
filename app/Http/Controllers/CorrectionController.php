@@ -33,7 +33,7 @@ final class CorrectionController
         return $this->render($request->session()->pull('correctionStatus'));
     }
 
-    public function store(StoreCorrectionRequest $request, SubmitCorrectionEvidence $submitter): RedirectResponse|HttpResponse
+    public function store(Request $request, SubmitCorrectionEvidence $submitter): RedirectResponse|HttpResponse
     {
         $contentLength = (int) $request->server('CONTENT_LENGTH', 0);
         $bodyBytes = max($contentLength, strlen($request->getContent()));
@@ -44,7 +44,8 @@ final class CorrectionController
                 ->setStatusCode(422);
         }
 
-        $validated = $request->validated();
+        // Resolve after the size guard: injecting this FormRequest would validate too early.
+        $validated = app(StoreCorrectionRequest::class)->validated();
 
         $clientKey = hash_hmac(
             'sha256',
