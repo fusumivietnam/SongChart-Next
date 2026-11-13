@@ -47,6 +47,28 @@ def main() -> int:
             if owned_path not in content:
                 errors.append(f"{name}: owned path trigger missing: {owned_path}")
 
+    # Scoped negative path filters avoid unrelated expensive slice runs while
+    # preserving foundation-level correction coverage and shared dependencies.
+    foundation = contents.get("foundation-app.yml", "")
+    for required in ("      - app/**", "      - tests/Feature/**"):
+        if foundation.count(required) < 2:
+            errors.append(f"foundation-app.yml: missing PR/main correction coverage trigger {required}")
+
+    isolated_correction_paths = (
+        "app/Http/Controllers/CorrectionController.php",
+        "app/Music/Corrections/**",
+        "app/Models/CorrectionSubmission.php",
+    )
+    for name in ("vs01a-artist.yml", "vs02-release-recording.yml"):
+        content = contents.get(name, "")
+        for required in ("      - app/**", "      - database/**", "      - routes/**"):
+            if content.count(required) != 2:
+                errors.append(f"{name}: shared dependency trigger must remain in PR and main: {required}")
+        for path in isolated_correction_paths:
+            exclusion = "      - '!"+path+"'"
+            if content.count(exclusion) != 2:
+                errors.append(f"{name}: isolated correction exclusion must match PR and main: {path}")
+
     protected_browser = contents.get("protected-preview-browser-preflight.yml", "")
     for required in (
         "workflow_dispatch:", "environment: preview-test", "github.ref == 'refs/heads/main'",
