@@ -340,7 +340,7 @@ jobs:
             echo "- One-step disposable latest-migration rollback + forward re-apply to fully-up state: passed"
             echo "- Temporary database dump was deleted and is not retained as an artifact"
             echo "- Foundation application checks separately own locked audits, licenses, provenance, production-target validation and SBOMs and must pass on this same exact SHA"
-            echo "- G2/G3/G4 tested scope is ready; launch is NOT declared and production-deploy remains candidate until #69 + G5 evidence"
+            echo "- G2/G3/G4 tested scope is ready; launch is NOT declared and production-deploy remains implemented (package only), not deployed until #69 + G5 evidence"
             echo "- Evidence artifacts: \`vs04-launch-${EVIDENCE_SHA}\`, \`vs04-recovery-${EVIDENCE_SHA}\`, \`vs04-health-${EVIDENCE_SHA}\`"
           } >> "$GITHUB_STEP_SUMMARY"
 

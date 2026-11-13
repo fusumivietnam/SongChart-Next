@@ -96,9 +96,9 @@ Automatic reconciliation fails closed when metadata declares or implies:
 2. collects successful exact-head pull-request workflow evidence for the merged source SHA;
 3. applies the deterministic writer locally;
 4. creates/updates `automation/roadmap-reconcile-pr-<number>` and a bounded reconciliation PR;
-5. explicitly dispatches protected `governance`, `verify`, and `health` workflows on that exact reconciliation SHA because PRs created with `GITHUB_TOKEN` must not rely on implicit workflow recursion;
-6. stops automatic merge if a human review has intervened, the PR is draft/unmergeable, or any protected check fails/times out;
-7. merges only the generated factual reconciliation PR through normal branch protection;
+5. creates/updates the reconciliation PR using the dedicated `ROADMAP_RECONCILE_TOKEN` so normal PR-associated `governance`, `verify`, and `health` checks run on the exact reconciliation SHA; it waits for those PR-associated checks rather than treating workflow-dispatch-only runs as branch-protection evidence; 
+6. stops automatic merge if a human review has intervened, the PR is draft/unmergeable, or any PR-associated protected check fails, is missing or times out;
+7. merges only the generated factual reconciliation PR through normal branch protection, without writing protected `main` directly;
 8. explicitly refreshes Project #2 as a derived projection and deletes the generated branch after successful merge.
 
 Generated reconciliation PRs mark themselves `skip` to prevent recursive reconciliation. Replay exists for deterministic repair/backfill of already merged PRs after metadata is authored; it cannot bypass the same safety gates.
