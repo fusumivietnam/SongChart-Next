@@ -116,7 +116,7 @@ jobs:
             echo "- Source revision: \`${EVIDENCE_SHA}\`"
             echo "- PostgreSQL provider evidence schema: passed"
             echo "- Success/404/malformed/network/503 contracts: passed"
-            echo "- Deployment-wide >=1 second request spacing: passed"
+            echo "- PostgreSQL sequential spacing and independent worker serialization: passed"
             echo "- 503 bounded backoff + jitter: passed"
             echo "- No canonical Artist mutation on provider failure: passed"
             echo "- Live MusicBrainz network access in CI: disabled"
