@@ -44,7 +44,7 @@ def correction_slice_trigger_errors(workflow: str) -> list[str]:
     expected_prefix = ["app/**", *("!" + p for p in ISOLATED_CORRECTION_PATHS)]
     for event in ("pull_request", "push"):
         block = re.search(
-            rf"(?ms)^  {event}:\\n    (?:branches: \\[[^\\n]*\\]\\n)?    paths:\\n(?P<paths>(?:      - [^\\n]+\\n)+)",
+            rf"(?ms)^  {event}:\n    (?:branches: \[[^\n]*\]\n)?    paths:\n(?P<paths>(?:      - [^\n]+\n)+)",
             workflow,
         )
         if block is None:
