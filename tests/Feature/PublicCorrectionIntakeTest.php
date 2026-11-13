@@ -116,6 +116,29 @@ final class PublicCorrectionIntakeTest extends TestCase
         $this->assertSame(0, CorrectionSubmission::query()->count());
     }
 
+    public function test_oversized_and_invalid_request_prioritizes_size_guard(): void
+    {
+        $artist = $this->artist();
+
+        $this->withServerVariables([
+            'REMOTE_ADDR' => '198.51.100.16',
+            'CONTENT_LENGTH' => '9000',
+        ])->post('/corrections', [
+            'subject_type' => 'artist',
+            'subject_id' => $artist->id,
+            'claim' => '',
+            'evidence_url' => 'javascript:alert(1)',
+        ])
+            ->assertStatus(422)
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('site/document')
+                ->where('correctionIntake.status', 'validation')
+                ->where('correctionIntake.message', 'The correction request is too large.'));
+
+        $this->assertSame(0, CorrectionSubmission::query()->count());
+        $this->assertSame('Signal Atlas', $artist->fresh()?->name);
+    }
+
     public function test_anonymous_rate_limit_returns_deterministic_429(): void
     {
         $artist = $this->artist();
