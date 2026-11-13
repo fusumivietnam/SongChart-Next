@@ -63,7 +63,8 @@ def main() -> int:
 
     read_probe = contents.get("protected-preview-browser-read-probe.yml", "")
     for required in ("workflow_dispatch:", "environment: preview-test", "github.ref == 'refs/heads/main'",
-                     "contents: read", "persist-credentials: false", "timeout-minutes: 15",
+                     "contents: read", "persist-credentials: false", "timeout-minutes: 6",
+                     "timeout --signal=TERM --kill-after=5s 150s",
                      "--require-hashes", "requirements-browser.lock", "verify_protected_preview_browser.py",
                      "secrets.VERCEL_API_READ_TOKEN", "secrets.VERCEL_AUTOMATION_BYPASS_SECRET",
                      "vars.VERCEL_TEAM_ID"):

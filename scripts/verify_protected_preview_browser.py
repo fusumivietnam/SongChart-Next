@@ -28,17 +28,24 @@ def run_probe(*, origin: str, deployment_id: str, expected_sha: str,
     print("PROTECTED PREVIEW PHASE: provenance-and-cookie-verified", flush=True)
     try:
         with sync_playwright() as playwright:
+            print("PROTECTED PREVIEW PHASE: chromium-launch-started", flush=True)
             browser = playwright.chromium.launch(executable_path=chrome, headless=True)
+            print("PROTECTED PREVIEW PHASE: chromium-launched", flush=True)
             try:
-                for width, height in ((390, 844), (1440, 1024)):
+                for label, width, height in (("mobile", 390, 844), ("desktop", 1440, 1024)):
+                    print(f"PROTECTED PREVIEW PHASE: {label}-context-started", flush=True)
                     context = browser.new_context(
                         viewport={"width": width, "height": height},
                         service_workers="block", accept_downloads=False,
                     )
                     try:
+                        print(f"PROTECTED PREVIEW PHASE: {label}-context-created", flush=True)
                         install_isolated_cookie(context, normalized, cookie)
+                        print(f"PROTECTED PREVIEW PHASE: {label}-guard-and-cookie-installed", flush=True)
                         page = context.new_page()
+                        print(f"PROTECTED PREVIEW PHASE: {label}-navigation-started", flush=True)
                         response = page.goto(normalized + "/", wait_until="domcontentloaded", timeout=15000)
+                        print(f"PROTECTED PREVIEW PHASE: {label}-navigation-returned", flush=True)
                         if response is None or response.status >= 400:
                             raise RuntimeError("NAVIGATION_FAILED")
                         if page.locator("body").count() != 1:
@@ -46,7 +53,7 @@ def run_probe(*, origin: str, deployment_id: str, expected_sha: str,
                         if page.evaluate("document.documentElement.scrollWidth > innerWidth + 1"):
                             raise RuntimeError("HORIZONTAL_OVERFLOW")
                         # No third-party navigation, form submission or page captures.
-                        print("PROTECTED PREVIEW PHASE: viewport-verified", flush=True)
+                        print(f"PROTECTED PREVIEW PHASE: {label}-viewport-verified", flush=True)
                     finally:
                         context.close()
             finally:
