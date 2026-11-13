@@ -122,6 +122,71 @@ class CiExecutionPolicyTests(unittest.TestCase):
         self.assertIn("bounded legal/support document anatomy was approved in VS-04a", design)
         self.assertNotIn("Candidate Release/Recording/Credits/discovery/editorial/legal/form/error archetypes", design)
 
+    def test_reconciliation_authority_tracks_real_pr_associated_protected_checks(self):
+        roadmap = (ROOT / "docs/roadmap/ROADMAP_GOVERNANCE.md").read_text(encoding="utf-8")
+        ownership = (ROOT / "docs/operations/CI_WORKFLOW_OWNERSHIP.md").read_text(encoding="utf-8")
+        workflow = (ROOT / ".github/workflows/roadmap-reconcile.yml").read_text(encoding="utf-8")
+        self.assertIn("dedicated `ROADMAP_RECONCILE_TOKEN`", roadmap)
+        self.assertIn("PR-associated checks", roadmap)
+        self.assertNotIn("PRs created with `GITHUB_TOKEN`", roadmap)
+        self.assertIn("secrets.ROADMAP_RECONCILE_TOKEN", workflow)
+        self.assertIn("any(.pull_requests[]?; .number == $pr)", workflow)
+        self.assertIn("normal pull-request protected checks", workflow)
+        self.assertIn("PR-associated", ownership)
+
+    def test_production_package_lifecycle_claim_is_consistent(self):
+        import json
+        capability_map = json.loads((ROOT / "governance/CAPABILITY_MAP.json").read_text(encoding="utf-8"))
+        production = next(c for c in capability_map["capabilities"] if c["id"] == "production-deploy")
+        workflow = (ROOT / ".github/workflows/vs04-launch-proof.yml").read_text(encoding="utf-8")
+        self.assertEqual("implemented", production["status"])
+        self.assertIn("production-deploy remains implemented (package only), not deployed", workflow)
+        self.assertNotIn("production-deploy remains candidate", workflow)
+
+    def test_isolated_correction_change_does_not_spawn_canonical_slice_checks(self):
+        ownership = (ROOT / "docs/operations/CI_WORKFLOW_OWNERSHIP.md").read_text(encoding="utf-8")
+        foundation = (ROOT / ".github/workflows/foundation-app.yml").read_text(encoding="utf-8")
+        self.assertIn("Cross-slice trigger dependency contract", ownership)
+        self.assertEqual(2, foundation.count("      - app/**"))
+        self.assertEqual(2, foundation.count("      - tests/Feature/**"))
+        for path in ("vs01a-artist.yml", "vs02-release-recording.yml"):
+            workflow = (ROOT / ".github/workflows" / path).read_text(encoding="utf-8")
+            self.assertEqual(2, workflow.count("      - app/**"))
+            for excluded in (
+                "app/Http/Controllers/CorrectionController.php",
+                "app/Music/Corrections/**",
+                "app/Models/CorrectionSubmission.php",
+            ):
+                self.assertEqual(2, workflow.count("      - '!" + excluded + "'"))
+            for shared in ("database/**", "routes/**"):
+                self.assertEqual(2, workflow.count("      - " + shared))
+
+    def test_ci_correction_exclusions_are_ordered_and_shared_paths_are_preserved(self):
+        from runpy import run_path
+
+        verify = run_path(str(ROOT / "scripts/verify_ci_ownership.py"))
+        validate = verify["correction_slice_trigger_errors"]
+
+        for name in ("vs01a-artist.yml", "vs02-release-recording.yml"):
+            workflow = (ROOT / ".github/workflows" / name).read_text(encoding="utf-8")
+            self.assertEqual([], validate(workflow), name)
+
+            reordered = workflow.replace(
+                "      - app/**\n      - '!app/Http/Controllers/CorrectionController.php'",
+                "      - '!app/Http/Controllers/CorrectionController.php'\n      - app/**",
+            )
+            self.assertTrue(any("immediately followed" in error for error in validate(reordered)), name)
+
+            missing_shared = workflow.replace("      - routes/**\n", "")
+            self.assertTrue(any("shared dependency trigger missing" in error for error in validate(missing_shared)), name)
+
+            unsafe_override = workflow.replace(
+                "      - '!app/Models/CorrectionSubmission.php'\n",
+                "      - '!app/Models/CorrectionSubmission.php'\n"
+                "      - app/Music/Corrections/**\n",
+            )
+            self.assertTrue(any("unexpected positive app path" in error for error in validate(unsafe_override)), name)
+
     def test_vs04_operations_trigger_is_bounded(self):
         text = (ROOT / ".github/workflows/vs04-launch-proof.yml").read_text(encoding="utf-8")
         self.assertNotIn("- docs/operations/**", text)

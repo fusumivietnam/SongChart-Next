@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Classify changed repository paths into deterministic CI impact categories.
 
-Categories remain advisory for CI fan-out. The one enforced use is the Vercel
-preview skip safety rule: branches deliberately skipped by Vercel must not carry
-runtime-affecting changes.
+Categories remain advisory for CI fan-out. The enforced use is the
+repository's docs/governance branch-name safety rule: these branch prefixes
+must not hide runtime-affecting changes. Actual Vercel Git deployments are
+disabled independently by vercel.json; the classifier does not enable them.
 """
 from __future__ import annotations
 

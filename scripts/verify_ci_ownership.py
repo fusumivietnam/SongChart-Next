@@ -28,6 +28,42 @@ PR_MAIN_EVIDENCE = {
 }
 
 
+
+# The GitHub paths list is ordered: a later positive match can override a
+# preceding negative match. Keep exclusions adjacent to the broad app glob
+# so any future app-path trigger needs conscious review.
+ISOLATED_CORRECTION_PATHS = (
+    "app/Http/Controllers/CorrectionController.php",
+    "app/Music/Corrections/**",
+    "app/Models/CorrectionSubmission.php",
+)
+
+
+def correction_slice_trigger_errors(workflow: str) -> list[str]:
+    errors: list[str] = []
+    expected_prefix = ["app/**", *("!" + p for p in ISOLATED_CORRECTION_PATHS)]
+    for event in ("pull_request", "push"):
+        block = re.search(
+            rf"(?ms)^  {event}:\n(?:    branches: \[[^\n]*\]\n)?    paths:\n(?P<paths>(?:      - [^\n]+\n)+)",
+            workflow,
+        )
+        if block is None:
+            errors.append(f"{event}: expected a path-filtered trigger")
+            continue
+        paths = [
+            line.strip().removeprefix("- ").strip().strip("'").strip('"')
+            for line in block.group("paths").splitlines()
+        ]
+        if paths[:len(expected_prefix)] != expected_prefix:
+            errors.append(f"{event}: app glob must be immediately followed by approved negative paths")
+        if any(path.startswith("app/") and path not in expected_prefix for path in paths[len(expected_prefix):]):
+            errors.append(f"{event}: unexpected positive app path may override correction exclusions")
+        for shared in ("database/**", "routes/**"):
+            if shared not in paths:
+                errors.append(f"{event}: shared dependency trigger missing: {shared}")
+    return errors
+
+
 def main() -> int:
     errors: list[str] = []
     present = {p.name for p in WORKFLOWS.glob("*.y*ml")}
@@ -46,6 +82,17 @@ def main() -> int:
         for owned_path in expected_owned_paths:
             if owned_path not in content:
                 errors.append(f"{name}: owned path trigger missing: {owned_path}")
+
+    # Scoped negative path filters avoid unrelated expensive slice runs while
+    # preserving foundation-level correction coverage and shared dependencies.
+    foundation = contents.get("foundation-app.yml", "")
+    for required in ("      - app/**", "      - tests/Feature/**"):
+        if foundation.count(required) < 2:
+            errors.append(f"foundation-app.yml: missing PR/main correction coverage trigger {required}")
+
+    for name in ("vs01a-artist.yml", "vs02-release-recording.yml"):
+        for problem in correction_slice_trigger_errors(contents.get(name, "")):
+            errors.append(f"{name}: {problem}")
 
     protected_browser = contents.get("protected-preview-browser-preflight.yml", "")
     for required in (
