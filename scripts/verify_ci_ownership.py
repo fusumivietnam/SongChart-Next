@@ -28,6 +28,42 @@ PR_MAIN_EVIDENCE = {
 }
 
 
+
+# The GitHub paths list is ordered: a later positive match can override a
+# preceding negative match. Keep exclusions adjacent to the broad app glob
+# so any future app-path trigger needs conscious review.
+ISOLATED_CORRECTION_PATHS = (
+    "app/Http/Controllers/CorrectionController.php",
+    "app/Music/Corrections/**",
+    "app/Models/CorrectionSubmission.php",
+)
+
+
+def correction_slice_trigger_errors(workflow: str) -> list[str]:
+    errors: list[str] = []
+    expected_prefix = ["app/**", *("!" + p for p in ISOLATED_CORRECTION_PATHS)]
+    for event in ("pull_request", "push"):
+        block = re.search(
+            rf"(?ms)^  {event}:\\n    (?:branches: \\[[^\\n]*\\]\\n)?    paths:\\n(?P<paths>(?:      - [^\\n]+\\n)+)",
+            workflow,
+        )
+        if block is None:
+            errors.append(f"{event}: expected a path-filtered trigger")
+            continue
+        paths = [
+            line.strip().removeprefix("- ").strip().strip("'").strip('"')
+            for line in block.group("paths").splitlines()
+        ]
+        if paths[:len(expected_prefix)] != expected_prefix:
+            errors.append(f"{event}: app glob must be immediately followed by approved negative paths")
+        if any(path.startswith("app/") and path not in expected_prefix for path in paths[len(expected_prefix):]):
+            errors.append(f"{event}: unexpected positive app path may override correction exclusions")
+        for shared in ("database/**", "routes/**"):
+            if shared not in paths:
+                errors.append(f"{event}: shared dependency trigger missing: {shared}")
+    return errors
+
+
 def main() -> int:
     errors: list[str] = []
     present = {p.name for p in WORKFLOWS.glob("*.y*ml")}
@@ -54,20 +90,9 @@ def main() -> int:
         if foundation.count(required) < 2:
             errors.append(f"foundation-app.yml: missing PR/main correction coverage trigger {required}")
 
-    isolated_correction_paths = (
-        "app/Http/Controllers/CorrectionController.php",
-        "app/Music/Corrections/**",
-        "app/Models/CorrectionSubmission.php",
-    )
     for name in ("vs01a-artist.yml", "vs02-release-recording.yml"):
-        content = contents.get(name, "")
-        for required in ("      - app/**", "      - database/**", "      - routes/**"):
-            if content.count(required) != 2:
-                errors.append(f"{name}: shared dependency trigger must remain in PR and main: {required}")
-        for path in isolated_correction_paths:
-            exclusion = "      - '!"+path+"'"
-            if content.count(exclusion) != 2:
-                errors.append(f"{name}: isolated correction exclusion must match PR and main: {path}")
+        for problem in correction_slice_trigger_errors(contents.get(name, "")):
+            errors.append(f"{name}: {problem}")
 
     protected_browser = contents.get("protected-preview-browser-preflight.yml", "")
     for required in (
