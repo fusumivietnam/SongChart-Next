@@ -161,6 +161,32 @@ class CiExecutionPolicyTests(unittest.TestCase):
             for shared in ("database/**", "routes/**"):
                 self.assertEqual(2, workflow.count("      - " + shared))
 
+    def test_ci_correction_exclusions_are_ordered_and_shared_paths_are_preserved(self):
+        from runpy import run_path
+
+        verify = run_path(str(ROOT / "scripts/verify_ci_ownership.py"))
+        validate = verify["correction_slice_trigger_errors"]
+
+        for name in ("vs01a-artist.yml", "vs02-release-recording.yml"):
+            workflow = (ROOT / ".github/workflows" / name).read_text(encoding="utf-8")
+            self.assertEqual([], validate(workflow), name)
+
+            reordered = workflow.replace(
+                "      - app/**\n      - '!app/Http/Controllers/CorrectionController.php'",
+                "      - '!app/Http/Controllers/CorrectionController.php'\n      - app/**",
+            )
+            self.assertTrue(any("immediately followed" in error for error in validate(reordered)), name)
+
+            missing_shared = workflow.replace("      - routes/**\n", "")
+            self.assertTrue(any("shared dependency trigger missing" in error for error in validate(missing_shared)), name)
+
+            unsafe_override = workflow.replace(
+                "      - '!app/Models/CorrectionSubmission.php'\n",
+                "      - '!app/Models/CorrectionSubmission.php'\n"
+                "      - app/Music/Corrections/**\n",
+            )
+            self.assertTrue(any("unexpected positive app path" in error for error in validate(unsafe_override)), name)
+
     def test_vs04_operations_trigger_is_bounded(self):
         text = (ROOT / ".github/workflows/vs04-launch-proof.yml").read_text(encoding="utf-8")
         self.assertNotIn("- docs/operations/**", text)
