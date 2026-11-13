@@ -62,6 +62,24 @@ final class PublicCorrectionIntakeTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_invalid_correction_fields_are_rejected_before_persistence(): void
+    {
+        $artist = $this->artist();
+
+        $this->withServerVariables(['REMOTE_ADDR' => '198.51.100.15'])
+            ->post('/corrections', [
+                'subject_type' => 'artist',
+                'subject_id' => $artist->id,
+                'claim' => '',
+                'evidence_url' => 'javascript:alert(1)',
+            ])
+            ->assertRedirect()
+            ->assertSessionHasErrors(['claim', 'evidence_url']);
+
+        $this->assertSame(0, CorrectionSubmission::query()->count());
+        $this->assertSame('Signal Atlas', $artist->fresh()?->name);
+    }
+
     public function test_identical_submission_within_24_hours_is_suppressed(): void
     {
         $artist = $this->artist();
