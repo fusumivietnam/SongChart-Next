@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCorrectionRequest;
 use App\Music\Corrections\CorrectionEvidence;
 use App\Music\Corrections\CorrectionSubjectType;
 use App\Music\Corrections\SubmitCorrectionEvidence;
@@ -32,7 +33,7 @@ final class CorrectionController
         return $this->render($request->session()->pull('correctionStatus'));
     }
 
-    public function store(Request $request, SubmitCorrectionEvidence $submitter): RedirectResponse|HttpResponse
+    public function store(StoreCorrectionRequest $request, SubmitCorrectionEvidence $submitter): RedirectResponse|HttpResponse
     {
         $contentLength = (int) $request->server('CONTENT_LENGTH', 0);
         $bodyBytes = max($contentLength, strlen($request->getContent()));
@@ -43,12 +44,7 @@ final class CorrectionController
                 ->setStatusCode(422);
         }
 
-        $validated = $request->validate([
-            'subject_type' => ['required', 'string', 'in:artist,release,recording'],
-            'subject_id' => ['required', 'string', 'ulid'],
-            'claim' => ['required', 'string', 'max:4000'],
-            'evidence_url' => ['nullable', 'string', 'max:2048', 'url:http,https'],
-        ]);
+        $validated = $request->validated();
 
         $clientKey = hash_hmac(
             'sha256',
