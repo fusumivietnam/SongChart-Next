@@ -16,6 +16,24 @@ from preview_browser_discovery import DiscoveryBlocked, discover
 from preview_browser_preflight import validate
 
 
+class BrowserReadBlocked(ValueError):
+    """Fixed, non-sensitive read-verification outcome; never embeds page data."""
+
+    def __init__(self, code: str):
+        self.code = code
+        super().__init__(code)
+
+
+def verify_read_response(response, page) -> None:
+    """Validate a read-only viewport without exposing response or DOM content."""
+    if response is None or response.status >= 400:
+        raise BrowserReadBlocked("HTTP_RESPONSE_REJECTED")
+    if page.locator("body").count() != 1:
+        raise BrowserReadBlocked("DOCUMENT_MISSING")
+    if page.evaluate("document.documentElement.scrollWidth > innerWidth + 1"):
+        raise BrowserReadBlocked("HORIZONTAL_OVERFLOW")
+
+
 def run_probe(*, origin: str, deployment_id: str, expected_sha: str,
               secret: str, api_token: str, team_id: str, chrome: str) -> None:
     """Perform one provenance-bound in-memory bootstrap and two read-only visits."""
@@ -46,12 +64,7 @@ def run_probe(*, origin: str, deployment_id: str, expected_sha: str,
                         print(f"PROTECTED PREVIEW PHASE: {label}-navigation-started", flush=True)
                         response = page.goto(normalized + "/", wait_until="domcontentloaded", timeout=15000)
                         print(f"PROTECTED PREVIEW PHASE: {label}-navigation-returned", flush=True)
-                        if response is None or response.status >= 400:
-                            raise RuntimeError("NAVIGATION_FAILED")
-                        if page.locator("body").count() != 1:
-                            raise RuntimeError("DOCUMENT_MISSING")
-                        if page.evaluate("document.documentElement.scrollWidth > innerWidth + 1"):
-                            raise RuntimeError("HORIZONTAL_OVERFLOW")
+                        verify_read_response(response, page)
                         # No third-party navigation, form submission or page captures.
                         print(f"PROTECTED PREVIEW PHASE: {label}-viewport-verified", flush=True)
                     finally:
@@ -87,6 +100,9 @@ def main() -> int:
         print(f"PROTECTED PREVIEW BROWSER BLOCKED [{error.code}]", file=sys.stderr)
         return 1
     except PreflightBlocked as error:
+        print(f"PROTECTED PREVIEW BROWSER BLOCKED [{error.code}]", file=sys.stderr)
+        return 1
+    except BrowserReadBlocked as error:
         print(f"PROTECTED PREVIEW BROWSER BLOCKED [{error.code}]", file=sys.stderr)
         return 1
     except Exception:
