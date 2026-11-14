@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Private local read-only smoke, no host Python dependency.
+# Private local read-only smoke, using only the Bash/curl shell tools.
 set -euo pipefail
 origin='http://127.0.0.1:8000'
 routes=('/' '/search?q=Signals' '/corrections' '/about' '/privacy' '/terms' '/disclaimer' '/support')
