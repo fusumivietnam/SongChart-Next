@@ -26,8 +26,23 @@ class BrowserReadBlocked(ValueError):
 
 def verify_read_response(response, page) -> None:
     """Validate a read-only viewport without exposing response or DOM content."""
-    if response is None or response.status >= 400:
-        raise BrowserReadBlocked("HTTP_RESPONSE_REJECTED")
+    if response is None:
+        raise BrowserReadBlocked("HTTP_RESPONSE_MISSING")
+    if response.status >= 400:
+        # Deliberately fixed categories; never log exact HTTP status, URL,
+        # headers, cookies, response text, or page content.
+        status = response.status
+        if status in (401, 403):
+            code = "HTTP_ACCESS_REJECTED"
+        elif status == 404:
+            code = "HTTP_NOT_FOUND"
+        elif status == 429:
+            code = "HTTP_RATE_LIMITED"
+        elif 500 <= status < 600:
+            code = "HTTP_SERVER_REJECTED"
+        else:
+            code = "HTTP_OTHER_REJECTED"
+        raise BrowserReadBlocked(code)
     if page.locator("body").count() != 1:
         raise BrowserReadBlocked("DOCUMENT_MISSING")
     if page.evaluate("document.documentElement.scrollWidth > innerWidth + 1"):

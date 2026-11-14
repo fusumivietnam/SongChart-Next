@@ -117,8 +117,13 @@ class ProtectedPreviewRunnerTests(unittest.TestCase):
 
     def test_read_response_failure_codes_are_fixed_and_do_not_expose_page_data(self):
         cases = (
-            (None, 1, False, "HTTP_RESPONSE_REJECTED"),
-            (SimpleNamespace(status=403), 1, False, "HTTP_RESPONSE_REJECTED"),
+            (None, 1, False, "HTTP_RESPONSE_MISSING"),
+            (SimpleNamespace(status=401), 1, False, "HTTP_ACCESS_REJECTED"),
+            (SimpleNamespace(status=403), 1, False, "HTTP_ACCESS_REJECTED"),
+            (SimpleNamespace(status=404), 1, False, "HTTP_NOT_FOUND"),
+            (SimpleNamespace(status=429), 1, False, "HTTP_RATE_LIMITED"),
+            (SimpleNamespace(status=503), 1, False, "HTTP_SERVER_REJECTED"),
+            (SimpleNamespace(status=418), 1, False, "HTTP_OTHER_REJECTED"),
             (SimpleNamespace(status=200), 0, False, "DOCUMENT_MISSING"),
             (SimpleNamespace(status=200), 1, True, "HORIZONTAL_OVERFLOW"),
         )
