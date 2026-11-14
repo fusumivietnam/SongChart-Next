@@ -115,6 +115,8 @@ for (const surface of surfaces) {
             if (!dom.includes('rel="noopener noreferrer"')) throw new Error('Recording destination is missing opener isolation.');
         }
         if (!dom.includes('role="search"')) throw new Error(`${surface.label} is missing the search landmark.`);
+        if (!dom.includes('action="/search"')) throw new Error(`${surface.label} search form must submit to /search, not Home.`);
+        if (!dom.includes('name="q"')) throw new Error(`${surface.label} is missing the canonical search query input.`);
         if (!dom.includes('Skip to content')) throw new Error(`${surface.label} is missing the skip link.`);
         if (dom.includes('/@vite/client') || dom.includes('127.0.0.1:5173')) throw new Error(`${surface.label} unexpectedly references Vite dev server.`);
 
