@@ -31,8 +31,22 @@ commit, keep port 8000 private and run:
 ```bash
 bash scripts/codespaces_doctor.sh
 bash scripts/design_review.sh
+# For a brand-new, disposable Codespaces PostgreSQL database ONLY:
+# docker compose exec -T app php artisan migrate --force
 bash scripts/codespaces_public_read.sh
 ```
+
+**First-use schema prerequisite:** `scripts/design_review.sh` does not run
+Laravel migrations. Home and Search query canonical Artist, Release and Recording
+tables, so an empty new PostgreSQL volume can pass the Design Authority
+preview but fail these public pages. On a **confirmed new, disposable**
+Codespaces database, use the explicitly shown `docker compose exec -T app
+php artisan migrate --force` command once before the smoke. For any
+existing/populated or uncertain volume, do **not** run migrations merely to
+make a smoke test pass: inspect schema and the migration plan first and
+request an explicit reviewed decision. Never use `migrate:fresh`,
+`docker compose down -v` or import fixtures just to pass this command.
+An empty migrated database may legitimately show empty music discovery.
 
 The last command sends only GET requests to loopback
 `http://127.0.0.1:8000` for `/health`, Home, Search, Corrections,
