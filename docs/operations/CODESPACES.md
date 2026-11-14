@@ -22,6 +22,34 @@ Ports:
 
 Default requested machine specification is 2 CPU, 8 GB RAM and 32 GB storage. A larger machine is an explicit operator choice for a bounded task, not the repository default.
 
+## Private Codespaces public-read smoke (#253)
+
+Reuse the approved Compose app and PostgreSQL; this is **not** a second Preview
+or production deployment. On a Codespace checked out at the intended exact
+commit, keep port 8000 private and run:
+
+```bash
+bash scripts/codespaces_doctor.sh
+bash scripts/design_review.sh
+python3 scripts/codespaces_public_read.py
+```
+
+The last command sends only GET requests to loopback
+`http://127.0.0.1:8000` for `/health`, Home, Search, Corrections,
+About, Privacy, Terms, Disclaimer, and Support. It checks HTTP 200,
+JSON health `{"status":"ok"}` or HTML content type, without following
+redirects, printing response bodies, or creating/changing database records.
+The smoke fails closed when the app/database are not ready; do **not** reset
+a populated developer database to make it pass. Route/HTTP status proof is
+not hydrated UI, keyboard/focus or narrow/wide browser evidence.
+
+Artist, Release and Recording fixture-backed routes, visual browser
+assertions and PostgreSQL reset/recovery exercises remain in the **existing
+disposable** VS-03/VS-04/Foundation GitHub CI owners, never in this local
+script. Human review uses the private port 8000 at 390×844 and
+1440×1024, recording the exact commit and any observed UX gaps in Issue
+#253. Do not present this as Vercel, G4/G5 or #175 full UX acceptance.
+
 ## Quota discipline
 
 Codespaces is a convenience shell, not a persistent server or CI runner. To keep monthly core-hours and storage bounded:
