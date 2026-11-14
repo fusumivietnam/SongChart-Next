@@ -1,98 +1,69 @@
-"""Offline network-free checks for the Codespaces public read smoke."""
-import io
-import json
-import sys
+"""Network-free Bash/curl tests. Python is used by CI, not Codespaces shell."""
+import os
+import subprocess
+import tempfile
 import unittest
-from contextlib import redirect_stdout
 from pathlib import Path
-from types import SimpleNamespace
-from unittest.mock import patch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts"))
-import codespaces_public_read as smoke
-
-
-class FakeResponse:
-    def __init__(self, url, status=200, content_type="text/html", payload=b"UNREAD-SENSITIVE-BODY"):
-        self.url, self.status = url, status
-        self.headers = {"Content-Type": content_type}
-        self.payload = payload
-        self.read_calls = 0
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *_args):
-        return False
-
-    def geturl(self):
-        return self.url
-
-    def read(self, n=-1):
-        self.read_calls += 1
-        return self.payload[:n]
-
-
-class FakeOpener:
-    def __init__(self, overrides=None):
-        self.overrides = overrides or {}
-        self.seen = []
-        self.responses = []
-
-    def open(self, request, timeout):
-        self.seen.append((request.full_url, request.get_method(), timeout))
-        if request.full_url in self.overrides:
-            value = self.overrides[request.full_url]
-            if isinstance(value, Exception):
-                raise value
-            response = value
-        elif request.full_url.endswith("/health"):
-            response = FakeResponse(request.full_url, content_type="application/json",
-                                    payload=b'{"status":"ok"}')
-        else:
-            response = FakeResponse(request.full_url)
-        self.responses.append(response)
-        return response
-
+ROOT = Path(__file__).resolve().parents[2]
+SCRIPT = ROOT / "scripts/codespaces_public_read.sh"
+ROUTES = ("/health", "/", "/search?q=Signals", "/corrections", "/about", "/privacy", "/terms", "/disclaimer", "/support")
 
 class CodespacesPublicReadTests(unittest.TestCase):
-    def test_read_only_allowlist_passes_without_reading_html(self):
-        opener = FakeOpener()
-        results = smoke.verify(opener)
-        self.assertEqual(len(results), len(smoke.HTML_ROUTES) + 1)
-        self.assertTrue(all(ok for _path, ok in results))
-        self.assertTrue(all(method == "GET" and timeout == 5 and url.startswith(smoke.ORIGIN)
-                            for url, method, timeout in opener.seen))
-        self.assertTrue(all(resp.read_calls == 0 for resp in opener.responses[1:]))
-        self.assertEqual(opener.responses[0].read_calls, 1)
+    def run_fixture(self, health='{"status":"ok"}', html="200|text/html; charset=UTF-8", fail_path=None):
+        with tempfile.TemporaryDirectory() as temp:
+            stub = Path(temp) / "curl"
+            calls = Path(temp) / "calls"
+            stub.write_text("""#!/usr/bin/env bash
+set -euo pipefail
+url=''
+body=0
+for arg in "$@"; do
+  [[ "$arg" == http://127.0.0.1:8000/* ]] && url="$arg"
+  [[ "$arg" == '--output' ]] && body=1
+done
+[[ -n "$url" ]] || exit 3
+printf '%s\\n' "$url" >> "$CALLS"
+if [[ "$url" == "$FAIL_PATH" ]]; then exit 22; fi
+if [[ "$body" == 0 ]]; then
+  printf '%s\\n200|application/json' "$HEALTH"
+else
+  printf '%s' "$HTML"
+fi
+""", encoding="utf-8")
+            stub.chmod(0o755)
+            env = dict(os.environ, PATH=temp + os.pathsep + os.environ.get("PATH", ""), CALLS=str(calls),
+                       HEALTH=health, HTML=html, FAIL_PATH="http://127.0.0.1:8000" + fail_path if fail_path else "")
+            proc = subprocess.run(["bash", str(SCRIPT)], env=env, text=True, capture_output=True, timeout=15)
+            urls = calls.read_text(encoding="utf-8").splitlines() if calls.exists() else []
+            return proc, urls
 
-    def test_fail_closed_non200_redirect_malformed_health_and_unavailable(self):
-        cases = (
-            FakeResponse(smoke.ORIGIN + "/", status=503),
-            FakeResponse("https://foreign.example/", status=200),
-            FakeResponse(smoke.ORIGIN + "/", content_type="application/json"),
-            TimeoutError("secret-bearing error details"),
-        )
-        for failure in cases:
-            with self.subTest(failure=type(failure).__name__):
-                opener = FakeOpener({smoke.ORIGIN + "/": failure})
-                result = smoke.verify(opener)
-                self.assertFalse(result[1][1])
-        bad_health = FakeOpener({smoke.ORIGIN + "/health":
-            FakeResponse(smoke.ORIGIN + "/health", content_type="application/json",
-                         payload=json.dumps({"status": "unavailable"}).encode())})
-        self.assertFalse(smoke.verify(bad_health)[0][1])
+    def test_loopback_get_allowlist_and_no_host_python(self):
+        proc, urls = self.run_fixture()
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertEqual(urls, ["http://127.0.0.1:8000" + route for route in ROUTES])
+        self.assertIn("CODESPACES READ 08: PASS", proc.stdout)
+        self.assertNotIn("http://", proc.stdout)
+        source = SCRIPT.read_text(encoding="utf-8")
+        self.assertNotIn("python", source.lower())
+        self.assertNotIn("--location", source)
+        self.assertIn("--output /dev/null", source)
 
-    def test_output_never_exposes_response_or_origin(self):
-        with patch.object(smoke, "verify", return_value=[("/health", False), ("/", True)]):
-            stdout = io.StringIO()
-            with redirect_stdout(stdout):
-                self.assertEqual(smoke.main(), 1)
-        self.assertIn("CODESPACES READ 00: FAIL", stdout.getvalue())
-        self.assertNotIn(smoke.ORIGIN, stdout.getvalue())
-        self.assertNotIn("/health", stdout.getvalue())
-        self.assertNotIn("UNREAD-SENSITIVE-BODY", stdout.getvalue())
-
+    def test_fail_closed(self):
+        for health in ('{"status":"unavailable"}', '{"status":"ok","extra":1}'):
+            proc, _ = self.run_fixture(health=health)
+            self.assertEqual(proc.returncode, 1)
+            self.assertIn("CODESPACES READ 00: FAIL", proc.stdout)
+            self.assertNotIn(health, proc.stdout)
+        for html in ("503|text/html", "302|text/html", "200|application/json"):
+            proc, _ = self.run_fixture(html=html)
+            self.assertEqual(proc.returncode, 1)
+            self.assertIn("CODESPACES READ 01: FAIL", proc.stdout)
+        proc, urls = self.run_fixture(fail_path="/privacy")
+        self.assertEqual(proc.returncode, 1)
+        self.assertEqual(len(urls), len(ROUTES))
+        self.assertIn("CODESPACES READ 05: FAIL", proc.stdout)
+        self.assertNotIn("http://", proc.stdout)
 
 if __name__ == "__main__":
     unittest.main()

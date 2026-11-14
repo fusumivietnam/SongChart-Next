@@ -31,7 +31,7 @@ commit, keep port 8000 private and run:
 ```bash
 bash scripts/codespaces_doctor.sh
 bash scripts/design_review.sh
-python3 scripts/codespaces_public_read.py
+bash scripts/codespaces_public_read.sh
 ```
 
 The last command sends only GET requests to loopback

@@ -6,7 +6,7 @@ on:
       - .devcontainer/**
       - docs/adr/ADR-0007-understand-anything-developer-analysis.md
       - scripts/codespaces_doctor.sh
-      - scripts/codespaces_public_read.py
+      - scripts/codespaces_public_read.sh
       - tests/governance/test_codespaces_public_read.py
       - scripts/design_review.sh
       - compose.yaml
@@ -21,7 +21,7 @@ on:
       - .devcontainer/**
       - docs/adr/ADR-0007-understand-anything-developer-analysis.md
       - scripts/codespaces_doctor.sh
-      - scripts/codespaces_public_read.py
+      - scripts/codespaces_public_read.sh
       - tests/governance/test_codespaces_public_read.py
       - scripts/design_review.sh
       - compose.yaml
@@ -113,7 +113,10 @@ jobs:
           ! grep -E 'git (clone|checkout|pull).* (main|master)([[:space:]]|$)' .devcontainer/install-understand-anything.sh
 
       - name: Check local-only public smoke contract without network
-        run: python3 -m unittest tests.governance.test_codespaces_public_read -v
+        shell: bash
+        run: |
+          bash -n scripts/codespaces_public_read.sh
+          python3 -m unittest tests.governance.test_codespaces_public_read -v
 
       - name: Confirm Codespaces base image exists
         run: docker pull mcr.microsoft.com/devcontainers/base:ubuntu-24.04
