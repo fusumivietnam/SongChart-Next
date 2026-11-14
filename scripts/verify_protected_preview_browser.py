@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import os
 import sys
+import time
 
 from preview_browser_bootstrap import PreflightBlocked, bootstrap
 from preview_browser_context import install_isolated_cookie
@@ -49,6 +50,29 @@ def verify_read_response(response, page) -> None:
         raise BrowserReadBlocked("HORIZONTAL_OVERFLOW")
 
 
+def navigate_with_bootstrap_retry(page, url: str, *,
+                                  monotonic=time.monotonic, sleep=time.sleep):
+    """Retry only a bounded Preview startup 503; never bypass normal read checks."""
+    deadline = monotonic() + 40
+    response = None
+    for attempt in range(16):
+        remaining = deadline - monotonic()
+        if remaining <= 0:
+            break
+        # Every attempt remains a normal browser navigation through the
+        # already-installed same-origin guard and host-only cookie.
+        response = page.goto(
+            url, wait_until="domcontentloaded",
+            timeout=max(1000, min(15000, int(remaining * 1000))),
+        )
+        if response is None or response.status != 503:
+            return response
+        if attempt == 15 or deadline - monotonic() <= 2:
+            break
+        sleep(2)
+    return response
+
+
 def run_probe(*, origin: str, deployment_id: str, expected_sha: str,
               secret: str, api_token: str, team_id: str, chrome: str) -> None:
     """Perform one provenance-bound in-memory bootstrap and two read-only visits."""
@@ -77,7 +101,7 @@ def run_probe(*, origin: str, deployment_id: str, expected_sha: str,
                         print(f"PROTECTED PREVIEW PHASE: {label}-guard-and-cookie-installed", flush=True)
                         page = context.new_page()
                         print(f"PROTECTED PREVIEW PHASE: {label}-navigation-started", flush=True)
-                        response = page.goto(normalized + "/", wait_until="domcontentloaded", timeout=15000)
+                        response = navigate_with_bootstrap_retry(page, normalized + "/")
                         print(f"PROTECTED PREVIEW PHASE: {label}-navigation-returned", flush=True)
                         verify_read_response(response, page)
                         # No third-party navigation, form submission or page captures.

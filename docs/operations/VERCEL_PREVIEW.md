@@ -83,6 +83,8 @@ For a repository-owned alternative to external metered browser services, run the
 
 The verifier retries only HTTP 503 bootstrap responses, honors a bounded `Retry-After` (maximum five seconds per retry), and fails on every other non-200 response.
 
+The separate protected Preview browser **read probe** also retries only a transient HTTP 503 returned during startup, within a 40-second deadline and at most 16 same-origin, read-only browser navigation attempts spaced two seconds apart. It does not retry absent responses, 401/403, 404, 429 or other 5xx responses. On exhaustion, the existing safe `HTTP_SERVER_REJECTED` verdict remains, without recording status numbers, URLs, headers, cookies or response bodies. This bounded retry is not a readiness/UX pass and does not replace the 12-route HTTP smoke.
+
 ### Fast failure classification
 
 ```text

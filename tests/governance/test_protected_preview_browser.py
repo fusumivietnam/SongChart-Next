@@ -139,6 +139,57 @@ class ProtectedPreviewRunnerTests(unittest.TestCase):
                 self.assertNotIn(ORIGIN, str(raised.exception))
                 self.assertNotIn("fixture-only", str(raised.exception))
 
+    def test_bootstrap_503_is_retried_only_on_same_origin_and_stops_on_success(self):
+        clock = [0]
+        statuses = [503, 503, 200]
+        seen = []
+        def goto(url, **kwargs):
+            seen.append((url, kwargs))
+            return SimpleNamespace(status=statuses.pop(0))
+        page = SimpleNamespace(goto=goto)
+        result = runner.navigate_with_bootstrap_retry(
+            page, ORIGIN + "/", monotonic=lambda: clock[0],
+            sleep=lambda seconds: clock.__setitem__(0, clock[0] + seconds),
+        )
+        self.assertEqual(result.status, 200)
+        self.assertEqual(len(seen), 3)
+        self.assertEqual(clock[0], 4)
+        self.assertTrue(all(url == ORIGIN + "/" for url, _kwargs in seen))
+        self.assertTrue(all(kwargs["wait_until"] == "domcontentloaded" for _url, kwargs in seen))
+        self.assertTrue(all(kwargs["timeout"] <= 15000 for _url, kwargs in seen))
+
+    def test_bootstrap_retries_are_bounded_and_other_errors_are_not_retried(self):
+        for first_status in (None, 401, 403, 404, 429, 500, 502, 504):
+            with self.subTest(first_status=first_status):
+                calls = []
+                def goto(url, **kwargs):
+                    calls.append(url)
+                    return None if first_status is None else SimpleNamespace(status=first_status)
+                result = runner.navigate_with_bootstrap_retry(
+                    SimpleNamespace(goto=goto), ORIGIN + "/",
+                    monotonic=lambda: 0, sleep=lambda _seconds: self.fail("unwanted retry"),
+                )
+                self.assertEqual(len(calls), 1)
+                self.assertEqual(result.status if result is not None else None, first_status)
+
+        clock = [0]
+        calls = []
+        def goto_503(url, **kwargs):
+            calls.append((url, kwargs["timeout"]))
+            return SimpleNamespace(status=503)
+        result = runner.navigate_with_bootstrap_retry(
+            SimpleNamespace(goto=goto_503), ORIGIN + "/",
+            monotonic=lambda: clock[0],
+            sleep=lambda seconds: clock.__setitem__(0, clock[0] + seconds),
+        )
+        self.assertEqual(result.status, 503)
+        self.assertEqual(len(calls), 16)
+        self.assertEqual(clock[0], 30)
+        self.assertTrue(all(url == ORIGIN + "/" for url, _timeout in calls))
+        with self.assertRaises(runner.BrowserReadBlocked) as raised:
+            runner.verify_read_response(result, None)
+        self.assertEqual(raised.exception.code, "HTTP_SERVER_REJECTED")
+
     def test_successful_read_response_has_no_extra_side_effects(self):
         page = SimpleNamespace(
             locator=lambda _selector: SimpleNamespace(count=lambda: 1),
