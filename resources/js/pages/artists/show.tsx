@@ -84,7 +84,7 @@ export default function ArtistShow({ artist }: Props) {
 
                         <form
                             className="flex min-w-0 flex-1 gap-2"
-                            action="/"
+                            action="/search"
                             method="get"
                             role="search"
                         >
