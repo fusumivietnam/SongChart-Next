@@ -53,6 +53,17 @@ class WorkManagementContractTests(unittest.TestCase):
             self.assertIn("disable-model-invocation: true", text)
             self.assertIn("dormant-until-eligible-copilot-plan", text)
 
+    def test_agent_profiles_share_handoff_protocol(self):
+        runbook = ROOT / "docs/operations/GITHUB_WORK_MANAGEMENT.md"
+        self.assertIn("## Agent handoff protocol", runbook.read_text(encoding="utf-8"))
+        for relative in self.data["agents"]["profiles"]:
+            profile = (ROOT / relative).read_text(encoding="utf-8")
+            self.assertIn(
+                "../../docs/operations/GITHUB_WORK_MANAGEMENT.md#agent-handoff-protocol",
+                profile,
+                relative,
+            )
+
     def test_required_views_are_unique(self):
         views = self.data["github_project"]["required_views"]
         self.assertEqual(len(views), len(set(views)))

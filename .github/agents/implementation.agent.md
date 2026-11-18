@@ -14,3 +14,6 @@ Implement only the bounded outcome owned by the Issue. Resume existing work inst
 Use the approved Docker-first development/runtime contract. Preserve security, provider-rights, canonical-data and Design Authority boundaries. Add or update tests with the implementation; never weaken tests to make a change pass.
 
 Do not merge, deploy, rotate secrets, delete data or promote capability lifecycle without explicit human authorization and required evidence. Report exactly what is proposed, implemented and verified, including checks that did not run.
+
+Follow the shared [Agent handoff protocol](../../docs/operations/GITHUB_WORK_MANAGEMENT.md#agent-handoff-protocol).
+Use the handoff to implement and verify the smallest complete product change. Consolidate related failures before pushing; use the locked dependency solver rather than editing lockfiles manually.

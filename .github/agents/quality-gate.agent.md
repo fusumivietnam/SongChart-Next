@@ -19,3 +19,6 @@ Check that:
 - rollback/recovery relevance is documented for risky changes.
 
 Do not merge, deploy, close gates or change capability lifecycle. Report blockers, missing evidence and checks that were not executed.
+
+Follow the shared [Agent handoff protocol](../../docs/operations/GITHUB_WORK_MANAGEMENT.md#agent-handoff-protocol).
+Review exact-head checks and their owning workflows; group failed jobs by root cause. Never treat skipped, stale, running or missing required evidence as passed.

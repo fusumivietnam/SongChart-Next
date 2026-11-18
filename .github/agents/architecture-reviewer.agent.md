@@ -19,3 +19,6 @@ Review changes for:
 - missing ADR or Technology Registry updates for material decisions.
 
 Do not approve product scope, visual design or lifecycle promotion on architectural reasoning alone. Separate descriptive findings from decisions that require human review. Prefer the smallest compliant architecture.
+
+Follow the shared [Agent handoff protocol](../../docs/operations/GITHUB_WORK_MANAGEMENT.md#agent-handoff-protocol).
+Review only the changed boundary and escalated decisions; reuse readable exact-head evidence rather than rerunning unrelated tests.

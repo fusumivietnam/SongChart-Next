@@ -60,6 +60,19 @@ The profiles are **dormant configuration** until the GitHub account has an eligi
 
 ChatGPT and GitHub connector workflows can continue to operate against Issues/PRs/repository content without these Copilot agents.
 
+## Agent handoff protocol
+
+Use this protocol in ChatGPT, a local coding agent or an eligible manually selected Copilot profile. This does not activate Copilot or delegate human decisions. The implementation role coordinates one bounded change; other roles contribute only when their review adds evidence or resolves a risk.
+
+1. **Bootstrap once per session:** follow PROJECT_CONTROL and AGENTS in full. Record main HEAD, active Issue/PR, branch/head and relevant CI results. During the session refresh live state before mutations, when HEAD changes or evidence becomes stale; reuse the source already read at the same SHA. Do not use a prior chat as repository authority.
+2. **Route the work:** implementation owns the patch; architecture reviews material boundary/dependency decisions; quality checks the changed contracts and exact-head evidence; roadmap governs authority/decision consistency. Do not invoke four agents for every small defect. Escalate real security, rights, persistent data or contract decisions to the human owner.
+3. **One handoff:** record Issue/capability/slice, base and head SHA, scoped diff, outstanding decisions, tests run/results, missing evidence and next action in the owning PR (or Issue before a PR exists). Reference existing evidence rather than duplicate it in a new status document or repetitive comments. Do not claim a tool ran without its result.
+4. **Verify economically:** where available, use the existing Windows/WSL2 or Linux Docker Compose development app, with locked dependencies and appropriate targeted checks. For the application test suite follow [Docker development](DOCKER_DEVELOPMENT.md): explicitly isolate test storage from populated development PostgreSQL; use existing disposable CI owners for fixture-backed PostgreSQL/browser proof. Use the read-only public smoke script only after the local schema prerequisite is satisfied. No destructive reset, fixture writes to a persistent DB, or host PHP/Node installation to work around container failures.
+5. **Submit once:** follow the Delivery Contract and CI Workflow Ownership. Group failures by root cause, make a consolidated repair, and reuse successful evidence only at the same SHA. Do not trigger reruns for unchanged deterministic failures or add workflows that duplicate owners. A changed head requires fresh applicable evidence.
+6. **Human gate:** continue independent authorized work without waiting for status acknowledgments, but stop at unapproved merge/deploy, provider rights, activation, secret or persistent-data decisions. State the exact decision or local command needed; never simulate approval or claim production readiness from local or CI tests.
+
+When no execution tool is available, report the specific unavailable capability and provide the minimal safe operator command; do not generate fake evidence or repeatedly request already supplied information.
+
 ## Automation and external setup
 
 Required labels are reconciled automatically after contract changes on `main`; no PAT is used for label or milestone writes. Explicitly managed milestones use the same least-privilege workflow.
