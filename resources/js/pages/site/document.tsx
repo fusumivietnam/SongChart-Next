@@ -14,6 +14,8 @@ type DocumentAction = {
 
 type CorrectionIntake = {
     enabled: boolean;
+    subjectType: string;
+    subjectId: string;
     status: 'accepted' | 'validation' | 'throttled' | 'unavailable' | null;
     retryAfter: number | null;
     message: string | null;
@@ -38,8 +40,8 @@ type Props = {
 
 export default function SiteDocument({ document, correctionIntake }: Props) {
     const form = useForm({
-        subject_type: 'artist',
-        subject_id: '',
+        subject_type: correctionIntake?.subjectType ?? 'artist',
+        subject_id: correctionIntake?.subjectId ?? '',
         claim: '',
         evidence_url: '',
     });

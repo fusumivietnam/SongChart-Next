@@ -110,6 +110,12 @@ for (const surface of surfaces) {
         for (const path of surface.expectedLinks) {
             if (!dom.includes(`href="${path}"`)) throw new Error(`${surface.label} is missing journey link: ${path}`);
         }
+        const correctionType = surface.label === 'recording-empty-destination' ? 'recording' : surface.label;
+        if (['artist', 'release', 'recording'].includes(correctionType)) {
+            const id = surface.path.split('/')[2];
+            const correctionHref = `/corrections?subject_type=${correctionType}&amp;subject_id=${id}`;
+            if (!dom.includes(`href="${correctionHref}"`)) throw new Error(`${surface.label} is missing the canonical correction entry.`);
+        }
         if (surface.label === 'recording') {
             if (!dom.includes('target="_blank"')) throw new Error('Recording destination is missing explicit external target treatment.');
             if (!dom.includes('rel="noopener noreferrer"')) throw new Error('Recording destination is missing opener isolation.');
