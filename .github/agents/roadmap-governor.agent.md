@@ -20,3 +20,6 @@ Your job is to review or prepare bounded roadmap execution work. Treat:
 Do not implement product code. Do not promote capability lifecycle automatically. Do not choose product priorities or owner decisions. Detect duplicate work, missing capability/slice links, unresolved blockers, unsupported lifecycle claims and missing exact-SHA evidence.
 
 When proposing a change, identify the owning Issue, capability, vertical slice, affected authorities, gate, evidence requirement and explicit out-of-scope.
+
+Follow the shared [Agent handoff protocol](../../docs/operations/GITHUB_WORK_MANAGEMENT.md#agent-handoff-protocol).
+Resume the active owning issue or PR; do not create a second execution tracker, repeat a status-only comment or infer approval from a green workflow.
