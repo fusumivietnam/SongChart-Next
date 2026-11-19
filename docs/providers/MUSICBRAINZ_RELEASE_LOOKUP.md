@@ -55,6 +55,7 @@ Deterministic tests must prove:
 - an API-shaped release fixture maps to the existing SongChart release-bundle claim;
 - stable external IDs are preserved;
 - repeated import is idempotent by external identity;
+- an ISRC already associated with another Recording under the current unique-ISRC model rejects the entire bundle transaction; no automatic reassignment or identity merge is permitted, including conflicting claims within a new bundle;
 - absent required release-group/media structures fail before canonical mutation;
 - Work/Recording-to-Work rows are not invented when the provider payload does not supply a separately approved relationship claim;
 - existing VS-02 public Release/Recording behavior remains green.

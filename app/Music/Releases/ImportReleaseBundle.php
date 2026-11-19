@@ -64,10 +64,17 @@ final class ImportReleaseBundle
                     $this->replaceCredits('recording', (string) $recording->getKey(), $recordingData['credits']);
 
                     foreach ($recordingData['isrcs'] as $isrc) {
-                        DB::table('recording_isrcs')->updateOrInsert(
-                            ['isrc' => $isrc],
-                            ['recording_id' => $recording->getKey(), 'updated_at' => now(), 'created_at' => now()],
-                        );
+                        DB::table('recording_isrcs')->insertOrIgnore([
+                            'isrc' => $isrc,
+                            'recording_id' => $recording->getKey(),
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+
+                        $owner = DB::table('recording_isrcs')->where('isrc', $isrc)->value('recording_id');
+                        if ($owner !== $recording->getKey()) {
+                            throw new RuntimeException('ISRC already belongs to a different Recording or could not be admitted.');
+                        }
                     }
 
                     if ($recordingData['work'] !== null) {
