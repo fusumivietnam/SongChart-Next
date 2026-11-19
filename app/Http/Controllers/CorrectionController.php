@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 use InvalidArgumentException;
@@ -29,7 +30,16 @@ final class CorrectionController
 
     public function show(Request $request): Response
     {
-        return $this->render($request->session()->pull('correctionStatus'));
+        $type = $request->query('subject_type');
+        $id = $request->query('subject_id');
+        $subject = is_string($type) ? CorrectionSubjectType::tryFrom($type) : null;
+        $status = $request->session()->pull('correctionStatus');
+
+        if ($subject !== null && is_string($id) && Str::isUlid($id)) {
+            return $this->render($status, subjectType: $subject->value, subjectId: $id);
+        }
+
+        return $this->render($status);
     }
 
     public function store(Request $request, SubmitCorrectionEvidence $submitter): RedirectResponse|HttpResponse
@@ -96,7 +106,7 @@ final class CorrectionController
         return to_route('corrections')->with('correctionStatus', 'accepted');
     }
 
-    private function render(?string $status = null, ?int $retryAfter = null, ?string $message = null): Response
+    private function render(?string $status = null, ?int $retryAfter = null, ?string $message = null, string $subjectType = 'artist', string $subjectId = ''): Response
     {
         return Inertia::render('site/document', [
             'document' => [
@@ -130,6 +140,8 @@ final class CorrectionController
             ],
             'correctionIntake' => [
                 'enabled' => true,
+                'subjectType' => $subjectType,
+                'subjectId' => $subjectId,
                 'status' => $status,
                 'retryAfter' => $retryAfter,
                 'message' => $message,

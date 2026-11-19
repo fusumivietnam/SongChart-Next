@@ -46,6 +46,28 @@ final class PublicLaunchSurfacesTest extends TestCase
                 ->where('document.sections.2.paragraphs.0', 'A correction submission never writes canonical tables directly. Submission only records pending evidence for later review and does not mean SongChart accepted the proposed canonical change.'));
     }
 
+    public function test_correction_entry_prefills_only_valid_subject_pairs(): void
+    {
+        $id = '01ARZ3NDEKTSV4RRFFQ69G5FAV';
+
+        foreach (['artist', 'release', 'recording'] as $type) {
+            $this->get('/corrections?subject_type='.$type.'&subject_id='.$id)
+                ->assertOk()
+                ->assertInertia(fn (Assert $page) => $page
+                    ->where('correctionIntake.subjectType', $type)
+                    ->where('correctionIntake.subjectId', $id)
+                    ->where('document.canonicalUrl', url('/corrections')));
+        }
+
+        foreach (['subject_type=work&subject_id='.$id, 'subject_type=release&subject_id=invalid', 'subject_type[]=artist&subject_id='.$id, 'subject_type=artist&subject_id[]=x', ''] as $query) {
+            $this->get('/corrections?'.$query)
+                ->assertOk()
+                ->assertInertia(fn (Assert $page) => $page
+                    ->where('correctionIntake.subjectType', 'artist')
+                    ->where('correctionIntake.subjectId', ''));
+        }
+    }
+
     public function test_support_warns_against_putting_secrets_in_public_issues(): void
     {
         $this->get('/support')

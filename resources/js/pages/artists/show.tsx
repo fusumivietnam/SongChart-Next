@@ -207,13 +207,12 @@ export default function ArtistShow({ artist }: Props) {
                                     from canonical structured credits, never from a
                                     name-only match.
                                 </p>
-                                <button
-                                    type="button"
-                                    disabled
-                                    className="mt-3 rounded-md text-sm font-medium text-slate-500 underline underline-offset-4 disabled:cursor-not-allowed"
+                                <a
+                                    href={`/corrections?subject_type=artist&subject_id=${artist.id}`}
+                                    className="mt-3 inline-block rounded-sm text-sm font-medium text-blue-700 underline underline-offset-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
                                 >
-                                    Report a correction — workflow not active yet
-                                </button>
+                                    Report a correction
+                                </a>
                             </section>
                         </div>
                     </section>
