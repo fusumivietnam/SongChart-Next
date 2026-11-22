@@ -1,0 +1,40 @@
+{
+  "id": "44444444-4444-4444-8444-444444444444",
+  "title": "Synthetic No Work",
+  "length": 123000,
+  "disambiguation": "fixture only",
+  "artist-credit": [
+    {
+      "name": "Example Ensemble",
+      "joinphrase": "",
+      "artist": {
+        "id": "22222222-2222-4222-8222-222222222222",
+        "name": "Example Ensemble",
+        "tags": [
+          {
+            "name": "excluded"
+          }
+        ],
+        "genres": [],
+        "aliases": []
+      }
+    }
+  ],
+  "isrcs": [
+    "USAAA2600001"
+  ],
+  "relations": [],
+  "tags": [
+    {
+      "name": "excluded"
+    }
+  ],
+  "genres": [],
+  "rating": {
+    "value": 5,
+    "votes": 2
+  },
+  "annotation": "excluded synthetic value",
+  "aliases": [],
+  "video": false
+}
