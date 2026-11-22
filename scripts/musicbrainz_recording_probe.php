@@ -25,6 +25,8 @@ $counts = [
     'unsupported_work_relations' => 0,
     'supplementary_fields_present' => 0,
     'records_with_isrc' => 0,
+    'shape_valid_with_supported_work' => 0,
+    'shape_valid_without_supported_work' => 0,
 ];
 $reasons = [];
 
@@ -103,17 +105,27 @@ while ($counts['records_inspected'] < MAX_RECORDS && ($line = fgets(STDIN)) !== 
                     continue;
                 }
                 $work = $relation['work'] ?? null;
-                $valid = ($relation['type'] ?? null) === 'performance'
-                    && ($relation['direction'] ?? null) === 'forward'
-                    && ($relation['attributes'] ?? null) === []
-                    && ($relation['attribute-ids'] ?? null) === []
-                    && ($relation['attribute-values'] ?? null) === []
-                    && is_array($work)
-                    && uuid($work['id'] ?? null)
-                    && is_string($work['title'] ?? null)
-                    && trim($work['title']) !== '';
-                if (!$valid) {
-                    $why[] = 'unrepresentable_performance_relation';
+                if (($relation['type'] ?? null) !== 'performance'
+                    || ($relation['direction'] ?? null) !== 'forward') {
+                    $why[] = 'unexpected_performance_type_or_direction';
+                    continue;
+                }
+                if (!is_array($relation['attributes'] ?? null)
+                    || !is_array($relation['attribute-ids'] ?? null)
+                    || !is_array($relation['attribute-values'] ?? null)) {
+                    $why[] = 'invalid_performance_attribute_shape';
+                    continue;
+                }
+                if ($relation['attributes'] !== []
+                    || $relation['attribute-ids'] !== []
+                    || $relation['attribute-values'] !== []) {
+                    $why[] = 'unsupported_performance_attributes';
+                    continue;
+                }
+                if (!is_array($work) || !uuid($work['id'] ?? null)
+                    || !is_string($work['title'] ?? null)
+                    || trim($work['title']) === '') {
+                    $why[] = 'invalid_performance_work_identity';
                     continue;
                 }
                 $counts['supported_work_relations']++;
@@ -127,6 +139,7 @@ while ($counts['records_inspected'] < MAX_RECORDS && ($line = fgets(STDIN)) !== 
 
     if ($why === []) {
         $counts['shape_valid']++;
+        $counts[$hasSupportedWork ? 'shape_valid_with_supported_work' : 'shape_valid_without_supported_work']++;
     } else {
         $counts['quarantine']++;
         foreach (array_unique($why) as $reason) {
@@ -137,6 +150,7 @@ while ($counts['records_inspected'] < MAX_RECORDS && ($line = fgets(STDIN)) !== 
 ksort($reasons);
 echo json_encode([
     'scope' => 'read_only_shape_probe_not_rights_clearance_or_admission',
+    'note' => 'supplementary_fields_present counts field occurrences, not violating records; supported work counts may overlap quarantined rows',
     'sample_limit' => MAX_RECORDS,
     'counts' => $counts,
     'quarantine_reasons' => $reasons,
