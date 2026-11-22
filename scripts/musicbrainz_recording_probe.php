@@ -27,12 +27,17 @@ $counts = [
     'records_with_isrc' => 0,
     'shape_valid_with_supported_work' => 0,
     'shape_valid_without_supported_work' => 0,
+    'recordings_with_attributed_performance' => 0,
+    'attributed_performance_relations' => 0,
+    'attributed_performance_attribute_occurrences' => 0,
 ];
 $reasons = [];
+$attributeHistogram = ['cover' => 0, 'instrumental' => 0, 'live' => 0, 'partial' => 0, 'other' => 0];
 
 while ($counts['records_inspected'] < MAX_RECORDS && ($line = fgets(STDIN)) !== false) {
     $counts['records_inspected']++;
     $why = [];
+    $hasAttributedPerformance = false;
     try {
         $row = json_decode($line, true, 512, JSON_THROW_ON_ERROR);
     } catch (JsonException) {
@@ -119,6 +124,14 @@ while ($counts['records_inspected'] < MAX_RECORDS && ($line = fgets(STDIN)) !== 
                 if ($relation['attributes'] !== []
                     || $relation['attribute-ids'] !== []
                     || $relation['attribute-values'] !== []) {
+                    $hasAttributedPerformance = true;
+                    $counts['attributed_performance_relations']++;
+                    foreach ($relation['attributes'] as $attribute) {
+                        $key = is_string($attribute) && array_key_exists($attribute, $attributeHistogram)
+                            ? $attribute : 'other';
+                        $attributeHistogram[$key]++;
+                        $counts['attributed_performance_attribute_occurrences']++;
+                    }
                     $why[] = 'unsupported_performance_attributes';
                     continue;
                 }
@@ -137,6 +150,10 @@ while ($counts['records_inspected'] < MAX_RECORDS && ($line = fgets(STDIN)) !== 
         }
     }
 
+    if ($hasAttributedPerformance) {
+        $counts['recordings_with_attributed_performance']++;
+    }
+
     if ($why === []) {
         $counts['shape_valid']++;
         $counts[$hasSupportedWork ? 'shape_valid_with_supported_work' : 'shape_valid_without_supported_work']++;
@@ -150,8 +167,9 @@ while ($counts['records_inspected'] < MAX_RECORDS && ($line = fgets(STDIN)) !== 
 ksort($reasons);
 echo json_encode([
     'scope' => 'read_only_shape_probe_not_rights_clearance_or_admission',
-    'note' => 'supplementary_fields_present counts field occurrences, not violating records; supported work counts may overlap quarantined rows',
+    'note' => 'supplementary_fields_present counts field occurrences, not violating records; supported work counts may overlap quarantined rows; histogram counts attribute occurrences on possibly multi-attribute relations',
     'sample_limit' => MAX_RECORDS,
     'counts' => $counts,
     'quarantine_reasons' => $reasons,
+    'attributed_performance_attribute_histogram' => $attributeHistogram,
 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR), PHP_EOL;
