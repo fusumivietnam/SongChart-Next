@@ -1,0 +1,65 @@
+{
+  "id": "55555555-5555-4555-8555-555555555555",
+  "title": "Synthetic Starlight",
+  "length": 123000,
+  "disambiguation": "fixture only",
+  "artist-credit": [
+    {
+      "name": "Example Ensemble",
+      "joinphrase": "",
+      "artist": {
+        "id": "22222222-2222-4222-8222-222222222222",
+        "name": "Example Ensemble",
+        "tags": [
+          {
+            "name": "excluded"
+          }
+        ],
+        "genres": [],
+        "aliases": []
+      }
+    }
+  ],
+  "isrcs": [],
+  "relations": [
+    {
+      "type-id": "a3005666-a872-32c3-ad06-98af558e99b0",
+      "type": "performance",
+      "target-type": "work",
+      "direction": "forward",
+      "attributes": [
+        "cover"
+      ],
+      "attribute-ids": [
+        "00000000-0000-4000-8000-000000000001"
+      ],
+      "attribute-values": [],
+      "work": {
+        "id": "33333333-3333-4333-8333-333333333333",
+        "title": "Synthetic Suite",
+        "type": null,
+        "disambiguation": "fixture only",
+        "iswcs": [],
+        "languages": [],
+        "tags": [
+          {
+            "name": "excluded"
+          }
+        ]
+      }
+    }
+  ],
+  "tags": [
+    {
+      "name": "excluded"
+    }
+  ],
+  "genres": [],
+  "rating": {
+    "value": 5,
+    "votes": 2
+  },
+  "annotation": "excluded synthetic value",
+  "aliases": [],
+  "video": false
+}
