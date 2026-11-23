@@ -45,6 +45,9 @@ final class OfflineRecordingBatchEvaluator
                 $counts['quarantined']++;
                 $reason = $result['reason'];
                 $reasons[$reason] = ($reasons[$reason] ?? 0) + 1;
+                if ($counts['inspected'] >= $limit) {
+                    break;
+                }
                 continue;
             }
             $counts['candidates']++;
@@ -52,6 +55,9 @@ final class OfflineRecordingBatchEvaluator
             $counts[$candidate['works'] === [] ? 'recording_only_candidates' : 'candidates_with_work']++;
             if ($candidate['isrcs'] !== []) {
                 $counts['candidates_with_isrc']++;
+            }
+            if ($counts['inspected'] >= $limit) {
+                break;
             }
         }
 

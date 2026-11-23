@@ -77,6 +77,23 @@ final class OfflineRecordingBatchEvaluatorTest extends TestCase
         self::assertSame(8, $result['provenance']['last_line']);
     }
 
+    public function test_generator_does_not_read_beyond_limit_for_candidate_or_quarantine(): void
+    {
+        foreach (['recording-performance-valid', 'recording-attributed-performance'] as $fixtureName) {
+            $yielded = 0;
+            $fixture = $this->fixture($fixtureName);
+            $rows = (function () use (&$yielded, $fixture): \Generator {
+                for ($i = 0; $i < 3; $i++) {
+                    $yielded++;
+                    yield $fixture;
+                }
+            })();
+            $result = $this->evaluator()->evaluate($rows, $this->source(), 2);
+            self::assertSame(2, $yielded, "Source over-read for {$fixtureName}.");
+            self::assertSame(2, $result['counts']['inspected']);
+        }
+    }
+
     public function test_empty_input_and_malformed_json_are_safe(): void
     {
         $empty = $this->evaluator()->evaluate([], $this->source());
