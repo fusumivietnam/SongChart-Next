@@ -12,7 +12,7 @@ final class OfflineRecordingBatchEvaluator
     public function __construct(private readonly OfflineRecordingProjector $projector) {}
 
     /**
-     * @param iterable<string> $lines
+     * @param iterable<mixed> $lines
      * @param array<string,mixed> $source An operator-supplied reference, NOT proof of cryptographic verification.
      * @return array<string,mixed>
      */
@@ -75,7 +75,10 @@ final class OfflineRecordingBatchEvaluator
         ];
     }
 
-    /** @param array<string,mixed> $source @return array<string,mixed> */
+    /**
+     * @param array<string,mixed> $source
+     * @return array<string,mixed>
+     */
     private function sourceReference(array $source): array
     {
         if (($source['provider'] ?? null) !== 'musicbrainz'
