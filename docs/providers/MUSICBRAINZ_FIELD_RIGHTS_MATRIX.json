@@ -1,0 +1,253 @@
+{
+  "schema_version": 1,
+  "scope": "synthetic_only_field_review_not_rights_approval",
+  "source_kind": "musicbrainz_official_json_dumps_pending_archive_verification",
+  "decision": "blocked_pending_owner_field_signoff",
+  "sources": {
+    "json_dump_license": "https://musicbrainz.org/doc/Development/JSON_Data_Dumps",
+    "core_split": "https://musicbrainz.org/doc/MusicBrainz_Database",
+    "dataset_catalog": "https://metabrainz.org/datasets/postgres-dumps",
+    "upstream_license_discrepancy": "https://tickets.metabrainz.org/browse/MBS-12977"
+  },
+  "paths": [
+    {
+      "path": "$.id",
+      "entity": "recording",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "recording_identity_or_metadata"
+    },
+    {
+      "path": "$.title",
+      "entity": "recording",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "recording_identity_or_metadata"
+    },
+    {
+      "path": "$.length",
+      "entity": "recording",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "recording_identity_or_metadata"
+    },
+    {
+      "path": "$.disambiguation",
+      "entity": "recording",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "recording_identity_or_metadata"
+    },
+    {
+      "path": "$.artist-credit[*].artist.id",
+      "entity": "artist_credit",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "ordered_artist_credit_candidate"
+    },
+    {
+      "path": "$.artist-credit[*].name",
+      "entity": "artist_credit",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "ordered_artist_credit_candidate"
+    },
+    {
+      "path": "$.artist-credit[*].joinphrase",
+      "entity": "artist_credit",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "ordered_artist_credit_candidate"
+    },
+    {
+      "path": "$.artist-credit[*]",
+      "entity": "artist_credit",
+      "classification": "structural_container",
+      "decision": "never_export_whole_object",
+      "usage": "credit_position_derived_from_array_order_only"
+    },
+    {
+      "path": "$.isrcs[*]",
+      "entity": "recording",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "isrc_identifier_not_ownership"
+    },
+    {
+      "path": "$.relations[*].target-type",
+      "entity": "recording_work",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "plain_performance_filter"
+    },
+    {
+      "path": "$.relations[*].type-id",
+      "entity": "recording_work",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "plain_performance_filter"
+    },
+    {
+      "path": "$.relations[*].type",
+      "entity": "recording_work",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "plain_performance_filter"
+    },
+    {
+      "path": "$.relations[*].direction",
+      "entity": "recording_work",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "plain_performance_filter"
+    },
+    {
+      "path": "$.relations[*].work.id",
+      "entity": "work",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "work_identity_or_metadata"
+    },
+    {
+      "path": "$.relations[*].work.title",
+      "entity": "work",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "work_identity_or_metadata"
+    },
+    {
+      "path": "$.relations[*].work.type",
+      "entity": "work",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "work_identity_or_metadata"
+    },
+    {
+      "path": "$.relations[*].work.disambiguation",
+      "entity": "work",
+      "classification": "core_candidate",
+      "decision": "review_required",
+      "usage": "work_identity_or_metadata"
+    },
+    {
+      "path": "$.relations[*].attributes",
+      "entity": "recording_work",
+      "classification": "semantics_unsupported",
+      "decision": "quarantine_nonempty",
+      "usage": "unsupported_performance_attributes"
+    },
+    {
+      "path": "$.relations[*].attribute-ids",
+      "entity": "recording_work",
+      "classification": "semantics_unsupported",
+      "decision": "quarantine_nonempty",
+      "usage": "unsupported_performance_attributes"
+    },
+    {
+      "path": "$.relations[*].attribute-values",
+      "entity": "recording_work",
+      "classification": "semantics_unsupported",
+      "decision": "quarantine_nonempty",
+      "usage": "unsupported_performance_attributes"
+    },
+    {
+      "path": "$.tags",
+      "entity": "recording",
+      "classification": "supplementary_cc_by_nc_sa",
+      "decision": "exclude",
+      "usage": "never_project"
+    },
+    {
+      "path": "$.genres",
+      "entity": "recording",
+      "classification": "supplementary_cc_by_nc_sa",
+      "decision": "exclude",
+      "usage": "never_project"
+    },
+    {
+      "path": "$.rating",
+      "entity": "recording",
+      "classification": "supplementary_cc_by_nc_sa",
+      "decision": "exclude",
+      "usage": "never_project"
+    },
+    {
+      "path": "$.annotation",
+      "entity": "recording",
+      "classification": "supplementary_cc_by_nc_sa",
+      "decision": "exclude",
+      "usage": "never_project"
+    },
+    {
+      "path": "$.artist-credit[*].artist.tags",
+      "entity": "artist_credit",
+      "classification": "supplementary_cc_by_nc_sa",
+      "decision": "exclude",
+      "usage": "never_project"
+    },
+    {
+      "path": "$.artist-credit[*].artist.genres",
+      "entity": "artist_credit",
+      "classification": "supplementary_cc_by_nc_sa",
+      "decision": "exclude",
+      "usage": "never_project"
+    },
+    {
+      "path": "$.relations[*].work.tags",
+      "entity": "work",
+      "classification": "supplementary_cc_by_nc_sa",
+      "decision": "exclude",
+      "usage": "never_project"
+    },
+    {
+      "path": "$.artist-credit[*].artist.aliases",
+      "entity": "artist_credit",
+      "classification": "not_reviewed",
+      "decision": "exclude_pending_review",
+      "usage": "never_project"
+    },
+    {
+      "path": "$.relations[*].work.iswcs",
+      "entity": "work",
+      "classification": "not_reviewed",
+      "decision": "exclude_pending_review",
+      "usage": "never_project"
+    },
+    {
+      "path": "$.relations[*].work.languages",
+      "entity": "work",
+      "classification": "not_reviewed",
+      "decision": "exclude_pending_review",
+      "usage": "never_project"
+    },
+    {
+      "path": "$.video",
+      "entity": "recording",
+      "classification": "not_reviewed",
+      "decision": "exclude_pending_review",
+      "usage": "never_project"
+    }
+  ],
+  "other_entity_archives": [
+    {
+      "archive": "artist",
+      "path_status": "not_yet_verified_against_archive_schema",
+      "decision": "blocked"
+    },
+    {
+      "archive": "release-group",
+      "path_status": "not_yet_verified_against_archive_schema",
+      "decision": "blocked"
+    },
+    {
+      "archive": "release",
+      "path_status": "not_yet_verified_against_archive_schema",
+      "decision": "blocked"
+    },
+    {
+      "archive": "work",
+      "path_status": "not_yet_verified_against_archive_schema",
+      "decision": "blocked"
+    }
+  ]
+}
