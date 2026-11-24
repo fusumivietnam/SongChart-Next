@@ -11,6 +11,7 @@ The MetaBrainz [dataset catalog](https://metabrainz.org/datasets/postgres-dumps)
 ## Exact Recording projector input paths
 
 `MUSICBRAINZ_FIELD_RIGHTS_MATRIX.json` inventories **31** current `OfflineRecordingProjector` input paths with four statuses:
+- `structural_container / never_export_whole_object`: `$.artist-credit[*]` is an iteration boundary used to derive ordered credit position, never a license or permission to emit the entire nested Artist-credit object
 - `core_candidate / review_required`: Recording id/title/length/disambiguation; ordered Artist credits and their MBIDs; ISRCs (not proof of ownership); plain performance relation selectors and Work MBID/title/type/disambiguation
 - `supplementary_cc_by_nc_sa / exclude`: top-level tags, genres, rating, annotation, nested Artist tags/genres and Work tags — examples only, **not an exhaustive denylist**
 - `semantics_unsupported / quarantine_nonempty`: performance attributes, attribute-ids and attribute-values — semantic refusal, **not a copyright claim**

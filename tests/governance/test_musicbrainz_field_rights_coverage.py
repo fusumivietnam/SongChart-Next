@@ -23,6 +23,7 @@ class MusicBrainzFieldRightsCoverageTest(unittest.TestCase):
             "supplementary_cc_by_nc_sa": "exclude",
             "semantics_unsupported": "quarantine_nonempty",
             "not_reviewed": "exclude_pending_review",
+            "structural_container": "never_export_whole_object",
         }
         for row in rights:
             self.assertTrue(row["path"].startswith("$."))
@@ -32,12 +33,27 @@ class MusicBrainzFieldRightsCoverageTest(unittest.TestCase):
                      "$.artist-credit[*].artist.tags", "$.artist-credit[*].artist.genres",
                      "$.relations[*].work.tags"):
             self.assertEqual(bypath[path]["classification"], "supplementary_cc_by_nc_sa")
+        self.assertEqual(bypath["$.artist-credit[*]"]["decision"], "never_export_whole_object")
+        self.assertEqual(bypath["$.artist-credit[*]"]["classification"], "structural_container")
         for key in ("attributes", "attribute-ids", "attribute-values"):
             self.assertEqual(bypath["$.relations[*]."+key]["decision"], "quarantine_nonempty")
         self.assertEqual({x["archive"] for x in matrix["other_entity_archives"]},
                          {"artist", "release-group", "release", "work"})
         self.assertTrue(all(x["decision"] == "blocked" for x in matrix["other_entity_archives"]))
         self.assertIn("upstream_license_discrepancy", matrix["sources"])
+
+    def test_no_parent_container_is_licensed_by_leaf_review(self):
+        matrix = json.loads(RIGHTS.read_text(encoding="utf-8"))
+        rows = {x["path"]: x for x in matrix["paths"]}
+        # A typed order position may be derived from an array, but its entire
+        # nested object is not legally or semantically safe to project.
+        self.assertEqual(rows["$.artist-credit[*]"]["decision"], "never_export_whole_object")
+        approved_decisions = {"review_required"}
+        for path, row in rows.items():
+            if row["decision"] in approved_decisions:
+                self.assertNotIn(path, {"$.artist-credit[*]", "$.relations[*]", "$.artist-credit"})
+        # This is a triage map, not a usable runtime allowlist or a rights grant.
+        self.assertEqual(matrix["decision"], "blocked_pending_owner_field_signoff")
 
     def test_eight_scenarios_structural_only(self):
         scenarios = json.loads(SCENARIOS.read_text(encoding="utf-8"))["entity_groups"]

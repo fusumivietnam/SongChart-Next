@@ -62,9 +62,9 @@
     {
       "path": "$.artist-credit[*]",
       "entity": "artist_credit",
-      "classification": "core_candidate",
-      "decision": "review_required",
-      "usage": "ordered_artist_credit_candidate"
+      "classification": "structural_container",
+      "decision": "never_export_whole_object",
+      "usage": "credit_position_derived_from_array_order_only"
     },
     {
       "path": "$.isrcs[*]",
