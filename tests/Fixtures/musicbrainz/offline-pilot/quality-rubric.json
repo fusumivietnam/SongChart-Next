@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "scope": "synthetic_graph_quality_only_not_musicbrainz_data_or_canonical_admission",
+  "issue": 174,
+  "method": "bounded_stratified_synthetic_census",
+  "minimum_groups": 5,
+  "maximum_groups": 10,
+  "selected_group_ids": [
+    "G01",
+    "G02",
+    "G03",
+    "G04",
+    "G05",
+    "G06",
+    "G07",
+    "G08"
+  ],
+  "required_entity_types": [
+    "artist",
+    "release_group",
+    "release",
+    "medium",
+    "track",
+    "recording",
+    "work"
+  ],
+  "required_relationship_types": [
+    "release_group",
+    "medium",
+    "track",
+    "recording",
+    "artist_credit",
+    "performance"
+  ],
+  "expected_outcomes": {
+    "evaluation_only": 5,
+    "quarantine": 2,
+    "evaluation_with_admission_blocked": 1
+  },
+  "strata": [
+    {
+      "name": "full-journey",
+      "ids": [
+        "G01"
+      ]
+    },
+    {
+      "name": "identity-and-relationship-complexity",
+      "ids": [
+        "G02",
+        "G03",
+        "G04",
+        "G05"
+      ]
+    },
+    {
+      "name": "negative-and-rights-gates",
+      "ids": [
+        "G06",
+        "G07",
+        "G08"
+      ]
+    }
+  ],
+  "quality_checks": [
+    "unique_scenario_ids",
+    "unique_node_aliases_per_scenario",
+    "all_link_endpoints_exist",
+    "entity_type_coverage",
+    "relationship_type_coverage",
+    "explicit_expected_outcomes",
+    "rare_negative_strata_preserved",
+    "no_canonical_or_real_provider_data"
+  ]
+}
