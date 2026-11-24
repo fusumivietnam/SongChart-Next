@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "scope": "synthetic_scenario_definitions_only_not_real_musicbrainz_data_or_admission",
+  "owner_issue": 174,
+  "entity_groups": [
+    {
+      "id": "G01",
+      "case": "complete-chain",
+      "entities": [
+        "artist",
+        "release_group",
+        "release",
+        "medium",
+        "track",
+        "recording",
+        "work"
+      ],
+      "checks": [
+        "ordered_identity_links",
+        "plain_performance",
+        "source_id_not_canonical"
+      ],
+      "expected": "evaluation_only"
+    },
+    {
+      "id": "G02",
+      "case": "multi-artist-credits",
+      "entities": [
+        "artist",
+        "release",
+        "recording"
+      ],
+      "checks": [
+        "credit_order",
+        "credited_as",
+        "join_phrase",
+        "no_name_merge"
+      ],
+      "expected": "evaluation_only"
+    },
+    {
+      "id": "G03",
+      "case": "shared-recording",
+      "entities": [
+        "release",
+        "recording"
+      ],
+      "checks": [
+        "same_external_recording_identity",
+        "different_release_membership",
+        "no_title_merge"
+      ],
+      "expected": "evaluation_only"
+    },
+    {
+      "id": "G04",
+      "case": "multiple-works",
+      "entities": [
+        "recording",
+        "work"
+      ],
+      "checks": [
+        "multiple_plain_performance",
+        "stable_work_identity",
+        "duplicate_relation_handling"
+      ],
+      "expected": "evaluation_only"
+    },
+    {
+      "id": "G05",
+      "case": "recording-only",
+      "entities": [
+        "recording"
+      ],
+      "checks": [
+        "missing_work_allowed",
+        "no_inferred_work"
+      ],
+      "expected": "evaluation_only"
+    },
+    {
+      "id": "G06",
+      "case": "attributed-performance",
+      "entities": [
+        "recording",
+        "work"
+      ],
+      "checks": [
+        "attribute_cover",
+        "attribute_live",
+        "attribute_instrumental",
+        "attribute_partial",
+        "whole_record_quarantine"
+      ],
+      "expected": "quarantine"
+    },
+    {
+      "id": "G07",
+      "case": "malformed-identities",
+      "entities": [
+        "artist",
+        "recording",
+        "work"
+      ],
+      "checks": [
+        "invalid_mbid",
+        "missing_work_identity",
+        "no_name_fallback"
+      ],
+      "expected": "quarantine"
+    },
+    {
+      "id": "G08",
+      "case": "isrc-supplementary",
+      "entities": [
+        "recording",
+        "artist"
+      ],
+      "checks": [
+        "duplicate_isrc_detection",
+        "downstream_ownership_gate",
+        "recursive_supplementary_exclusion"
+      ],
+      "expected": "evaluation_with_admission_blocked"
+    }
+  ]
+}
