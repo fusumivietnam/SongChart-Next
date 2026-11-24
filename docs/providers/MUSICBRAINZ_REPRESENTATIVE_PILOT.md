@@ -56,3 +56,7 @@ See `tests/Fixtures/musicbrainz/offline-pilot/representative-groups.json` for **
 6. **Exit:** review #174 remains open until rights decision and representative legally permitted dataset evidence are independently accepted. CI PASS for synthetic artifacts must not promote `provider-adapters` or mark commercial/public use approved.
 
 No new external service, dependency, schema, migration, provider network request or production deployment is proposed.
+
+### Abstract synthetic link fixtures
+
+`tests/Fixtures/musicbrainz/offline-pilot/synthetic-graphs.json` encodes eight **abstract graphs** with deterministic synthetic aliases and explicit directed links. The registry contract tests check that every graph matches its scenario, all link targets resolve, credit order/reuse/multi-work and negative gates are represented. These are **not MusicBrainz JSONL payloads**, cannot be passed to the production adapter, and do not test canonical admission or rights eligibility. Future executable source-shape fixtures require a separate field-level review and a targeted application contract change; never treat an abstract link graph as a legally permitted source row.
