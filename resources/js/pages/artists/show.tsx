@@ -1,3 +1,4 @@
+import { PublicFooter } from '@/components/public-footer';
 import { Head } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 
@@ -217,6 +218,7 @@ export default function ArtistShow({ artist }: Props) {
                         </div>
                     </section>
                 </main>
+                <PublicFooter />
             </div>
         </>
     );

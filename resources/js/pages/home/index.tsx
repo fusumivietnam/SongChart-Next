@@ -1,3 +1,4 @@
+import { PublicFooter } from '@/components/public-footer';
 import { Head } from '@inertiajs/react';
 import { Search } from 'lucide-react';
 
@@ -163,6 +164,7 @@ export default function HomeIndex({ discovery }: Props) {
                         )}
                     </section>
                 </main>
+                <PublicFooter />
             </div>
         </>
     );

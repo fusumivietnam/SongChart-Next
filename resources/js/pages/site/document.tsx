@@ -1,3 +1,4 @@
+import { PublicFooter } from '@/components/public-footer';
 import { Head, useForm } from '@inertiajs/react';
 import { ExternalLink, Search } from 'lucide-react';
 import type { FormEvent } from 'react';
@@ -258,6 +259,7 @@ export default function SiteDocument({ document, correctionIntake }: Props) {
                         )}
                     </article>
                 </main>
+                <PublicFooter />
             </div>
         </>
     );
