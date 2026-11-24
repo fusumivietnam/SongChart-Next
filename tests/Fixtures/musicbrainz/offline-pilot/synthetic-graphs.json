@@ -1,0 +1,284 @@
+{
+  "schema_version": 1,
+  "scope": "purely_synthetic_abstract_links_not_musicbrainz_payloads_or_canonical_admission",
+  "graphs": [
+    {
+      "id": "G01",
+      "nodes": [
+        [
+          "artist",
+          "A01"
+        ],
+        [
+          "release_group",
+          "RG01"
+        ],
+        [
+          "release",
+          "R01"
+        ],
+        [
+          "medium",
+          "M01"
+        ],
+        [
+          "track",
+          "T01"
+        ],
+        [
+          "recording",
+          "REC01"
+        ],
+        [
+          "work",
+          "W01"
+        ]
+      ],
+      "links": [
+        [
+          "release_group",
+          "RG01",
+          "R01"
+        ],
+        [
+          "medium",
+          "R01",
+          "M01"
+        ],
+        [
+          "track",
+          "M01",
+          "T01"
+        ],
+        [
+          "recording",
+          "T01",
+          "REC01"
+        ],
+        [
+          "artist_credit",
+          "R01",
+          "A01"
+        ],
+        [
+          "performance",
+          "REC01",
+          "W01"
+        ]
+      ],
+      "expected": "evaluation_only"
+    },
+    {
+      "id": "G02",
+      "nodes": [
+        [
+          "artist",
+          "A02a"
+        ],
+        [
+          "artist",
+          "A02b"
+        ],
+        [
+          "release",
+          "R02"
+        ],
+        [
+          "recording",
+          "REC02"
+        ]
+      ],
+      "links": [
+        [
+          "artist_credit",
+          "R02",
+          "A02a"
+        ],
+        [
+          "artist_credit",
+          "R02",
+          "A02b"
+        ],
+        [
+          "recording",
+          "R02",
+          "REC02"
+        ]
+      ],
+      "credits": [
+        {
+          "artist": "A02a",
+          "position": 1,
+          "credited_as": "Ensemble A",
+          "join_phrase": " & "
+        },
+        {
+          "artist": "A02b",
+          "position": 2,
+          "credited_as": "Ensemble B",
+          "join_phrase": ""
+        }
+      ],
+      "expected": "evaluation_only"
+    },
+    {
+      "id": "G03",
+      "nodes": [
+        [
+          "release",
+          "R03a"
+        ],
+        [
+          "release",
+          "R03b"
+        ],
+        [
+          "recording",
+          "REC03"
+        ]
+      ],
+      "links": [
+        [
+          "recording",
+          "R03a",
+          "REC03"
+        ],
+        [
+          "recording",
+          "R03b",
+          "REC03"
+        ]
+      ],
+      "expected": "evaluation_only"
+    },
+    {
+      "id": "G04",
+      "nodes": [
+        [
+          "recording",
+          "REC04"
+        ],
+        [
+          "work",
+          "W04a"
+        ],
+        [
+          "work",
+          "W04b"
+        ]
+      ],
+      "links": [
+        [
+          "performance",
+          "REC04",
+          "W04a"
+        ],
+        [
+          "performance",
+          "REC04",
+          "W04b"
+        ]
+      ],
+      "expected": "evaluation_only"
+    },
+    {
+      "id": "G05",
+      "nodes": [
+        [
+          "recording",
+          "REC05"
+        ]
+      ],
+      "links": [],
+      "expected": "evaluation_only"
+    },
+    {
+      "id": "G06",
+      "nodes": [
+        [
+          "recording",
+          "REC06"
+        ],
+        [
+          "work",
+          "W06"
+        ]
+      ],
+      "links": [
+        [
+          "performance",
+          "REC06",
+          "W06"
+        ]
+      ],
+      "performance_attributes": [
+        "cover",
+        "live",
+        "instrumental",
+        "partial"
+      ],
+      "expected": "quarantine"
+    },
+    {
+      "id": "G07",
+      "nodes": [
+        [
+          "artist",
+          "A07"
+        ],
+        [
+          "recording",
+          "REC07"
+        ],
+        [
+          "work",
+          "W07"
+        ]
+      ],
+      "links": [
+        [
+          "performance",
+          "REC07",
+          "W07"
+        ],
+        [
+          "artist_credit",
+          "REC07",
+          "A07"
+        ]
+      ],
+      "invalid_external_identity_for": "W07",
+      "expected": "quarantine"
+    },
+    {
+      "id": "G08",
+      "nodes": [
+        [
+          "artist",
+          "A08"
+        ],
+        [
+          "recording",
+          "REC08"
+        ]
+      ],
+      "links": [
+        [
+          "artist_credit",
+          "REC08",
+          "A08"
+        ]
+      ],
+      "isrcs": [
+        "USAAA2600001",
+        "USAAA2600001"
+      ],
+      "supplementary_keys": [
+        "tags",
+        "rating",
+        "annotation"
+      ],
+      "expected": "evaluation_with_admission_blocked"
+    }
+  ]
+}
