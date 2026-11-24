@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "owner_issue": 174,
+  "scope": "synthetic_only_acceptance_contract_no_real_data_or_canonical_admission",
+  "overall_decision": "blocked_pending_rights_provenance_and_owner_approval",
+  "phases": [
+    {
+      "id": "SYN-01",
+      "phase": "synthetic",
+      "gate": "scenario_and_strata_coverage",
+      "owner": "provider-adapters",
+      "evidence": "scripts/evaluate_musicbrainz_synthetic_coverage.py",
+      "criterion": "all_8_of_8_G01_G08_in_fixed_three_strata",
+      "decision": "testable"
+    },
+    {
+      "id": "SYN-02",
+      "phase": "synthetic",
+      "gate": "graph_referential_integrity",
+      "owner": "provider-adapters",
+      "evidence": "scripts/evaluate_musicbrainz_synthetic_coverage.py",
+      "criterion": "all_synthetic_links_resolve_and_required_7_entities_6_link_types_present",
+      "decision": "testable"
+    },
+    {
+      "id": "SYN-03",
+      "phase": "synthetic",
+      "gate": "negative_and_blocked_cases",
+      "owner": "provider-adapters",
+      "evidence": "tests/Fixtures/musicbrainz/offline-pilot/quality-rubric.json",
+      "criterion": "five_evaluation_only_two_quarantine_one_admission_blocked_conceptual_scenarios",
+      "decision": "testable"
+    },
+    {
+      "id": "RGT-01",
+      "phase": "real_source",
+      "gate": "archive_and_field_rights",
+      "owner": "provider-policy_and_owner_legal",
+      "evidence_required": [
+        "exact_archive_identity",
+        "contemporaneous_official_terms",
+        "path_by_path_permission",
+        "exclusion_of_supplementary_and_unknown_fields",
+        "explicit_signoff"
+      ],
+      "criterion": "every_used_leaf_path_signed_off_and_no_excluded_fields_used",
+      "decision": "blocked"
+    },
+    {
+      "id": "RGT-02",
+      "phase": "real_source",
+      "gate": "service_and_commercial_permission",
+      "owner": "provider-policy_and_owner",
+      "evidence_required": [
+        "selected_primary_ingestion_path",
+        "hosted_API_commercial_terms_if_selected",
+        "external_asset_terms_separately",
+        "no_unapproved_redistribution"
+      ],
+      "criterion": "one_source_path_approved_for_intended_commercial_posture",
+      "decision": "blocked"
+    },
+    {
+      "id": "OPS-01",
+      "phase": "real_source",
+      "gate": "provenance_and_integrity",
+      "owner": "provider-adapters_and_operator",
+      "evidence_required": [
+        "signed_manifest_verification",
+        "archive_hash_verification",
+        "snapshot_identifier",
+        "source_line_or_entity_locator",
+        "source_schema_revision"
+      ],
+      "criterion": "cryptographically_verified_source_evidence_not_operator_assertion_only",
+      "decision": "blocked"
+    },
+    {
+      "id": "OPS-02",
+      "phase": "real_source",
+      "gate": "retention_and_privacy",
+      "owner": "provider-policy_and_operator",
+      "evidence_required": [
+        "bulk_dump_retention_and_deletion_decision",
+        "permitted_evidence_storage_budget",
+        "privacy_review",
+        "expiry_and_proof_of_deletion"
+      ],
+      "criterion": "written_bulk_retention_policy_before_any_real_pilot",
+      "decision": "blocked"
+    },
+    {
+      "id": "QLT-01",
+      "phase": "real_source",
+      "gate": "sample_representativeness",
+      "owner": "provider-adapters_and_product",
+      "evidence_required": [
+        "source_population_by_archive",
+        "reproducible_sample_seed_and_strata",
+        "release_nested_recording_coverage",
+        "work_side_relationship_coverage",
+        "missing_link_denominators"
+      ],
+      "criterion": "multi_archive_coverage_and_missingness_are_measurable_not_first_100_only",
+      "decision": "blocked"
+    },
+    {
+      "id": "QLT-02",
+      "phase": "real_source",
+      "gate": "identity_and_semantic_quality",
+      "owner": "canonical-music-core_and_product",
+      "evidence_required": [
+        "MBID_external_vs_canonical_separation",
+        "false_merge_and_false_split_review",
+        "duplicate_ISRC_and_name_collision_cases",
+        "partial_and_missing_Work_cases",
+        "unsupported_attributes_quarantine",
+        "deterministic_replay"
+      ],
+      "criterion": "quality_thresholds_and_dispositions_approved_before_real_pilot",
+      "decision": "blocked"
+    },
+    {
+      "id": "CAN-01",
+      "phase": "canonical",
+      "gate": "canonical_admission",
+      "owner": "canonical-music-core_and_owner",
+      "evidence_required": [
+        "separately_approved_admission_change",
+        "domain_authorization_and_validation",
+        "database_transaction_and_rollback_proof",
+        "end_to_end_review_and_release_gate"
+      ],
+      "criterion": "no_provider_evidence_directly_mutates_canonical",
+      "decision": "blocked"
+    }
+  ],
+  "synthetic_evidence_counts": {
+    "authored_scenarios": 8,
+    "real_provider_rows": 0,
+    "full_application_joins": 0,
+    "rights_approved_groups": 0,
+    "canonical_admissions": 0
+  },
+  "source_authorities": [
+    "docs/providers/MUSICBRAINZ.md",
+    "docs/providers/PROVIDER_POLICY.md",
+    "docs/providers/MUSICBRAINZ_FIELD_RIGHTS_MATRIX.json",
+    "docs/providers/MUSICBRAINZ_SYNTHETIC_SAMPLE_PROTOCOL.md",
+    "docs/operations/ACCEPTANCE_GATES.md"
+  ]
+}
