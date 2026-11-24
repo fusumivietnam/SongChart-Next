@@ -37,3 +37,14 @@ verified local snapshot (never committed)
 Next bounded implementation: a pure read-only projector with automated tests for exact projected key lists, nested exclusions, supported/unsupported/multiple relations, failures, deterministic replay, provenance references and non-mutating behavior. Use synthetic fixtures in CI; never commit real MusicBrainz rows or run live API in CI. Keep #174 open. Before real data import, separately approve per-field commercial/public-use rights, provider attribution, bulk retention, representative Artist→Release→Recording→Work coverage, canonical ID resolution, ISRC ownership transaction rollback, and source admission. No capability lifecycle promotion from this design PR.
 
 Authority: [MusicBrainz policy](MUSICBRAINZ.md), [Provider policy](PROVIDER_POLICY.md), [Architecture](../architecture/ARCHITECTURE.md).
+
+
+## Bounded evaluation and provenance reference (implementation candidate)
+
+`OfflineRecordingBatchEvaluator` (proposed in the next PR) accepts an iterable of synthetic JSONL lines, a strictly shaped **operator-supplied** source reference and a limit of 1–100 lines. It delegates each line to `OfflineRecordingProjector::projectJson()` without invoking canonical admission, databases, HTTP or filesystem writes. Its return contains **aggregate counts only**, deterministic quarantine-reason buckets and a provenance reference (snapshot ID, archive SHA256, signing-key fingerprint, source line range and observed-at timestamp). It never emits Recording title, Artist credit, Work title, full JSON payload or per-row IDs.
+
+**Trust distinction:** checksum/fingerprint fields are syntactically validated but **not cryptographically verified by the evaluator**. The result explicitly says `operator_supplied_not_verified_by_evaluator`. The operator must separately verify the signed SHA256 manifest and archive before treating references as independently verified evidence. This component neither initiates downloads nor authorizes ongoing retention of a bulk dump.
+
+Four synthetic fixture cases yield two evaluation candidates (one with Work, one Recording-only) and two quarantines (unsupported performance attributes, invalid Artist MBID). Limits, malformed JSON, empty batches, redaction and deterministic replay are tested. These are tests of the **evaluation mechanism**, not tests of real-world import, source licensing or data completeness.
+
+This batch evaluator deliberately exposes no CLI/Artisan command and writes no report file. A controlled offline runner and any use against real archived rows are separately reviewed/approved; in CI use synthetic fixtures only.
