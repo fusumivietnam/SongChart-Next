@@ -122,18 +122,6 @@ jobs:
           docker compose exec -T app php artisan migrate --force
           docker compose exec -T app php artisan db:show --database=pgsql
 
-      # TEMPORARY single-PR dependency remediation probe. Remove in the solver-lock commit.
-      # No GitHub write permission, secrets, source-data access or canonical DB changes.
-      - name: Resolve vulnerable WebAuthn lock in disposable CI
-        shell: bash
-        run: |
-          set -euo pipefail
-          docker compose exec -T app composer update web-auth/webauthn-lib --with-dependencies --minimal-changes --no-interaction
-          docker compose exec -T app composer audit --locked --no-interaction
-          echo 'SONGCHART_COMPOSER_LOCK_BEGIN'
-          base64 -w 76 composer.lock
-          echo 'SONGCHART_COMPOSER_LOCK_END'
-
       - name: Frontend assets, type checks and starter tests
         run: |
           docker compose exec -T app pnpm run build
