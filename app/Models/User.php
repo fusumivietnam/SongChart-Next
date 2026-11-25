@@ -39,11 +39,20 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
      *
      * @return array<string, string>
      */
+    public function hasOperatorAccess(): bool
+    {
+        return $this->is_super_admin === true
+            && $this->hasVerifiedEmail()
+            && $this->two_factor_confirmed_at !== null
+            && $this->two_factor_secret !== null;
+    }
+
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_super_admin' => 'boolean',
             /* @chisel-2fa */
             'two_factor_confirmed_at' => 'datetime',
             /* @end-chisel-2fa */
