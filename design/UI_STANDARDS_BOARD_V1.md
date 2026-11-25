@@ -146,7 +146,56 @@ Existing rendered Foundation evidence (approved on 2026-10-02) is referenced in 
 
 **Next review sequence:** evidence EV-01–05 first; present a concrete visual before/after and severity matrix; obtain an authored Design Authority decision (EV-06) for material changes; only then open one cohesive UI implementation work unit with exact-SHA verification (EV-07). Keep current Draft PR unmerged until the owner explicitly approves its documentation lifecycle.
 
-## 9. Evidence links and boundaries
+## 9. Visual proposal review — Home / Artist / Release, desktop + mobile (candidate only)
+
+**Review source:** Concept A storyboard generated in the project conversation after the 9/9 directional review, showing six proposed screen views (Home/Artist/Release at desktop and mobile), plus illustrative component/token samples. It is **not** a checked-in screenshot, an exact-SHA application render, a canonical dataset, or an approved baseline. The image itself has not been uploaded to this PR; this section describes observable intent and records corrections required before any formal visual acceptance. Do not cite this mockup as runtime evidence.
+
+### Visual comparison matrix
+
+| Surface | Direction endorsed (candidate) | Current implementation reference | Desktop sample contract (1440×1024) | Mobile sample contract (390×844) | Required disposition |
+| --- | --- | --- | --- | --- | --- |
+| **V-01 Home** | Search-first Calm Editorial, restrained introductory hero, bounded categories/collections | `resources/js/pages/home/index.tsx`, S02 | Wordmark in shared Shell; single dominant search; factual Artist/Release/Recording modules with no popularity inference; whitespace/dividers preferred | One column; search field and button 44px or larger; navigation reachable without unapproved placeholder categories; useful zero-data experience | **CANDIDATE** — any hero illustration, gradient background, browse tab or 'Recently added' section requires factual dataset/ordering review and a design decision |
+| **V-02 Artist** | Strong identity, disambiguation, releases and factual provenance | `resources/js/pages/artists/show.tsx`, S04 | Optional square artwork next to full name/metadata; explicit stable SongChart ID distinct from provider claims; relationships and correction action | Name and meaningful identity text first; artwork appropriately sized; metadata and releases stack, no clipped international names | **CANDIDATE** — illustrated portrait and invented 'active since' fields are not evidence and may not be projected without authorized data contracts |
+| **V-03 Release** | Release identity, artist credits, ordered medium/track list, provenance and navigation to Recording | `resources/js/pages/releases/show.tsx`, S05 | Album title/type, credited artist, date precision if known; ordered medium/track structure and track→Recording links; restrained action hierarchy | One readable column; track numbers and durations do not clip; artist and metadata remain accessible; long titles wrap | **CANDIDATE** — decorative playback buttons **MUST BE REMOVED**. SongChart is not a self-hosted player. External destination only on a verified allowed provider link under existing VS-03c contracts |
+
+### Mockup-to-product corrections (apply to any next proposal before approval)
+
+| ID | Mockup detail | Decision / required correction | Evidence owner |
+| --- | --- | --- | --- |
+| VIS-01 | Triangle **play** icons beside Release tracks | **REJECT for MVP**; replace with navigation to canonical Recording details. On Recording, permitted external provider links must identify the provider and open outside SongChart. No implicit inline playback, fake player, streaming rights or autoplay | Design + product charter / VS-03 |
+| VIS-02 | Mockup names, portrait/artwork, release titles, dates, track durations, IDs and activity ranges | **FICTIONAL SAMPLE ONLY**; use controlled deterministic synthetic fixture with explicit mock/sample labeling in design review. Never invent factual names/credits/dates for the live canonical UI | Design + domain fixtures |
+| VIS-03 | Browse tabs for Artists, Releases, Recordings, Documents and multiple top-nav items | **UNAPPROVED interaction/navigation variants**; public nav exposes only real activated routes. No implied /artists index, generic /documents index or tag/category browser where no route/product contract exists | Public-web route inventory |
+| VIS-04 | 'Recently added', 'Popular' or 'Featured releases' type sections | Only show if source data, sort semantics and display rights are specified; existing Home has bounded canonical modules, not user-personalized, popularity or engagement rankings | VS-03/HomeDiscovery |
+| VIS-05 | Artist 'Overview / Releases / Recordings / Documents' tabs and Release overview/tracklist tabs | **Visual candidate**; do not render dead tabs or invent standalone resource pages. Prefer plain section headings / in-page anchors only if keyboard order and small-screen behavior are verified | Public-web page anatomy |
+| VIS-06 | 'Official' link boxes and verification-like status badges | Only when real source/destination is eligible and factual status is recorded. Avoid generic verification/certification claims and link to unreviewed domains | Provenance/destination contracts |
+| VIS-07 | Brand logo icon (blue bars), large decorative hero waves and style-board gradient | **Candidate brand/illustration only**, not part of approved logo, palette or hero token. Do not propagate into app or `foundation.json` before separate DEC-09/material decision | Design Authority |
+| VIS-08 | Corrections table listing 'my corrections', pending statuses, new request and user records in earlier collage | **OUT OF SCOPE** for anonymous public MVP; no public account, personalized correction history or reviewer queue. Retain existing anonymous evidence-only intake | #173 and correction policy |
+| VIS-09 | Search result counters, filters, category counts and document-index rows | **Candidate only**; do not display invented counts or routes. Existing results are canonical Artist/Release/Recording, with factual disambiguation; no unactivated 'Documents' search category | Search read contract |
+| VIS-10 | Compact mobile icon-only search/menu actions | Requires accessible labels, 44px pointer targets where layout permits, focus-visible, logical DOM order, meaningful menu destinations and no hidden essential data | Quality contract |
+
+### Proposed desktop and mobile acceptance storyboards (not implementation)
+
+**Home**: Header and search must remain recognizable across navigation. Desktop can provide one editorial search area and restrained modules; mobile puts search first and stacks real canonical data. Empty DB must show honest empty guidance, not fabricated 'latest' entries. Query submission goes to `/search?q=...`, with accessible label and clear focus.
+
+**Artist**: Page type → Artist name → disambiguation → artwork/metadata → related releases → canonical/provenance/correction. Desktop may use 2-column identity layout; mobile must not subordinate the name to a portrait. Mixed-script long names, absent artwork, unknown country and no related releases are mandatory review states.
+
+**Release**: Page type → title → artist credit → structured release/medium/track details → provenance/correction. Track rows link to Recording detail, not an inline play action; missing artwork/date and multi-disc/long-title cases must be covered. Preserve stable ID+slug canonical URL behavior.
+
+### Evidence capture matrix — required before the mockup can be accepted
+
+| Case | Render context and required artifact | Status |
+| --- | --- | --- |
+| C-01 | Existing local-only Foundation Artist/Search previews at 390×844 and 1440×1024, exact SHA/fixture, linked approved baseline | **HISTORICALLY APPROVED baseline**; verify/retrieve current artifact as needed |
+| C-02 | Current runtime Home (data + empty), same two viewports, current source SHA and deterministic fixture provenance | **NOT CAPTURED here** |
+| C-03 | Current runtime Artist normal + long mixed-script + no-artwork, both viewports | **NOT CAPTURED here** |
+| C-04 | Current runtime Release multi-medium + missing artwork/date + track links, both viewports | **NOT CAPTURED here** |
+| C-05 | Computed font/focus/contrast/layout, mobile keyboard and overflow for all three | **NOT CAPTURED here** |
+| C-06 | Side-by-side comparison with Concept A storyboard: keep/refine/reject per visual element, screenshot references and owner review | **PENDING** |
+| C-07 | An authored Design Authority approval decision for any material shared anatomy or style changes, separate from DEC directional endorsements | **BLOCKED pending C-01…06 and owner signoff** |
+
+Use `#175`/`#253` and existing `foundation-visual.yml`, VS-03/VS-04 test ownership; no new expensive CI or direct persistent DB fixture import solely for screenshots. Current design doc changes do not authorize browser claims, CI pass, or deployment. The stable Foundation token values are unchanged.
+
+## 10. Evidence links and boundaries
 
 - Authorities: [Design Authority](DESIGN_AUTHORITY.md), [Identity](IDENTITY.md), [Concept Contract](CONCEPT_CONTRACT.md), [Foundation tokens](tokens/foundation.json), [Component Contracts](components/COMPONENT_CONTRACTS.md), [Archetypes](PAGE_ARCHETYPES.md), [Quality](QUALITY_CONTRACT.md), [Foundation approval](decisions/FOUNDATION_BASELINE_APPROVAL.md).
 - Existing cross-page sample reference: [MVP Page Samples](MVP_PAGE_SAMPLES.md).
