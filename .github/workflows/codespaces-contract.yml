@@ -119,7 +119,13 @@ jobs:
         shell: bash
         run: |
           bash -n scripts/codespaces_public_read.sh
-          python3 -m unittest tests.governance.test_codespaces_public_read tests.governance.test_codespaces_workspace_bind -v
+          python3 -m unittest tests.governance.test_codespaces_public_read -v
+          python3 - <<'PY'
+          from tests.governance import test_codespaces_workspace_bind as contract
+          for name in sorted(n for n in dir(contract) if n.startswith("test_")):
+              getattr(contract, name)()
+              print(f"PASS: {name}")
+          PY
 
       - name: Confirm Codespaces base image exists
         run: docker pull mcr.microsoft.com/devcontainers/base:ubuntu-24.04
