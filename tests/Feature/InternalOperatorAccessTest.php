@@ -20,10 +20,7 @@ class InternalOperatorAccessTest extends TestCase
 
     public function test_verified_and_confirmed_two_factor_identity_can_be_provisioned_and_revoked(): void
     {
-        $user = User::factory()->create([
-            'email_verified_at' => now(),
-        ]);
-        $user->forceFill(['two_factor_confirmed_at' => now()])->save();
+        $user = User::factory()->withTwoFactor()->create();
 
         $this->artisan('songchart:operator:access', [
             'user' => (string) $user->id,
@@ -45,8 +42,10 @@ class InternalOperatorAccessTest extends TestCase
     {
         $unverified = User::factory()->unverified()->create();
         $unconfirmed = User::factory()->create();
+        $noSecret = User::factory()->create();
+        $noSecret->forceFill(['two_factor_confirmed_at' => now()])->save();
 
-        foreach ([$unverified, $unconfirmed] as $user) {
+        foreach ([$unverified, $unconfirmed, $noSecret] as $user) {
             $this->artisan('songchart:operator:access', [
                 'user' => (string) $user->id,
                 '--force' => true,
@@ -75,15 +74,15 @@ class InternalOperatorAccessTest extends TestCase
 
     public function test_operator_access_fails_closed_if_verification_or_two_factor_is_removed(): void
     {
-        $user = User::factory()->create();
-        $user->forceFill([
-            'is_super_admin' => true,
-            'two_factor_confirmed_at' => now(),
-        ])->save();
+        $user = User::factory()->withTwoFactor()->create();
+        $user->forceFill(['is_super_admin' => true])->save();
 
         $this->assertTrue($user->hasOperatorAccess());
 
-        $user->forceFill(['two_factor_confirmed_at' => null])->save();
+        $user->forceFill(['two_factor_secret' => null])->save();
+        $this->assertFalse($user->hasOperatorAccess());
+
+        $user->forceFill(['two_factor_secret' => encrypt('test-secret'), 'two_factor_confirmed_at' => null])->save();
         $this->assertFalse($user->hasOperatorAccess());
 
         $user->forceFill([
