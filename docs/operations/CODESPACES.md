@@ -18,9 +18,27 @@ After a stopped Codespace is started again, `.devcontainer/post-start.sh` keeps 
 
 Ports:
 - 8000 — SongChart app, private by default
-- 5173 — optional Vite development server, private/silent by default
+- 5173 — optional Vite/Understand Anything port-forward reservation; not published by the default app Compose service. This avoids blocking the mandatory port 8000 on a Codespaces forwarding failure for an unused HMR port. If HMR is explicitly needed, configure a reviewed local-only Compose override for port 5173; do not add it back to the mandatory boot path.
 
 Default requested machine specification is 2 CPU, 8 GB RAM and 32 GB storage. A larger machine is an explicit operator choice for a bounded task, not the repository default.
+
+### Recovery if Docker port forwarding fails for 5173
+
+If the creation log says `/forwards/expose returned unexpected status: 500` while publishing `127.0.0.1:5173`, the default Compose app on updated `main` no longer publishes that optional port. On a clean checkout fast-forward to the latest `main`, then run:
+
+```bash
+git status --short
+git fetch origin
+git switch main
+git pull --ff-only
+docker compose config --quiet
+docker compose up -d --no-build --force-recreate --wait app
+bash scripts/codespaces_public_read.sh
+```
+
+**Scope:** the `--force-recreate` command touches the app container only and preserves all named volumes. `--no-build` reuses the existing image, so rebuild it separately only if missing/stale. No `down -v`, `migrate:fresh`, fixture import, or destructive database recovery. If port `8000` also fails, do not claim this patch resolves the Codespaces platform forwarding service; check `bash scripts/codespaces_doctor.sh` and GitHub Codespaces/port-forward status.
+
+For WSL2 + Docker Desktop development, prefer the preflight startup command `bash scripts/dev_up.sh` in `docs/operations/DOCKER_DEVELOPMENT.md`. It diagnoses Windows/VS Code port listeners and uses the approved Compose runtime, rather than adding a second application runtime. It does not fix a broken Docker Desktop forwarding relay automatically; if even a free port fails with `/forwards/expose 500`, diagnose Docker Desktop before retrying.
 
 ## Private Codespaces public-read smoke (#253)
 

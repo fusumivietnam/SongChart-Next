@@ -33,8 +33,7 @@ services:
       DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in untracked .env}
       VITE_HOST: "0.0.0.0"
     ports:
-      - "127.0.0.1:8000:8000"
-      - "127.0.0.1:5173:5173"
+      - "127.0.0.1:${SONGCHART_HTTP_PORT:-8000}:8000"
     volumes:
       - ${LOCAL_WORKSPACE_FOLDER:-.}:/var/www/html
       - composer_vendor:/var/www/html/vendor

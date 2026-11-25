@@ -6,6 +6,10 @@ on:
       - .devcontainer/**
       - docs/adr/ADR-0007-understand-anything-developer-analysis.md
       - scripts/codespaces_doctor.sh
+      - scripts/dev_up.sh
+      - .vscode/tasks.json
+      - scripts/git_workspace_status.sh
+      - tests/governance/test_vscode_auto_start.py
       - scripts/codespaces_public_read.sh
       - tests/governance/test_codespaces_public_read.py
       - scripts/design_review.sh
@@ -21,6 +25,10 @@ on:
       - .devcontainer/**
       - docs/adr/ADR-0007-understand-anything-developer-analysis.md
       - scripts/codespaces_doctor.sh
+      - scripts/dev_up.sh
+      - .vscode/tasks.json
+      - scripts/git_workspace_status.sh
+      - tests/governance/test_vscode_auto_start.py
       - scripts/codespaces_public_read.sh
       - tests/governance/test_codespaces_public_read.py
       - scripts/design_review.sh
@@ -84,6 +92,8 @@ jobs:
           bash -n .devcontainer/post-start.sh
           bash -n .devcontainer/install-understand-anything.sh
           bash -n scripts/codespaces_doctor.sh
+          bash -n scripts/dev_up.sh
+          bash -n scripts/git_workspace_status.sh
           bash -n scripts/design_review.sh
 
       - name: Enforce blocking onCreate dependency boundary
@@ -117,6 +127,18 @@ jobs:
         run: |
           bash -n scripts/codespaces_public_read.sh
           python3 -m unittest tests.governance.test_codespaces_public_read -v
+          python3 - <<'PY'
+          from tests.governance import test_vscode_auto_start as contract
+          for name in sorted(n for n in dir(contract) if n.startswith('test_')):
+              getattr(contract, name)()
+              print(f'PASS: {name}')
+          PY
+          python3 - <<'PY'
+          from tests.governance import test_codespaces_workspace_bind as contract
+          for name in sorted(n for n in dir(contract) if n.startswith("test_")):
+              getattr(contract, name)()
+              print(f"PASS: {name}")
+          PY
 
       - name: Confirm Codespaces base image exists
         run: docker pull mcr.microsoft.com/devcontainers/base:ubuntu-24.04

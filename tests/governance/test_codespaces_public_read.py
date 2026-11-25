@@ -10,7 +10,7 @@ SCRIPT = ROOT / "scripts/codespaces_public_read.sh"
 ROUTES = ("/health", "/", "/search?q=Signals", "/corrections", "/about", "/privacy", "/terms", "/disclaimer", "/support")
 
 class CodespacesPublicReadTests(unittest.TestCase):
-    def run_fixture(self, health='{"status":"ok"}', html="200|text/html; charset=UTF-8", fail_path=None):
+    def run_fixture(self, health='{"status":"ok"}', html="200|text/html; charset=UTF-8", fail_path=None, port=8000):
         with tempfile.TemporaryDirectory() as temp:
             stub = Path(temp) / "curl"
             calls = Path(temp) / "calls"
@@ -19,7 +19,7 @@ set -euo pipefail
 url=''
 body=0
 for arg in "$@"; do
-  [[ "$arg" == http://127.0.0.1:8000/* ]] && url="$arg"
+  [[ "$arg" == http://127.0.0.1:$TEST_PORT/* ]] && url="$arg"
   [[ "$arg" == '--output' ]] && body=1
 done
 [[ -n "$url" ]] || exit 3
@@ -33,7 +33,7 @@ fi
 """, encoding="utf-8")
             stub.chmod(0o755)
             env = dict(os.environ, PATH=temp + os.pathsep + os.environ.get("PATH", ""), CALLS=str(calls),
-                       HEALTH=health, HTML=html, FAIL_PATH="http://127.0.0.1:8000" + fail_path if fail_path else "")
+                       HEALTH=health, HTML=html, TEST_PORT=str(port), SONGCHART_HTTP_PORT=str(port), FAIL_PATH=f"http://127.0.0.1:{port}" + fail_path if fail_path else "")
             proc = subprocess.run(["bash", str(SCRIPT)], env=env, text=True, capture_output=True, timeout=15)
             urls = calls.read_text(encoding="utf-8").splitlines() if calls.exists() else []
             return proc, urls
@@ -48,6 +48,11 @@ fi
         self.assertNotIn("python", source.lower())
         self.assertNotIn("--location", source)
         self.assertIn("--output /dev/null", source)
+
+    def test_configured_loopback_port(self):
+        proc, urls = self.run_fixture(port=18080)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        self.assertEqual(urls, ["http://127.0.0.1:18080" + route for route in ROUTES])
 
     def test_fail_closed(self):
         for health in ('{"status":"unavailable"}', '{"status":"ok","extra":1}'):
