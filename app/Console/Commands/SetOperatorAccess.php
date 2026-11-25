@@ -34,7 +34,7 @@ class SetOperatorAccess extends Command
 
         $revoke = (bool) $this->option('revoke');
 
-        if (! $revoke && (! $user->hasVerifiedEmail() || $user->two_factor_confirmed_at === null)) {
+        if (! $revoke && (! $user->hasVerifiedEmail() || $user->two_factor_confirmed_at === null || $user->two_factor_secret === null)) {
             $this->error('Grant denied: the internal identity must have verified email and confirmed 2FA.');
 
             return self::FAILURE;
