@@ -26,6 +26,12 @@ A design-tool prototype, AI-generated image or standalone screenshot is a **cand
 
 The approved Foundation visual evidence covers Shell + Artist + Search. Later page families in `PAGE_ARCHETYPES.md` are deliberately **candidate** until their owning slice supplies deterministic render/accessibility evidence and a review decision.
 
+## Selected Concept A visual direction — owner-approved 2026-11-26
+
+The owner selected the **newer Concept A — Calm Editorial** Home/Artist/Release desktop-and-mobile storyboard as the **public UI visual direction**. The authoritative interpretation and explicit exclusions are recorded in [Concept A direction decision](decisions/CONCEPT_A_2026_DIRECTION_APPROVAL.md). **Read that decision for every public UI task.** This refines rather than invalidates the Foundation concept and its approved semantic tokens.
+
+Treat the mockup as visual direction, not a pixel-verified baseline or permission to implement imaginary playback, data, dead tabs/routes, personalized corrections or a generic admin dashboard. Existing typography, palette and layout tokens remain in force. Global CSS, common shell/component anatomy, logo/dark mode and material implementation changes still require separate Design Authority review and exact-SHA visual/accessibility evidence.
+
 ## Concept lock
 
 All future public pages start from the same concept: **calm knowledge interface / editorial database**. Implementations may vary their content anatomy, but they must reuse the approved visual DNA, semantic tokens, shared interaction/state language and quality constraints before proposing a new primitive.
