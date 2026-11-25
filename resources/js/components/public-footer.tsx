@@ -20,7 +20,7 @@ export function PublicFooter() {
                     <a
                         key={href}
                         href={href}
-                        className="rounded-sm underline-offset-4 hover:text-blue-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+                        className="inline-flex min-h-11 items-center rounded-sm underline-offset-4 hover:text-blue-800 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
                     >
                         {label}
                     </a>

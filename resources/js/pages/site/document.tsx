@@ -1,6 +1,6 @@
-import { PublicFooter } from '@/components/public-footer';
+import { PublicShell } from '@/components/public-shell';
 import { Head, useForm } from '@inertiajs/react';
-import { ExternalLink, Search } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import type { FormEvent } from 'react';
 
 type Section = {
@@ -63,53 +63,12 @@ export default function SiteDocument({ document, correctionIntake }: Props) {
                 <meta name="description" content={document.description} />
                 <link rel="canonical" href={document.canonicalUrl} />
             </Head>
-            <div
-                className="min-h-screen bg-white text-slate-900"
-                style={{ fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}
-            >
-                <a
-                    href="#main-content"
-                    className="sr-only rounded-md bg-blue-700 px-3 py-2 text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
-                >
-                    Skip to content
-                </a>
-
-                <header className="border-b border-slate-300 bg-white">
-                    <div className="mx-auto flex max-w-[72rem] flex-col gap-4 px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between">
-                        <a
-                            href="/"
-                            className="w-fit rounded-md text-lg font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
-                        >
-                            SongChart Next
-                        </a>
-                        <form className="flex w-full max-w-md gap-2" action="/search" method="get" role="search">
-                            <label htmlFor="site-search" className="sr-only">
-                                Search music knowledge
-                            </label>
-                            <div className="relative min-w-0 flex-1">
-                                <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-500" />
-                                <input
-                                    id="site-search"
-                                    name="q"
-                                    maxLength={80}
-                                    placeholder="Search music knowledge"
-                                    className="h-10 w-full rounded-[0.625rem] border border-slate-300 bg-white pr-3 pl-9 text-sm outline-none placeholder:text-slate-500 focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                className="h-10 rounded-[0.625rem] bg-blue-700 px-4 text-sm font-medium text-white outline-none hover:bg-blue-800 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
-                            >
-                                Search
-                            </button>
-                        </form>
-                    </div>
-                </header>
+            <PublicShell>
 
                 <main id="main-content" className="mx-auto w-full max-w-[72rem] px-4 py-10 sm:px-6">
                     <article className="max-w-3xl" aria-labelledby="document-title">
                         <p className="text-xs font-semibold tracking-[0.14em] text-blue-700 uppercase">SongChart Next</p>
-                        <h1 id="document-title" className="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">
+                        <h1 id="document-title" className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
                             {document.title}
                         </h1>
                         <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">{document.description}</p>
@@ -168,7 +127,7 @@ export default function SiteDocument({ document, correctionIntake }: Props) {
                                             aria-describedby={form.errors.subject_type ? 'subject-type-error' : undefined}
                                             value={form.data.subject_type}
                                             onChange={(event) => form.setData('subject_type', event.target.value)}
-                                            className="mt-2 h-10 w-full rounded-[0.625rem] border border-slate-300 bg-white px-3 text-sm outline-none focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
+                                            className="mt-2 h-11 w-full rounded-[0.625rem] border border-slate-300 bg-white px-3 text-sm outline-none focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
                                         >
                                             <option value="artist">Artist</option>
                                             <option value="release">Release</option>
@@ -189,7 +148,7 @@ export default function SiteDocument({ document, correctionIntake }: Props) {
                                             onChange={(event) => form.setData('subject_id', event.target.value)}
                                             autoComplete="off"
                                             required
-                                            className="mt-2 h-10 w-full rounded-[0.625rem] border border-slate-300 bg-white px-3 font-mono text-sm outline-none focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
+                                            className="mt-2 h-11 w-full rounded-[0.625rem] border border-slate-300 bg-white px-3 font-mono text-sm outline-none focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
                                         />
                                         {form.errors.subject_id && <p id="subject-id-error" className="mt-1 text-sm text-red-700">{form.errors.subject_id}</p>}
                                     </div>
@@ -226,7 +185,7 @@ export default function SiteDocument({ document, correctionIntake }: Props) {
                                             onChange={(event) => form.setData('evidence_url', event.target.value)}
                                             maxLength={correctionIntake.limits.evidenceUrlCharacters}
                                             placeholder="https://example.org/source"
-                                            className="mt-2 h-10 w-full rounded-[0.625rem] border border-slate-300 bg-white px-3 text-sm outline-none focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
+                                            className="mt-2 h-11 w-full rounded-[0.625rem] border border-slate-300 bg-white px-3 text-sm outline-none focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
                                         />
                                         <p className="mt-1 text-xs text-slate-500">Stored as submitted; SongChart does not fetch this URL during intake.</p>
                                         {form.errors.evidence_url && <p id="evidence-url-error" className="mt-1 text-sm text-red-700">{form.errors.evidence_url}</p>}
@@ -235,7 +194,7 @@ export default function SiteDocument({ document, correctionIntake }: Props) {
                                     <button
                                         type="submit"
                                         disabled={form.processing}
-                                        className="inline-flex min-h-10 items-center rounded-[0.625rem] bg-blue-700 px-4 py-2.5 text-sm font-medium text-white outline-none hover:bg-blue-800 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                                        className="inline-flex min-h-11 items-center rounded-[0.625rem] bg-blue-700 px-4 py-2.5 text-sm font-medium text-white outline-none hover:bg-blue-800 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
                                         {form.processing ? 'Submitting…' : 'Submit for review'}
                                     </button>
@@ -259,8 +218,7 @@ export default function SiteDocument({ document, correctionIntake }: Props) {
                         )}
                     </article>
                 </main>
-                <PublicFooter />
-            </div>
+            </PublicShell>
         </>
     );
 }

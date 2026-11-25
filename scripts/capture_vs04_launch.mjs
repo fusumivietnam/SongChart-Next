@@ -71,6 +71,8 @@ for (const surface of surfaces) {
         for (const text of ['Skip to content', 'role="search"', 'aria-label="Site information"', 'About', 'Privacy', 'Terms', 'Disclaimer', 'Support', 'Corrections', 'Sitemap']) {
             if (!dom.includes(text)) throw new Error(`${surface.path} missing public-shell contract: ${text}`);
         }
+        if ((dom.match(/data-public-shell="true"/g) ?? []).length !== 1 || (dom.match(/<main\b/g) ?? []).length !== 1 || (dom.match(/role="search"/g) ?? []).length !== 1) throw new Error(`${surface.path} must render one public shell, main and search landmark.`);
+        if (dom.includes('data-sidebar=') || dom.includes('data-slot="sidebar"')) throw new Error(`${surface.path} leaked authenticated sidebar markup.`);
         if (!dom.includes('name="description"')) throw new Error(`${surface.path} missing meta description.`);
         if (!dom.includes('rel="canonical"')) throw new Error(`${surface.path} missing canonical metadata.`);
         if (dom.includes('/@vite/client') || dom.includes('127.0.0.1:5173')) throw new Error(`${surface.path} unexpectedly references Vite dev server.`);

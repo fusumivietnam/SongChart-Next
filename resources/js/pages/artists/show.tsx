@@ -1,6 +1,6 @@
-import { PublicFooter } from '@/components/public-footer';
+import { ArtworkPlaceholder, MetadataRow } from '@/components/public-entity';
+import { PublicShell } from '@/components/public-shell';
 import { Head } from '@inertiajs/react';
-import { Search } from 'lucide-react';
 
 type Provenance = {
     provider: string;
@@ -34,14 +34,6 @@ type Props = {
     artist: Artist;
 };
 
-function MetadataRow({ label, value }: { label: string; value: string }) {
-    return (
-        <div className="grid grid-cols-[7rem_1fr] gap-3 border-t border-slate-200 py-3 text-sm first:border-t-0">
-            <dt className="font-medium text-slate-600">{label}</dt>
-            <dd className="min-w-0 break-words text-slate-900">{value}</dd>
-        </div>
-    );
-}
 
 function releaseDetail(release: RelatedRelease): string {
     return [
@@ -60,60 +52,7 @@ export default function ArtistShow({ artist }: Props) {
         <>
             <Head title={`${artist.name} — SongChart Next`} />
 
-            <div
-                className="min-h-screen bg-white text-slate-900"
-                style={{
-                    fontFamily:
-                        'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-                }}
-            >
-                <a
-                    href="#main-content"
-                    className="sr-only rounded-md bg-blue-700 px-3 py-2 text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50"
-                >
-                    Skip to content
-                </a>
-
-                <header className="border-b border-slate-300 bg-white">
-                    <div className="mx-auto flex max-w-[72rem] flex-col gap-4 px-4 py-4 sm:px-6 md:flex-row md:items-center">
-                        <a
-                            href="/"
-                            className="shrink-0 rounded-md text-lg font-semibold tracking-tight outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
-                        >
-                            SongChart Next
-                        </a>
-
-                        <form
-                            className="flex min-w-0 flex-1 gap-2"
-                            action="/search"
-                            method="get"
-                            role="search"
-                        >
-                            <label htmlFor="site-search" className="sr-only">
-                                Search music knowledge
-                            </label>
-                            <div className="relative min-w-0 flex-1">
-                                <Search
-                                    aria-hidden="true"
-                                    className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-500"
-                                />
-                                <input
-                                    id="site-search"
-                                    name="q"
-                                    maxLength={80}
-                                    placeholder="Search artists, releases, recordings"
-                                    className="h-10 w-full rounded-[0.625rem] border border-slate-300 bg-white pr-3 pl-9 text-sm outline-none placeholder:text-slate-500 focus-visible:border-blue-700 focus-visible:ring-2 focus-visible:ring-blue-600/25"
-                                />
-                            </div>
-                            <button
-                                type="submit"
-                                className="h-10 rounded-[0.625rem] bg-blue-700 px-4 text-sm font-medium text-white outline-none hover:bg-blue-800 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
-                            >
-                                Search
-                            </button>
-                        </form>
-                    </div>
-                </header>
+            <PublicShell>
 
                 <main
                     id="main-content"
@@ -137,13 +76,7 @@ export default function ArtistShow({ artist }: Props) {
                         aria-label="Artist identity"
                         className="grid gap-6 md:grid-cols-[14rem_minmax(0,1fr)] md:items-start"
                     >
-                        <div
-                            role="img"
-                            aria-label={`Artwork unavailable for ${artist.name}`}
-                            className="flex aspect-square w-full items-center justify-center rounded-[0.875rem] border border-slate-300 bg-slate-100 p-4 text-center text-sm font-medium text-slate-500"
-                        >
-                            Artwork unavailable
-                        </div>
+                        <ArtworkPlaceholder name={artist.name} />
 
                         <div className="min-w-0">
                             <dl className="rounded-[0.875rem] border border-slate-300 bg-white px-4">
@@ -218,8 +151,7 @@ export default function ArtistShow({ artist }: Props) {
                         </div>
                     </section>
                 </main>
-                <PublicFooter />
-            </div>
+            </PublicShell>
         </>
     );
 }
