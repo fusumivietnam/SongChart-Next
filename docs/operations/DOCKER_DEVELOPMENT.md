@@ -4,7 +4,7 @@ Status: development app runtime is merged into `main` from [PR #6](https://githu
 
 ## Environment and startup
 
-Install Docker Engine/Desktop with Compose v2. Copy `.env.example` to untracked `.env` and replace the password placeholder (both occurrences) with the same unique local secret. Do not use sample values for real access. Do not commit `.env`. PostgreSQL binds no host port; application and Vite are bound to host loopback.
+Install Docker Engine/Desktop with Compose v2. Copy `.env.example` to untracked `.env` and replace the password placeholder (both occurrences) with the same unique local secret. Do not use sample values for real access. Do not commit `.env`. PostgreSQL binds no host port; the application publishes only host-loopback port 8000 by default. Vite hot reload is optional and must opt in to a separately reviewed host-port mapping; the default boot path does not depend on port 5173.
 
 Once `composer.lock` and `pnpm-lock.yaml` are available:
 
@@ -12,7 +12,7 @@ Once `composer.lock` and `pnpm-lock.yaml` are available:
 2. Run `docker compose up -d --wait db app`. First boot installs locked Composer and pnpm dependencies into named development volumes.
 3. Run `docker compose exec app php artisan key:generate --force` once; this writes an APP_KEY to your untracked `.env`. Check it exists before using auth/session pages.
 4. Run `docker compose exec app php artisan migrate --force` for the **new local** database only. The starter migrations are not SongChart canonical music schemas.
-5. Run `docker compose exec app pnpm run build`, or `docker compose exec app pnpm dev --host 0.0.0.0` separately for hot reload.
+5. Run `docker compose exec app pnpm run build`. For optional hot reload, `docker compose exec app pnpm dev --host 0.0.0.0` starts Vite inside the container, but accessing Vite from the host also requires a separately configured local-only port mapping; it is intentionally not active during default bootstrap.
 6. Run `docker compose exec -e APP_ENV=testing -e DB_CONNECTION=sqlite -e DB_DATABASE=:memory: app php artisan test`; the upstream scaffold suite uses in-memory SQLite (pdo_sqlite extension). Never run the fixture test suite against a populated PostgreSQL development database. The app's *runtime* database is PostgreSQL and must be checked separately via `docker compose exec app php artisan db:show --database=pgsql`.
 7. Browse http://localhost:8000 only for framework smoke testing. Upstream welcome/auth/dashboard pages are **not** SongChart's approved design or released product.
 

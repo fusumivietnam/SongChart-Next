@@ -34,7 +34,6 @@ services:
       VITE_HOST: "0.0.0.0"
     ports:
       - "127.0.0.1:8000:8000"
-      - "127.0.0.1:5173:5173"
     volumes:
       - ${LOCAL_WORKSPACE_FOLDER:-.}:/var/www/html
       - composer_vendor:/var/www/html/vendor
