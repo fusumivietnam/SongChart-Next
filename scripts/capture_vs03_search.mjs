@@ -120,6 +120,8 @@ for (const surface of surfaces) {
             if (!dom.includes('target="_blank"')) throw new Error('Recording destination is missing explicit external target treatment.');
             if (!dom.includes('rel="noopener noreferrer"')) throw new Error('Recording destination is missing opener isolation.');
         }
+        if ((dom.match(/data-public-shell="true"/g) ?? []).length !== 1 || (dom.match(/<main\b/g) ?? []).length !== 1 || (dom.match(/role="search"/g) ?? []).length !== 1) throw new Error(`${surface.label} must render one public shell, main and search landmark.`);
+        if (dom.includes('data-sidebar=') || dom.includes('data-slot="sidebar"')) throw new Error(`${surface.label} leaked authenticated sidebar markup.`);
         if (!dom.includes('role="search"')) throw new Error(`${surface.label} is missing the search landmark.`);
         if (!dom.includes('action="/search"')) throw new Error(`${surface.label} search form must submit to /search, not Home.`);
         if (!dom.includes('name="q"')) throw new Error(`${surface.label} is missing the canonical search query input.`);

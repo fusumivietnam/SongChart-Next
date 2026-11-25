@@ -75,7 +75,7 @@ export default function HomeIndex({ discovery }: Props) {
                             Explore canonical data
                         </h2>
                         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                            Explore a bounded selection of canonical records, ordered alphabetically.
+                            Explore a bounded selection of canonical records, ordered alphabetically by name or title with stable SongChart identity as the tie-breaker. These are not recommendations or popularity charts.
                         </p>
 
                         {!hasDiscovery && (
