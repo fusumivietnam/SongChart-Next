@@ -32,4 +32,4 @@ For **every public UI task**, read [Concept A direction decision](decisions/CONC
 
 ## Current proposals (not approved authority)
 
-- [UI Standards Board v1.0 — Concept A proposal and source audit](UI_STANDARDS_BOARD_V1.md) compares approved Foundation rules, observed public UI source and candidate consolidation decisions. **Owner review pending**: it does not modify or supersede the Design Authority, foundation tokens, page archetypes or runtime styles.
+- [UI Standards Board v1.0 — Concept A proposal and source audit](UI_STANDARDS_BOARD_V1.md) compares approved Foundation rules, observed public UI source and candidate consolidation decisions. **Concept A visual direction selected by owner on 2026-11-26; exact runtime visual implementation and material changes still pending review**: the board does not modify or supersede the Design Authority, foundation tokens, page archetypes or runtime styles.
