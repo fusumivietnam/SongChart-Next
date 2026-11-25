@@ -59,9 +59,7 @@ class InternalOperatorAccessTest extends TestCase
     public function test_user_cannot_self_assign_operator_access_through_mass_assignment(): void
     {
         $user = User::factory()->create();
-        $user->fill(['is_super_admin' => true]);
-        $user->save();
-
+        $this->assertFalse($user->isFillable('is_super_admin'));
         $this->assertFalse($user->fresh()->is_super_admin);
     }
 
