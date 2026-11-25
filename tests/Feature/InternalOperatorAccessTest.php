@@ -14,7 +14,7 @@ class InternalOperatorAccessTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->assertFalse($user->is_super_admin);
+        $this->assertFalse($user->fresh()->is_super_admin);
         $this->assertFalse($user->hasOperatorAccess());
     }
 
@@ -54,6 +54,16 @@ class InternalOperatorAccessTest extends TestCase
 
             $this->assertFalse($user->fresh()->is_super_admin);
         }
+    }
+
+    public function test_missing_user_is_rejected_without_creating_an_account(): void
+    {
+        $this->artisan('songchart:operator:access', [
+            'user' => '99999999',
+            '--force' => true,
+        ])->assertExitCode(1);
+
+        $this->assertSame(0, User::query()->count());
     }
 
     public function test_user_cannot_self_assign_operator_access_through_mass_assignment(): void
