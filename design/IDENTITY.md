@@ -8,6 +8,12 @@ Status: **approved Foundation concept baseline since 2026-10-02 for VS-01a**. Th
 
 When a new page is designed, preserving this concept takes priority over matching an isolated screenshot.
 
+## Selected 2026 visual direction
+
+The owner selected the **newer Concept A — Calm Editorial** desktop/mobile storyboard as the consistent direction for public web. See [Concept A direction decision](decisions/CONCEPT_A_2026_DIRECTION_APPROVAL.md) for the binding scope, constraints and exclusions. The aim is a calm **editorial music knowledge atlas**: search-first Home; identity/disambiguation-first Artist; credited release/tracklist-first Release; matching Search/Recording/Documents/Corrections anatomy.
+
+The source image remains an illustration, not an approved source of facts, logo, tabs, streaming/player controls, global CSS or pixel baseline. Retain existing Foundation tokens and require a separate material approval before runtime changes.
+
 ## Product posture
 
 SongChart Next is a search-first music knowledge catalogue and legal provider-navigation product. The UI prioritizes entity identity, relationships, provenance, correction and destination context over decorative chrome or engagement mechanics.

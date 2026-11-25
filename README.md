@@ -36,6 +36,10 @@ SongChart Next is **in development, not publicly launched**. Features and approv
 | Contribute code or work with AI | [AGENTS.md](AGENTS.md), [Architecture](docs/architecture/ARCHITECTURE.md) and [Developer Reference](reference/README.md) |
 | Review decisions and delivery evidence | [Project Control](docs/operations/PROJECT_CONTROL.md), [Acceptance Gates](docs/operations/ACCEPTANCE_GATES.md) and [CI Workflow Ownership](docs/operations/CI_WORKFLOW_OWNERSHIP.md) |
 
+## Design direction
+
+The owner-selected public-web direction is **Concept A — Calm Editorial (2026)**: a calm editorial music-knowledge atlas, with search-first Home, identity-first Artist and tracklist-first Release across desktop and mobile. The authoritative [Concept A direction decision](design/decisions/CONCEPT_A_2026_DIRECTION_APPROVAL.md) records what is included and what the illustrative mockup must **not** introduce. Review the [Design Authority](design/DESIGN_AUTHORITY.md) and [UI Standards Board](design/UI_STANDARDS_BOARD_V1.md) before UI work. Design direction approval is not a production UI implementation or release approval.
+
 ## Repository authority
 
 This repository is the **sole source of truth** for SongChart Next code, approved decisions and project governance. Previous SongChart repositories, ZIP archives, research notes and chat history do not establish current implementation status.

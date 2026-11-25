@@ -6,6 +6,12 @@ Status: **approved interpretation of the 2026-10-02 Foundation baseline**. This 
 
 SongChart Next is a **calm knowledge interface / editorial database for music metadata**: trustworthy, quiet, information-first, internationally robust and explicit about provenance, uncertainty and external destinations.
 
+## Selected visual reference — approved direction, not pixel baseline
+
+The 2026-11-26 owner-selected **Concept A / Calm Editorial** Home–Artist–Release responsive storyboard is the visual *direction* for future public UI proposals, governed by [Concept A direction decision](decisions/CONCEPT_A_2026_DIRECTION_APPROVAL.md) and Foundation tokens. Reuse one calm header/search/footer language and quiet metadata-first editorial spacing. Home prioritizes search and bounded factual discovery; Artist prioritizes identity, relationships and provenance; Release prioritizes credited identity, ordered medium/track links to Recording.
+
+The mockup does not authorize inline play buttons, invented artwork/facts, dead navigation/tabs, personalized correction queues, a new logo/gradient, dark mode or global styles. Record material component, font and palette decisions separately before implementation.
+
 ## 2. Visual DNA
 
 - Light neutral canvas; white is the default page background.
