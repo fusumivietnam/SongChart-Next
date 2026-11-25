@@ -21,6 +21,22 @@ docker info --format 'Docker daemon: {{.Name}} ({{.OperatingSystem}})' || {
   exit 1
 }
 
+# Idempotent workspace-open: a healthy existing SongChart container owns the
+# service; Windows/VS Code may legitimately forward that same port. Check it
+# before treating a Windows listener as a conflict. Never recreate a running app.
+app_id="$(docker compose ps -q app 2>/dev/null || true)"
+if [[ -n "$app_id" ]] && [[ "$(docker inspect -f '{{.State.Running}}' "$app_id" 2>/dev/null || true)" == "true" ]]; then
+  if curl --fail --silent --show-error --max-time 5 "http://127.0.0.1:${port}/health" >/dev/null; then
+    echo "SongChart app already running; leaving containers untouched."
+    bash scripts/codespaces_public_read.sh
+    echo "Ready: http://127.0.0.1:${port}"
+    exit 0
+  fi
+  echo "SongChart app container is running but HTTP health is unreachable on port ${port}." >&2
+  echo "Inspect 'docker compose ps' and the VS Code/Windows port forwarding; refusing to restart or switch ports automatically." >&2
+  exit 3
+fi
+
 # Checking the host before Compose avoids the opaque /forwards/expose 500
 # when VS Code or another Windows process owns the loopback listener.
 if [[ -n "${WSL_DISTRO_NAME:-}" ]] && command -v powershell.exe >/dev/null 2>&1; then
