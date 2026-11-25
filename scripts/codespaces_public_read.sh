@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 # Private local read-only smoke, using only the Bash/curl shell tools.
 set -euo pipefail
-origin='http://127.0.0.1:8000'
+port="${SONGCHART_HTTP_PORT:-8000}"
+if [[ ! "$port" =~ ^[0-9]+$ ]] || (( 10#$port < 1 || 10#$port > 65535 )); then
+  echo 'Invalid SONGCHART_HTTP_PORT; expected 1..65535.' >&2
+  exit 2
+fi
+origin="http://127.0.0.1:${port}"
 routes=('/' '/search?q=Signals' '/corrections' '/about' '/privacy' '/terms' '/disclaimer' '/support')
 failed=0
 health="$(curl --silent --max-time 5 --max-filesize 80 --write-out $'\n%{http_code}|%{content_type}' "$origin/health" 2>/dev/null)" || health=''

@@ -2,9 +2,17 @@
 
 Status: development app runtime is merged into `main` from [PR #6](https://github.com/fusumivietnam/SongChart-Next/pull/6). Foundation CI passed on exact PR head `05e60db52d424ceee71b079b8ff93d321c2d400a` before merge, covering app/db build, PostgreSQL connectivity, starter tests, frontend checks, dependency audits, provenance, SBOM generation and runtime smoke checks. Framework/runtime verification does **not** verify SongChart product features or production deployment. ADR-0001 governs local Docker; ADR-0003 records the accepted Foundation runtime baseline. Source and real dependency lockfiles are on `main`. These instructions assume a new, disposable database, not a PostgreSQL 17 data migration.
 
+## One-command local WSL startup and port preflight
+
+On Windows 11 / VS Code **WSL: Ubuntu**, use `bash scripts/dev_up.sh` as the preferred entry point after reviewing `git status`. It validates the configured host port, checks Docker Desktop availability, detects an existing Windows listener (including stale VS Code forwards) and local Linux listeners when possible, then starts the existing Compose app/db and runs the read-only nine-route smoke. On a conflict it **fails with a diagnosis** instead of killing processes, switching ports automatically, creating secrets, resetting data, or deleting volumes.
+
+Default URL: `http://127.0.0.1:8000`. For a **deliberate**, temporary override, set `SONGCHART_HTTP_PORT=18080 bash scripts/dev_up.sh` after ensuring the new port is free. This changes only the host-side loopback mapping, not Laravel's internal 8000 or the production Nginx/PHP-FPM topology. The smoke uses the same configured port. For the normal case use the default; do not change ports merely to mask a Docker Desktop forwarding-service error. The optional Vite host port is *not* required for a static-build-based browser review.
+
+This script assumes a working untracked local `.env` and an available development app image; it does not create passwords, run migrations, build images, or inject fixtures. If the image is missing, use the established Docker development setup as a separate deliberate action. Docker named volumes remain intact.
+
 ## Environment and startup
 
-Install Docker Engine/Desktop with Compose v2. Copy `.env.example` to untracked `.env` and replace the password placeholder (both occurrences) with the same unique local secret. Do not use sample values for real access. Do not commit `.env`. PostgreSQL binds no host port; the application publishes only host-loopback port 8000 by default. Vite hot reload is optional and must opt in to a separately reviewed host-port mapping; the default boot path does not depend on port 5173.
+Install Docker Engine/Desktop with Compose v2. Copy `.env.example` to untracked `.env` and replace the password placeholder (both occurrences) with the same unique local secret. Do not use sample values for real access. Do not commit `.env`. PostgreSQL binds no host port; the application publishes host-loopback port 8000 by default, configurable via `SONGCHART_HTTP_PORT`. Vite hot reload is optional and must opt in to a separately reviewed host-port mapping; the default boot path does not depend on port 5173.
 
 Once `composer.lock` and `pnpm-lock.yaml` are available:
 

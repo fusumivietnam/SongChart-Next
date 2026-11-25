@@ -38,6 +38,8 @@ bash scripts/codespaces_public_read.sh
 
 **Scope:** the `--force-recreate` command touches the app container only and preserves all named volumes. `--no-build` reuses the existing image, so rebuild it separately only if missing/stale. No `down -v`, `migrate:fresh`, fixture import, or destructive database recovery. If port `8000` also fails, do not claim this patch resolves the Codespaces platform forwarding service; check `bash scripts/codespaces_doctor.sh` and GitHub Codespaces/port-forward status.
 
+For WSL2 + Docker Desktop development, prefer the preflight startup command `bash scripts/dev_up.sh` in `docs/operations/DOCKER_DEVELOPMENT.md`. It diagnoses Windows/VS Code port listeners and uses the approved Compose runtime, rather than adding a second application runtime. It does not fix a broken Docker Desktop forwarding relay automatically; if even a free port fails with `/forwards/expose 500`, diagnose Docker Desktop before retrying.
+
 ## Private Codespaces public-read smoke (#253)
 
 Reuse the approved Compose app and PostgreSQL; this is **not** a second Preview

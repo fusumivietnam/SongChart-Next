@@ -6,6 +6,7 @@ on:
       - .devcontainer/**
       - docs/adr/ADR-0007-understand-anything-developer-analysis.md
       - scripts/codespaces_doctor.sh
+      - scripts/dev_up.sh
       - scripts/codespaces_public_read.sh
       - tests/governance/test_codespaces_public_read.py
       - scripts/design_review.sh
@@ -21,6 +22,7 @@ on:
       - .devcontainer/**
       - docs/adr/ADR-0007-understand-anything-developer-analysis.md
       - scripts/codespaces_doctor.sh
+      - scripts/dev_up.sh
       - scripts/codespaces_public_read.sh
       - tests/governance/test_codespaces_public_read.py
       - scripts/design_review.sh
@@ -84,6 +86,7 @@ jobs:
           bash -n .devcontainer/post-start.sh
           bash -n .devcontainer/install-understand-anything.sh
           bash -n scripts/codespaces_doctor.sh
+          bash -n scripts/dev_up.sh
           bash -n scripts/design_review.sh
 
       - name: Enforce blocking onCreate dependency boundary
@@ -116,7 +119,7 @@ jobs:
         shell: bash
         run: |
           bash -n scripts/codespaces_public_read.sh
-          python3 -m unittest tests.governance.test_codespaces_public_read -v
+          python3 -m unittest tests.governance.test_codespaces_public_read tests.governance.test_codespaces_workspace_bind -v
 
       - name: Confirm Codespaces base image exists
         run: docker pull mcr.microsoft.com/devcontainers/base:ubuntu-24.04
