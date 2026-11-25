@@ -1,6 +1,6 @@
 # SongChart Next — UI Standards Board v1.0 (Concept A)
 
-**Status:** PROPOSED / OWNER REVIEW REQUIRED. **Decision:** the owner selected Concept A (Calm Editorial) as the direction to **propose a controlled redesign**, **not** approval to change global tokens, production UI, navigation, typography or shared behavior. Created 2026-11-25 against the repository's current `main` source. **Scope:** public-web MVP; internal reviewer/admin remains a separate candidate. **Issues:** [#175](https://github.com/fusumivietnam/SongChart-Next/issues/175), [#253](https://github.com/fusumivietnam/SongChart-Next/issues/253).
+**Status:** PROPOSED / ALL DEC-01–09 DIRECTIONS ENDORSED BY OWNER / MATERIAL CHANGES NOT APPROVED. **Decision:** the owner selected Concept A (Calm Editorial), and on 2026-11-25 agreed with the *direction* of all nine DEC items. This is **not** approval to merge, change global tokens, alter production UI/navigation/typography/shared behavior, or activate deferred capabilities. Created 2026-11-25 against the repository's current `main` source. **Scope:** public-web MVP; internal reviewer/admin remains a separate candidate. **Issues:** [#175](https://github.com/fusumivietnam/SongChart-Next/issues/175), [#253](https://github.com/fusumivietnam/SongChart-Next/issues/253).
 
 > This is a comparison board and source audit, not an additional authoritative design system. Until an explicit owner-approved decision is recorded under `design/decisions/`, existing `design/DESIGN_AUTHORITY.md`, concept, tokens, patterns, components, archetypes and QA contracts remain authoritative. The board must not be used to silently rewrite those contracts.
 
@@ -107,19 +107,44 @@ These references extend `design/PAGE_ARCHETYPES.md` and `design/MVP_PAGE_SAMPLES
 
 Suggested order after G3: public shell/search → shared entity/result primitives → Home/Search/Artist → Release/Recording → document/correction → utility errors. Correct visual defects only with reproducible evidence; no speculative redesign of all screens.
 
-## 8. Owner decision matrix (to complete before token/code changes)
+## 8. Owner directional review — recorded 2026-11-25
 
-| Decision ID | Topic | Default Concept A proposal | Owner choice / evidence |
+**Review disposition:** all nine DEC proposals are **DIRECTION ENDORSED** (owner input on PR #271 planning). This is a review outcome on the candidate board only. It does not promote any candidate to `approved` or `verified`, authorize a source implementation, merge this Draft PR, or override the existing Foundation approvals.
+
+| Decision ID | Direction endorsed by owner | Remaining material decision |
+| --- | --- | --- |
+| DEC-01 — Palette | Retain the approved blue/slate Foundation palette | No global token edit authorized; measured contrast and any requested palette delta need separate evidence/decision |
+| DEC-02 — Typography | Retain system sans and Foundation scale; audit starter font | Computed public styles / cross-layout mapping still unknown; global font/scale edit not authorized |
+| DEC-03 — Header & Search | Pursue one coherent shared public shell/search anatomy | Exact responsive examples, Home exception, focus and single-main behavior must be reviewed before changing common component anatomy |
+| DEC-04 — Entity details | Standardize Artist/Release/Recording identity, artwork, metadata and provenance primitives | Compare domain-specific relationships and narrow/wide screenshots; no entity-hierarchy rewrite yet |
+| DEC-05 — Home/Discovery | Search-first Calm Editorial layout with truthful canonical modules | Compare actual Home + zero-data rendering; no ranking/feed/popularity assumptions |
+| DEC-06 — Search, empty and error | Keep semantics while pursuing consistent result and state visuals | Verify empty, ambiguous, recoverable error, keyboard and screen-reader behavior; no search-ranking change |
+| DEC-07 — Documents & Corrections | Preserve approved legal anatomy and correction evidence-only behavior, improve consistency | Confirm rendered form labels/error semantics; no change to 180/365-day policy, schema or reviewer rights |
+| DEC-08 — Admin / Reviewer | Defer runtime design/activation to the separately reviewed #173 permission gate | Endorsement explicitly **does not** authorize reviewer routes, privileges, 2FA bypass or generic admin dashboard |
+| DEC-09 — Logo, brand, dark mode | Keep these as separately evaluated material design questions | No change to public brand identity, logo, global dark theme or custom font approved |
+
+### Evidence still missing (owner endorsement does not satisfy these)
+
+| Evidence ID | Required proof | Minimum record | Current status |
 | --- | --- | --- | --- |
-| DEC-01 | Global palette | **Retain** approved blue/slate `foundation.json` | Pending explicit approval |
-| DEC-02 | Font/typography | **Retain** system sans and scale; inspect starter `Instrument Sans` only as code audit | Pending explicit approval |
-| DEC-03 | Header/search | **Propose** shared PublicShell and search variants; same global hierarchy | Pending screenshot & approval |
-| DEC-04 | Artwork and metadata | **Propose** consistent entity primitives with domain distinctions | Pending screenshot & approval |
-| DEC-05 | Home composition | **Propose** editorial search-first; no fake feed, ranking or autoplay | Pending screenshot & approval |
-| DEC-06 | Search/result and errors | **Retain semantics**, normalize rows/states without changing ranking logic | Pending screenshot & approval |
-| DEC-07 | Document/correction | **Retain** approved anatomy; only reuse justified component code | Pending screenshot & approval |
-| DEC-08 | Admin/reviewer | **Defer** UI activation to #173 policy gate | Blocked by activation |
-| DEC-09 | Brand/logo/dark mode | **Defer** as separate material global decision | Not requested |
+| EV-01 | Current public web vs approved Foundation at **390×844** and **1440×1024** | Exact Git SHA, deterministic same-content fixture, route/state, rendered screenshot and diff/observation | **PENDING** — existing Foundation CI PASS is not a current public-page comparison |
+| EV-02 | Computed font, colors, spacing and layout for starter/public boundaries | Current public DOM/computed styles, applicable CSS source, reason for deviations, contrast measurements | **PENDING** — only code-level CSS mismatch observed |
+| EV-03 | Shared shell, Home variant and global search behavior | Header/search on Home/Search/Artist/Release/Recording/Documents; one main, skip link, 44px pointer targets, no duplicate nav | **PENDING** |
+| EV-04 | Entity detail and result consistency | Long mixed-script names, no-artwork, duplicate artist names, multi-medium tracklist, Works missing, destination present/absent | **PENDING** |
+| EV-05 | Corrections/document/accessibility state matrix | Form invalid without persistence; 429/503 from safe disposable tests; readable document measure; focus/labels/error announcements | **PENDING** |
+| EV-06 | Owner material-change approval decision | Reviewed before/after proposal, scope, risk, relevant screenshots, owner signoff under `design/decisions/` | **NOT GIVEN** — directional agreement only |
+| EV-07 | Implementation regression and owner acceptance | Bounded UI PR, exact-head TypeScript/browser/visual/keyboard tests, 390/1440 artifacts, issue #175/#253 evidence and decision | **NOT STARTED** |
+| EV-08 | Reviewer-specific permission activation if later pursued | Real moderation need, authorized roles/2FA review, default-deny tests and separate explicit activation | **BLOCKED** under #173, independent of UI Board |
+
+Existing rendered Foundation evidence (approved on 2026-10-02) is referenced in `design/decisions/FOUNDATION_BASELINE_APPROVAL.md` and `design/baselines/FOUNDATION.md`; reuse it, do not infer public-page acceptance from it. Current public browser/computed-style inspection remains to be performed.
+
+### Changes permitted at this stage
+
+- **Allowed without changing product runtime:** source/contract audit; document candidate component anatomy and responsive wireframes; calculate token-to-CSS mapping and contrast; collect exact-SHA **read-only** screenshots; use existing deterministic local/CI fixture and browser evidence; record discrepancies and owner decisions in this board / #175 / #253.
+- **Allowed only after separate G3 material approval:** editing `design/tokens/foundation.json`, global CSS/fonts, common shell/navigation and page identity hierarchy, global state semantics, replacing baseline screenshots; merging an implementation or design-system rebaseline.
+- **Not authorized:** auto-merge PR #271; change app routes/data/migrations; fetch third-party music records; create a second design system/UI framework; implement/activate admin/reviewer (#173); release/deploy production or change SSO/security.
+
+**Next review sequence:** evidence EV-01–05 first; present a concrete visual before/after and severity matrix; obtain an authored Design Authority decision (EV-06) for material changes; only then open one cohesive UI implementation work unit with exact-SHA verification (EV-07). Keep current Draft PR unmerged until the owner explicitly approves its documentation lifecycle.
 
 ## 9. Evidence links and boundaries
 
