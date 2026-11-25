@@ -25,3 +25,7 @@ The Design Authority is `design/DESIGN_AUTHORITY.md`. This folder is an authored
 ## Package completeness
 
 The package intentionally covers concept, semantic tokens, shared components, page families, interaction/state behavior, responsive/accessibility/content quality, baseline evidence and change governance. New pages should map to this package before any new design primitive is introduced.
+
+## Current proposals (not approved authority)
+
+- [UI Standards Board v1.0 — Concept A proposal and source audit](UI_STANDARDS_BOARD_V1.md) compares approved Foundation rules, observed public UI source and candidate consolidation decisions. **Owner review pending**: it does not modify or supersede the Design Authority, foundation tokens, page archetypes or runtime styles.
