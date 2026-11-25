@@ -10,6 +10,14 @@ Default URL: `http://127.0.0.1:8000`. For a **deliberate**, temporary override, 
 
 This script assumes a working untracked local `.env` and an available development app image; it does not create passwords, run migrations, build images, or inject fixtures. If the image is missing, use the established Docker development setup as a separate deliberate action. Docker named volumes remain intact.
 
+## VS Code auto-start on folder open (Windows WSL)
+
+Open this repository using **VS Code Remote - WSL** with Docker Desktop already running. The repository's `.vscode/tasks.json` declares a `folderOpen` task that runs `bash scripts/dev_up.sh` from the workspace root. On the first trusted workspace open, VS Code may ask to **Allow Automatic Tasks**; approve only after inspecting the tracked task. If automatic tasks were previously disallowed, open the Command Palette and run **Tasks: Manage Automatic Tasks in Folder**, then select **Allow Automatic Tasks**. This setting is controlled locally by VS Code; repository commits cannot bypass it.
+
+When the SongChart Compose app is already running and loopback HTTP health responds, `dev_up.sh` leaves containers untouched and runs the existing read-only 9-route smoke. This check happens **before** inspecting Windows VS Code port listeners: a legitimate forward of a healthy app is no longer treated as a startup conflict. If the container is running but health is unreachable, startup **fails closed** with diagnostics instead of restarting it. If no app is running, the script performs the original Windows/WSL port preflight and starts the existing Compose services only if the port is available. It never kills VS Code, chooses a new port, runs migrations, resets the database, builds images or changes production settings.
+
+Auto-start runs when opening the trusted folder, **not** when Windows boots. It does not start Docker Desktop for you. If you open several VS Code windows on the same workspace, check the task output and `docker compose ps` if a forwarding race occurs. Vite HMR remains opt-in and is not required for app bootstrap. Disable automatic startup by choosing **Disallow Automatic Tasks** via the same VS Code command; you can always run `bash scripts/dev_up.sh` manually.
+
 ## Environment and startup
 
 Install Docker Engine/Desktop with Compose v2. Copy `.env.example` to untracked `.env` and replace the password placeholder (both occurrences) with the same unique local secret. Do not use sample values for real access. Do not commit `.env`. PostgreSQL binds no host port; the application publishes host-loopback port 8000 by default, configurable via `SONGCHART_HTTP_PORT`. Vite hot reload is optional and must opt in to a separately reviewed host-port mapping; the default boot path does not depend on port 5173.
