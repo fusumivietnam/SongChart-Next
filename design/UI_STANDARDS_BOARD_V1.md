@@ -4,6 +4,10 @@
 
 > This is a comparison board and source audit, not an additional authoritative design system. Until an explicit owner-approved decision is recorded under `design/decisions/`, existing `design/DESIGN_AUTHORITY.md`, concept, tokens, patterns, components, archetypes and QA contracts remain authoritative. The board must not be used to silently rewrite those contracts.
 
+## Owner's selected Concept A storyboard — recorded 2026-11-26
+
+The owner explicitly selected the newer responsive **Concept A — Calm Editorial** proposal as the **default public UI visual direction**, following endorsement of DEC-01–09. The controlling decision is [Concept A direction approval](decisions/CONCEPT_A_2026_DIRECTION_APPROVAL.md). **Status of this board remains candidate for exact visual implementation**: no new CSS, global tokens, navigation, typography or component anatomy is authorized by this choice. Compare future mockups with the selected Home/Artist/Release design grammar, not unrelated visual experiments. Reject illustrative inline-play controls and fictional data/routes. The final rendered baseline still requires 390×844 + 1440×1024 evidence and separate material implementation approval.
+
 ## 1. Status vocabulary and decision rules
 
 - **APPROVED:** explicitly approved Foundation or subsequent Design Authority decision within its stated surface scope. Approval of a concept/token does **not** automatically approve all pages.
