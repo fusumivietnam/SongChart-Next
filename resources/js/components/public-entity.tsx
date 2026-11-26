@@ -16,10 +16,10 @@ export function EntityResultRow({ item, discovery = false }: { item: EntityItem;
 }
 
 export function MetadataRow({ label, value }: { label: string; value: string }) {
-    return <div className="grid gap-1 border-t border-slate-200 py-3 text-sm first:border-t-0 sm:grid-cols-[7rem_minmax(0,1fr)] sm:gap-3"><dt className="font-medium text-slate-600">{label}</dt><dd className="min-w-0 break-words text-slate-900">{value}</dd></div>;
+    return <div className="grid grid-cols-[6rem_minmax(0,1fr)] gap-3 border-t border-slate-200 py-3 text-sm first:border-t-0 sm:grid-cols-[7rem_minmax(0,1fr)]"><dt className="font-medium text-slate-600">{label}</dt><dd className="min-w-0 break-words text-slate-900">{value}</dd></div>;
 }
 
 export function ArtworkPlaceholder({ name, recording = false }: { name: string; recording?: boolean }) {
     const label = recording ? 'Recording metadata' : 'Artwork unavailable';
-    return <div role="img" aria-label={label + ' for ' + name} className="flex aspect-square w-full max-w-48 items-center justify-center rounded-[0.875rem] border border-slate-300 bg-slate-100 p-4 text-center text-sm font-medium text-slate-600 md:max-w-none">{label}</div>;
+    return <div role="img" aria-label={label + ' for ' + name} className="flex aspect-square w-full max-w-28 items-center justify-center rounded-[0.875rem] border border-slate-300 bg-slate-100 p-3 text-center text-xs font-medium text-slate-600 md:max-w-none md:p-4 md:text-sm">{label}</div>;
 }

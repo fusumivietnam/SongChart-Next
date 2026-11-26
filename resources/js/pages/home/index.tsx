@@ -58,19 +58,19 @@ export default function HomeIndex({ discovery }: Props) {
 
                 <main id="main-content" className="mx-auto w-full max-w-[72rem] px-4 py-10 sm:px-6">
                     <section className="rounded-[0.875rem] border border-slate-300 bg-slate-50 p-6 sm:p-8" aria-labelledby="home-title">
-                        <p className="text-xs font-semibold tracking-[0.14em] text-blue-700 uppercase">Canonical music discovery</p>
+                        <p className="text-xs font-semibold tracking-[0.14em] text-blue-700 uppercase">Discover music</p>
                         <h1 id="home-title" className="mt-2 text-3xl font-semibold tracking-tight sm:text-4xl">
                             Music knowledge, from canonical data
                         </h1>
                         <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
-                            Explore artists, releases and recordings through SongChart’s canonical music knowledge catalogue.
+                            Explore artists, releases and recordings. Discover the people, credits and connections behind music.
                         </p>
 
                         <GlobalSearch id="home-search" hero />
                     </section>
 
-                    <section className="mt-12 max-w-5xl" aria-labelledby="explore-title">
-                        <p className="text-xs font-semibold tracking-[0.14em] text-blue-700 uppercase">Deterministic discovery</p>
+                    <section className="mt-12" aria-labelledby="explore-title">
+                        <p className="text-xs font-semibold tracking-[0.14em] text-blue-700 uppercase">Music catalogue</p>
                         <h2 id="explore-title" className="mt-2 text-2xl font-semibold tracking-tight">
                             Explore canonical data
                         </h2>
@@ -91,17 +91,17 @@ export default function HomeIndex({ discovery }: Props) {
                             <div className="mt-7 grid gap-8 lg:grid-cols-3">
                                 <DiscoveryModule
                                     title="Artists"
-                                    description="Canonical Artist identities, ordered by name."
+                                    description="People and groups behind the music."
                                     items={discovery.artists}
                                 />
                                 <DiscoveryModule
                                     title="Releases"
-                                    description="Canonical Release identities, ordered by title."
+                                    description="Albums and other release editions."
                                     items={discovery.releases}
                                 />
                                 <DiscoveryModule
                                     title="Recordings"
-                                    description="Canonical Recording identities, ordered by title."
+                                    description="Individual recorded performances."
                                     items={discovery.recordings}
                                 />
                             </div>

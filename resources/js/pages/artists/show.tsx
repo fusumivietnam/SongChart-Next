@@ -88,16 +88,7 @@ export default function ArtistShow({ artist }: Props) {
                                     label="Country"
                                     value={artist.countryCode ?? 'Unknown'}
                                 />
-                                <MetadataRow label="SongChart ID" value={artist.id} />
-                                <MetadataRow
-                                    label="Provenance"
-                                    value={
-                                        primarySource
-                                            ? `${primarySource.provider} · ${primarySource.external_id}`
-                                            : 'No external provenance recorded'
-                                    }
-                                />
-                            </dl>
+                                </dl>
 
                             <section className="mt-6" aria-labelledby="artist-releases-heading">
                                 <h2 id="artist-releases-heading" className="text-lg font-semibold">
@@ -135,6 +126,16 @@ export default function ArtistShow({ artist }: Props) {
                                 <h2 className="font-semibold text-slate-900">
                                     Provenance and correction
                                 </h2>
+                                <dl className="mt-3 rounded-[0.625rem] border border-slate-300 bg-slate-50 px-4"><MetadataRow label="SongChart ID" value={artist.id} />
+                                <MetadataRow
+                                    label="Provenance"
+                                    value={
+                                        primarySource
+                                            ? `${primarySource.provider} · ${primarySource.external_id}`
+                                            : 'No external provenance recorded'
+                                    }
+                                />
+                            </dl>
                                 <p className="mt-2 leading-6">
                                     SongChart identity is independent from provider
                                     identity. Release relationships shown here come

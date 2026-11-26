@@ -7,10 +7,10 @@ type SearchProps = { id?: string; query?: string; hero?: boolean; autoFocus?: bo
 export function GlobalSearch({ id = 'site-search', query = '', hero = false, autoFocus = false }: SearchProps) {
     return (
         <form className={hero ? 'mt-6 flex w-full max-w-2xl gap-2' : 'flex w-full min-w-0 gap-2 md:max-w-md'} action="/search" method="get" role="search">
-            <label htmlFor={id} className="sr-only">Search music knowledge</label>
+            <label htmlFor={id} className="sr-only">Search artists, releases and recordings</label>
             <div className="relative min-w-0 flex-1">
                 <Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-600" />
-                <input id={id} name="q" defaultValue={query} maxLength={80} autoFocus={autoFocus} placeholder="Search artists, releases, recordings" className="h-11 w-full rounded-[0.625rem] border border-slate-300 bg-white pr-3 pl-9 text-sm text-slate-900 outline-none placeholder:text-slate-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" />
+                <input id={id} name="q" defaultValue={query} maxLength={80} autoFocus={autoFocus} placeholder="Search music" className="h-11 w-full rounded-[0.625rem] border border-slate-300 bg-white pr-3 pl-9 text-sm text-slate-900 outline-none placeholder:text-slate-600 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2" />
             </div>
             <button type="submit" className="h-11 shrink-0 rounded-[0.625rem] bg-blue-700 px-4 text-sm font-medium text-white outline-none hover:bg-blue-800 focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2">Search</button>
         </form>
